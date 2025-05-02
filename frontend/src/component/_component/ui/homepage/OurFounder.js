@@ -20,7 +20,7 @@ export default function FounderSection() {
     },
     {
       name: "Thanh Dat Nguyen",
-      role: "Founder",
+      role: "support member",
       avatar: url,
       rating: 5,
       title: "Thật Tuyệt Vời, Cảm Ơn Bạn!",
