@@ -1,3 +1,3 @@
-const domain = "http://localhost:4000";
+const domain = "http://boostcareer.click";
 
 export default domain;

@@ -261,7 +261,7 @@ const queryGetListJobBySearch = async (searchData) => {
       FROM 
           (select * from job where status_ = 1) as j
       JOIN
-          company c ON J.employer_id = c.company_id
+          company c ON j.employer_id = c.company_id
       JOIN
           catalog_industry ind ON j.industry_id = ind.industry_id
       JOIN
@@ -391,7 +391,7 @@ const queryGetListJobOfCompany = async (companyId) => {
       FROM 
           (select * from job where status_ = 1 and employer_id = ? and date_expi >=NOW()) as j
       JOIN
-          company c ON J.employer_id = c.company_id
+          company c ON j.employer_id = c.company_id
       JOIN
           catalog_industry ind ON j.industry_id = ind.industry_id
       JOIN
