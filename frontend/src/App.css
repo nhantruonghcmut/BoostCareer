@@ -1,0 +1,181 @@
+/* CSS cho thanh header */
+@media (min-width: 992px) {
+  
+
+  
+  
+}
+
+.carousel-indicators [data-bs-target]{
+  border-radius: 50%;
+  border: 1px solid rgb(13 110 253) !important;
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.main-border{
+  border-radius: 2% !important;
+}
+
+/* CSS cho thanh search */
+@media (max-width: 992px){
+  .md-display-none{
+    display: none !important;
+  }
+}
+
+/* CSS cho nút chuyển trang của việc làm mới nhất */
+.pagination .dot {
+  width: 12px;           /* Kích thước vòng tròn */
+  height: 12px;
+  border-radius: 50%;    /* Tạo hình tròn */
+  background-color: #ddd; /* Màu nền mặc định */
+  border: none;
+  padding: 0;
+  border: 1px solid rgb(13 110 253) !important;
+}
+
+.pagination .dot:hover {
+  background-color: #007bff; /* Màu khi hover */
+}
+
+.pagination .active .dot {
+  background-color: #007bff; /* Màu cho trạng thái active */
+}
+
+/* CSS cho background của section thông tin thị trường */
+.backgound-item-info{
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* CSS cho background item của tổng quan người tìm việc */
+.backgound-item-overview-seeker{
+  background-color: #D2E2FC !important;
+}
+
+.backgound-item-overview-seeker-2{
+  background-color: #ff7e56 !important;
+}
+
+/* CSS cho lúc active của item trong sidebar */
+/* .active{
+  border: 2px solid rgb(13 110 253) !important;
+} */
+.background-opacity{
+  background-color: bisque;
+}
+
+.custom-hover:hover{
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.custom-hover-2:hover{
+  cursor: pointer;
+  filter: brightness(1.5); /* Tăng độ sáng 20% */
+  transition: filter 0.3s ease; /* Hiệu ứng mượt */
+}
+
+.custom-hover-3:hover{
+  cursor: pointer;
+  filter: brightness(1.9); /* Tăng độ sáng 20% */
+  transition: filter 0.3s ease; /* Hiệu ứng mượt */
+}
+
+.custom-hover-4:hover{
+  transform: scale(1.007);
+  cursor: pointer;
+}
+
+.post-detail-bg{
+  background-color: #D2E2FC;
+}
+
+.text-color{
+  color: orangered;
+}
+
+
+
+.skill-badge {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: inline-block;
+}
+
+.skill-badge:hover {
+  background-color: #0d6efd !important;
+  transform: translateY(-2px);
+}
+
+.skill-link {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.skill-link:hover {
+  background-color: #e9ecef !important;
+  border-color: #adb5bd;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  border: 1px solid white; 
+}
+
+.range-container {
+  margin-top: 1.5rem;
+}
+
+.range-title {
+  font-weight: bold;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+}
+
+.custom-track {
+  height: 8px;
+  background: #dee2e6;
+  border-radius: 4px;
+  position: relative;
+  margin: 2rem 0 1rem 0;
+}
+
+.custom-track-filled {
+  position: absolute;
+  height: 8px;
+  background: #0d6efd;
+  border-radius: 4px;
+}
+
+.custom-thumb {
+  height: 16px;                  /* 👈 nhỏ hơn */
+  width: 16px;
+  background-color: #0d6efd;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1.5px solid white;     /* 👈 border mảnh hơn */
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2); /* 👈 bóng nhẹ hơn */
+  position: absolute; /* 👈 quan trọng */
+  top: 50%;           /* 👈 đưa vào giữa */
+  transform: translate(-50%, -50%); /* 👈 canh giữa cả ngang và dọc */
+  /* align-items: center;
+  justify-content: center; */
+}
+
+.thumb-tooltip {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
