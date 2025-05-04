@@ -138,7 +138,7 @@ const getJobDetailByUser = async (req, res, next) => {
       return next(new ApiError("Không tìm thấy bài đăng", 404));
     }
 
-    return res.success(data, "Lấy chi tiết bài đăng thành công");
+    return res.success(data[0], "Lấy chi tiết bài đăng thành công");
   } catch (err) {
     return next(new ApiError("Lỗi khi lấy chi tiết bài đăng", 500));
   }

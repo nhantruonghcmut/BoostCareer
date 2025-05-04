@@ -481,83 +481,90 @@ FROM
 
 const queryGetJobDetailByUser = async (job_id, employer_id) => {
   try {
-    const [work] = await db.query(
-      `
-    SELECT 
-      j.job_id,
-      j.title, 
-      j.employer_id,   
-      j.date_post,
-      j.date_expi,
-      j.address,
-      j.quantity,
-      j.describle,
-      j.working_time,
-      j.working_type,
-      j.views,
-      j.salary_max,
-      j.salary_min,
-      j.require_experience,
-      j.require_gender,
-      j.require_marital_status,
-      j.require_age_max,
-      j.require_age_min,
-      j.more_requirements,
-      c.company_name,
-      c.logo AS company_logo,
-      c.background,
-      ci.industry_id,
-      ci.industry_name,
-      func.job_function_id,
-      func.job_function_name,
-      loc.city_id,
-      loc.city_name AS work_location_name,
-      lvl.level_id,
-      lvl.level_name AS job_level_name,
-      j.require_education
-      edu.education_title,
-      (SELECT COALESCE(
-          JSON_ARRAYAGG(
-              JSON_OBJECT(
-          'skill_id', js.skill_id,
-            'skill_name', cta.tags_content
-              )
-          ),JSON_ARRAY())  
-        FROM 
-        (select * from job_require_skill where job_require_skill.job_id = j.job_id) as js
-        JOIN catalog_tags cta on cta.tag_id = js.skill_id) AS job_skills,
-      (SELECT COALESCE(
-          JSON_ARRAYAGG(
-              JSON_OBJECT(
-                  'language_id', ctl.language_id,
-                  'language_name', ctl.language_name,
-                  'metric_display', ctl.metric_display )
+    const [Job] = await db.query(
+      ` SELECT 
+    j.job_id,
+	  j.title, 
+    j.employer_id,   
+    j.date_post,
+    j.date_expi,
+    j.address,
+    j.quantity,
+    j.describle,
+    j.working_time,
+    j.working_type,
+    j.views,
+    j.salary_max,
+    j.salary_min,
+    j.require_experience,
+    j.require_gender,
+    j.require_marital_status,
+    j.require_age_max,
+    j.require_age_min,
+    j.more_requirements,
+    j.status_,
+	  c.company_name,
+    c.logo AS company_logo,
+    c.background,
+    ci.industry_id,
+    ci.industry_name,
+    func.job_function_id,
+    func.job_function_name,
+    loc.city_id,
+    loc.city_name AS work_location_name,
+    lvl.level_id,
+    lvl.level_name AS job_level_name,
+    j.require_education,
+    edu.education_title,
+    (SELECT COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+				'skill_id', js.skill_id,
+          'skill_name', cta.tags_content
+            )
+        ),JSON_ARRAY())  
+      FROM 
+      (select * from job_require_skill where job_require_skill.job_id = j.job_id) as js
+      JOIN catalog_tags cta on cta.tag_id = js.skill_id) AS job_skills,
+    (SELECT COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'language_id', ctl.language_id,
+                'language_name', ctl.language_name,
+                'metric_display', ctl.metric_display )
+          ), JSON_ARRAY())
+      FROM
+        (select * from job_require_language where job_require_language.job_id = j.job_id) as jrl 
+      JOIN
+        catalog_language ctl ON ctl.language_id = jrl.language_id) AS languages,
+     (SELECT COALESCE(
+        JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'certification', jrc.certification)
             ), JSON_ARRAY())
-        FROM
-          (select * from job_require_language where job_require_language.job_id = j.job_id) as jrl 
-        JOIN
-          catalog_language ctl ON ctl.language_id = jrl.language_id) AS languages ,
-      (SELECT COALESCE(
-    FROM
-        (select * from job where job_id = ? and employer_id = ?) as j
-    JOIN
-        company c ON j.employer_id = c.company_id
-    JOIN
-        catalog_industry ci ON j.industry_id = ci.industry_id
-    JOIN
-        catalog_job_function func ON j.job_function_id = func.job_function_id
-    JOIN
-        catalog_city loc ON j.work_location = loc.city_id    
-    JOIN
-        catalog_level lvl ON j.level_id = lvl.level_id
-    JOIN
-        catalog_education edu ON j.require_education = edu.education_id;
+            FROM job_require_certification jrc
+            where jrc.job_id = j.job_id
+            ) as certification         
+  FROM
+      (select * from job where job_id=? and employer_id =? ) as j
+  JOIN
+      company c ON j.employer_id = c.company_id
+  JOIN
+      catalog_industry ci ON j.industry_id = ci.industry_id
+  JOIN
+      catalog_job_function func ON j.job_function_id = func.job_function_id
+  JOIN
+      catalog_city loc ON j.work_location = loc.city_id    
+  JOIN
+      catalog_level lvl ON j.level_id = lvl.level_id
+  JOIN
+      catalog_education edu ON j.require_education = edu.education_id;
       `,
-      [job_id, employer_id]
+      [ job_id, employer_id]
     );
-    return work[0];
+    return Job;
   } catch (error) {
-    console.error("Error getting job detail by user:", error);
+    console.error("Error getting list job by user:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
