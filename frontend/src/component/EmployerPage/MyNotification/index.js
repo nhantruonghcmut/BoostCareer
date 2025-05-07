@@ -12,7 +12,7 @@ export default function EmployerNotification() {
   const { isLogin, user } = useSelector((state) => state.auth);
 
   const { data: notificationData, refetch } = useGetNotificationQuery(
-    user?.id,
+{},
     {
       skip: !user?.id, // Skip the query if user ID is not available
     }
@@ -28,12 +28,10 @@ export default function EmployerNotification() {
     setIsUpdating(true);
     try {
       console.log("Sending update request with:", {
-        employer_id: user?.id,
         notification_id: notification_id,
       });
 
       const response = await updateReadNotification({
-        employer_id: user?.id,
         notification_id: notification_id,
       }).unwrap();
 

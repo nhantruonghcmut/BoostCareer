@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
   useGetIndustriesQuery,
@@ -16,16 +17,14 @@ import CompanyBackground from "../../../component/_component/ui/employer/Company
 import { toast } from "react-toastify";
 
 export default function CompanyProfile() {
+    const navigate = useNavigate();
   const { isLogin, user } = useSelector((state) => state.auth);
-  const id = user?.id;
   const { data: industry } = useGetIndustriesQuery();
   const { data: scale } = useGetScalesQuery();
   const { data: cities } = useGetCitiesQuery(84); // 84 for Vietnam
   const { data: benefits } = useGetBenefitsQuery();
 
-  const { data, isLoading, refetch } = useGetCompanyInforQuery(id, {
-    skip: !id // Skip query if id is undefined
-  })|| {};
+  const { data, isLoading, refetch } = useGetCompanyInforQuery()|| {};
   
   // RTK Query mutations
   const [addCompanyInfo, { isLoading: isAdding }] =
@@ -101,7 +100,6 @@ export default function CompanyProfile() {
       const result = await updateCompanyInfo({
         type: "Basic",
         data: {
-          company_id: data.company_id,
           company_name: updateCompany.company_name,
           scale_id: updateCompany.scale_id,
           industry_id: updateCompany.industry_id,
@@ -137,7 +135,6 @@ export default function CompanyProfile() {
       const response = await addCompanyInfo({
         type: "company_location",
         data: {
-          company_id: data.company_id,
           address: newLocation.address,
           city_id: newLocation.city_id,
         },
@@ -171,7 +168,6 @@ export default function CompanyProfile() {
       const result = await updateCompanyInfo({
         type: "company_location",
         data: {
-          company_id: data.company_id,
           location_id: editLocation.location_id,
           address: editLocation.address,
           city_id: editLocation.city_id,
@@ -203,7 +199,6 @@ export default function CompanyProfile() {
         const response = await deleteCompanyInfo({          
              id: locationId,
             type: "company_location",
-            company_id: data.company_id 
         }).unwrap();
         if (response.success) {
           toast.success("Xóa địa chỉ công ty thành công");
@@ -235,7 +230,6 @@ export default function CompanyProfile() {
       const response = await addCompanyInfo({
         type: "company_benefit",
         data: {
-          company_id: data.company_id,
           benefit_id: newBenefit.benefit_id,
           benefit_value: newBenefit.benefit_value,
         },
@@ -274,7 +268,6 @@ export default function CompanyProfile() {
       const result = await updateCompanyInfo({
         type: "company_benefit",
         data: {
-          company_id: data.company_id,
           benefit_id: editBenefit.benefit_id,
           benefit_value: editBenefit.benefit_value,
         },
@@ -306,7 +299,6 @@ export default function CompanyProfile() {
         const response = await deleteCompanyInfo({
           id: benefitId,
           type: "company_benefit",
-          company_id: data.company_id,
         }).unwrap();
         setIsDeletingBenefit(false);
         if (response.success) {
@@ -321,7 +313,11 @@ export default function CompanyProfile() {
       toast.error("Xóa phúc lợi thất bại");
     }
   };
-
+  useEffect(() => {
+    if (!isLogin || user?.role !== 2) {
+      navigate("/login");
+    }
+  }, [isLogin, navigate, user]);
   // Hiển thị trạng thái loading khi đang tải dữ liệu
   if (isLoading) {
     return (

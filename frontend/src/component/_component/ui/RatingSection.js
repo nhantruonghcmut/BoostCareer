@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { formatDistanceToNow, parseISO, set } from "date-fns";
-import { ca, vi } from "date-fns/locale"; //
+import { formatDistanceToNow} from "date-fns";
 import { useRateCandidateMutation } from "../../../redux_toolkit/employerApi.js";
 import { toast } from "react-toastify";
 
@@ -26,7 +25,6 @@ const Rating = ({ ratingData, profile_id }) => {
         const response = await RateCandidate({
           type: "insert",
           application_id: profile_id,
-          employer_id: ratingData.employer_id,
           rating,
           content: comment,
         }).unwrap(); // Gọi API để đánh giá ứng viên
@@ -39,7 +37,6 @@ const Rating = ({ ratingData, profile_id }) => {
         const response = await RateCandidate({
           type: "update",
           application_id: profile_id,
-          employer_id: ratingData.employer_id,
           rating,
           content: comment,
         }).unwrap(); // Gọi API để đánh giá ứng viên

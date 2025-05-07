@@ -1,17 +1,19 @@
 const express = require("express");
-
+const router = express.Router();
 const {
-  isLogin,
   login,
-  logout,
   register,
+  logout,
+  refreshToken,
+  checkLoginStatus
 } = require("../controllers/authencationControllers.js");
+const { verifyToken } = require("../middlewares/authMiddleware");
 
-const authencationRoutes = express.Router();
+// Public routes
+router.post("/login", login);
+router.post("/register", register);
+router.post("/logout", logout);
+router.post("/refresh", refreshToken);
+router.get("/check-login", checkLoginStatus);
 
-authencationRoutes.get("/check", isLogin); //kiểm tra đã đăng nhập chưa
-authencationRoutes.post("/login", login); //Đăng nhập
-authencationRoutes.delete("/logout", logout); //Đăng xuất
-authencationRoutes.post("/register", register);
-
-module.exports = authencationRoutes;
+module.exports = router;

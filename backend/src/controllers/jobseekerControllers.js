@@ -28,7 +28,8 @@ const {
 
 const jobseekerGetJobDetail = async (req, res, next) => {
   try {
-    const { profile_id, job_id } = req.query;
+    const profile_id = req.user.id;
+    const {  job_id } = req.query;
     
     if (!job_id || !profile_id) {
       return next(new ApiError("Thiếu thông tin công việc hoặc ID hồ sơ", 400));
@@ -51,7 +52,7 @@ const jobseekerGetJobDetail = async (req, res, next) => {
 
 const updateJobseekerProfileImage = async (req, res, next) => {
   try {
-    const { id } = req.body;
+    const id = req.user.id;
     
     if (!id) {
       return next(new ApiError("Thiếu thông tin ID người dùng", 400));
@@ -82,7 +83,8 @@ const updateJobseekerProfileImage = async (req, res, next) => {
  */
 const getItemProfile = async (req, res, next) => {
   try {
-    const { type, profile_id } = req.query;
+    const profile_id = req.user.id;
+    const { type } = req.query;
     
     if (!type || !profile_id) {
       return next(new ApiError("Thiếu thông tin loại hồ sơ hoặc ID hồ sơ", 400));
@@ -103,6 +105,7 @@ const getItemProfile = async (req, res, next) => {
  */
 const updateItemProfile = async (req, res, next) => {
   try {
+    const profile_id = req.user.id;
     const { type, data } = req.body;
     // console.log("updateItemProfile", type, data);
     if (!type || !data) {
@@ -115,7 +118,7 @@ const updateItemProfile = async (req, res, next) => {
     
     data.create_at = new Date();
     
-    const result = await queryUpdateItemProfile(type, data);
+    const result = await queryUpdateItemProfile(type, {data,profile_id});
     
     if (!result) {
       return next(new ApiError("Cập nhật hồ sơ không thành công", 400));
@@ -131,17 +134,18 @@ const updateItemProfile = async (req, res, next) => {
  */
 const deleteItemProfile = async (req, res, next) => {
   try {
+    const profile_id = req.user.id;
     const { type, data } = req.body;
     
     if (!type || !data) {
       return next(new ApiError("Thiếu thông tin cần thiết", 400));
     }
     
-    if (!data.profile_id) {
+    if (!profile_id) {
       return next(new ApiError("Thiếu thông tin ID hồ sơ", 400));
     }
     
-    const success = await queryDeleteItemProfile(type, data);
+    const success = await queryDeleteItemProfile(type, {...data,profile_id});
     
     if (success) {
       return res.success({}, "Xóa thông tin hồ sơ thành công");
@@ -157,19 +161,20 @@ const deleteItemProfile = async (req, res, next) => {
  */
 const addItemProfile = async (req, res, next) => {
   try {
+    const profile_id = req.user.id;
     const { type, data } = req.body;
     
     if (!type || !data) {
       return next(new ApiError("Thiếu thông tin cần thiết", 400));
     }
     
-    if (!data.profile_id) {
+    if (!profile_id) {
       return next(new ApiError("Thiếu thông tin ID hồ sơ", 400));
     }
     
     data.create_at = new Date();
     
-    const affectedRows = await queryAddItemProfile(type, data);
+    const affectedRows = await queryAddItemProfile(type, {...data,profile_id});
     
     if (affectedRows === 0) {
       return next(new ApiError("Thêm thông tin hồ sơ không thành công", 400));
@@ -190,7 +195,7 @@ const addItemProfile = async (req, res, next) => {
 // Upload a new resume
 const addResume = async (req, res, next) => {
   try {
-    const profile_id = req.body.profile_id;
+    const profile_id = req.user.id;
     
     if (!profile_id) {
       return next(new ApiError("Missing user profile ID", 400));
@@ -242,7 +247,7 @@ const addResume = async (req, res, next) => {
 // Get all resumes for a user
 const getResume = async (req, res, next) => {
   try {
-    const profile_id = req.query.profile_id;
+    const profile_id = req.user.id;
     
     if (!profile_id) {
       return next(new ApiError("Missing user profile ID", 400));
@@ -262,7 +267,8 @@ const getResume = async (req, res, next) => {
 // Delete a resume
 const deleteResume = async (req, res, next) => {
   try {
-    const { cv_id, profile_id } = req.body;
+    const profile_id = req.user.id;
+    const { cv_id } = req.body;
     
     // First get the resume to retrieve the S3 key
     const [resume] = await db.query(
@@ -302,7 +308,8 @@ const deleteResume = async (req, res, next) => {
 
 const getListJobApplication = async (req, res, next) => {
   try {
-  const profile_id = req.query.profile_id;
+    const profile_id = req.user.id;
+  // const profile_id = req.query.profile_id;
   // console.log("getListJobApplication", profile_id);
   if (!profile_id) {
     return next(new ApiError("Thiếu thông tin ID người dùng", 400));
@@ -323,7 +330,8 @@ const getListJobApplication = async (req, res, next) => {
 
 const applyToJob = async (req, res, next) => {
   try {
-  const {profile_id,job_id} = req.body;
+    const profile_id = req.user.id;
+  const {job_id} = req.body;
   console.log("Apply job", profile_id, job_id);
   if (!job_id || !profile_id) {
     return next(new ApiError("Thiếu thông tin ID bài đăng hoặc ID người dùng", 400));
@@ -341,7 +349,8 @@ const applyToJob = async (req, res, next) => {
 
 const addCompanyReview = async (req, res, next) => {
   try {
-    const { company_id, profile_id, score,content } = req.body;
+    const profile_id = req.user.id;
+    const { company_id, score,content } = req.body;
   if (!company_id || !profile_id || !score) {
     return next(new ApiError("Thiếu thông tin ID công ty hoặc ID người dùng", 400));
   }
@@ -358,7 +367,7 @@ const addCompanyReview = async (req, res, next) => {
 
 const getListCompanyFollowing = async (req, res, next) => {
   try {  
-  const profile_id = req.query.profile_id;
+    const profile_id = req.user.id;
   if (!profile_id) {
     return next(new ApiError("Thiếu thông tin ID người dùng", 400));
   }
@@ -379,7 +388,8 @@ const getListCompanyFollowing = async (req, res, next) => {
 
 const deleteCompanyFollowing = async (req, res, next) => {
   try {
-  const {profile_id,company_id} = req.body;
+    const profile_id = req.user.id;
+  const {company_id} = req.body;
   if (!company_id || !profile_id) {
     return next(new ApiError("Thiếu thông tin ID công ty hoặc ID người dùng", 400));
   }
@@ -396,7 +406,8 @@ const deleteCompanyFollowing = async (req, res, next) => {
 
 const addCompanyFollowing = async (req, res, next) => {
   try {
-  const {company_id, profile_id} = req.body;
+    const profile_id = req.user.id;
+  const {company_id} = req.body;
   if (!company_id || !profile_id) {
     return next(new ApiError("Thiếu thông tin ID công ty hoặc ID người dùng", 400));
   }
@@ -413,7 +424,7 @@ const addCompanyFollowing = async (req, res, next) => {
 
 const getListJobSaving = async (req, res, next) => {
   try {
-  const profile_id = req.query.profile_id;
+    const profile_id = req.user.id;
   if (!profile_id) {
     return next(new ApiError("Thiếu thông tin ID người dùng", 400));
   }
@@ -433,7 +444,8 @@ const getListJobSaving = async (req, res, next) => {
 
 const addJobSaving = async (req, res, next) => {
   try {
-  const {profile_id,job_id} = req.body;
+    const profile_id = req.user.id;
+  const {job_id} = req.body;
 
   if (!job_id || !profile_id) {
     return next(new ApiError("Thiếu thông tin ID bài đăng hoặc ID người dùng", 400));
@@ -452,7 +464,8 @@ const addJobSaving = async (req, res, next) => {
 
 const deleteJobSaving = async (req, res, next) => {
   try {
-  const {profile_id,job_id} = req.body;
+    const profile_id = req.user.id;
+  const {job_id} = req.body;
   if (!job_id || !profile_id) {
     return next(new ApiError("Thiếu thông tin ID bài đăng hoặc ID người dùng", 400));
   }
@@ -470,7 +483,8 @@ const deleteJobSaving = async (req, res, next) => {
 
 const getOverview = async (req, res, next) => {
   try {
-    const {profile_id, days} = req.body;
+    const profile_id = req.user.id;
+    const { days} = req.body;
     
     if (!profile_id || !days) {
       return next(new ApiError("Thiếu thông tin", 400));
@@ -494,7 +508,7 @@ const getOverview = async (req, res, next) => {
 
 const getJobsSuggestion = async (req, res, next) => {
   try {
-    const { profile_id } = req.query;
+    const profile_id = req.user.id;
     
     if (!profile_id) {
       return next(new ApiError("Thiếu thông tin ID người dùng", 400));
@@ -514,7 +528,7 @@ const getJobsSuggestion = async (req, res, next) => {
 
 const getNotification = async (req, res, next) => {
   try {
-    const { profile_id } = req.query;
+    const profile_id = req.user.id;
     
     if (!profile_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
@@ -538,7 +552,8 @@ const getNotification = async (req, res, next) => {
 
 const updateReadNotification = async (req, res, next) => {
   try {
-    const { profile_id, notification_id } = req.body;
+    const profile_id = req.user.id;
+    const { notification_id } = req.body;
     
     if (!profile_id || !notification_id) {
       return next(new ApiError("Thiếu ID công ty/ thông báo", 400));

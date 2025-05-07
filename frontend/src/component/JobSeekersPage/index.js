@@ -49,7 +49,7 @@ export default function JobSeekerPage() {
     isLoading,
     error,
   } = useGetItemProfileQuery(
-    { type: "Basic", profile_id: user?.id },
+    { type: "Basic"},
     {
       skip: !user?.id,
     }

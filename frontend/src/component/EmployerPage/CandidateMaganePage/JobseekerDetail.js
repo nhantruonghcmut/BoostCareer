@@ -11,10 +11,7 @@ export default function EmployeeDetail() {
 
   const { id } = useParams();
   const { isLogin, user } = useSelector((state) => state.auth);
-  const { data } = useGetJobseekerDetailQuery({
-    jobseeker_id: id,
-    employer_id: user?.id,
-  });
+  const { data } = useGetJobseekerDetailQuery({jobseeker_id: id });
 
   const {
     education_info = [],

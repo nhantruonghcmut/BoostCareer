@@ -43,8 +43,7 @@ export default function JobSeekerProfile() {
   const gender_dict = ["male", "female"];
   const { isLogin, user } = useSelector((state) => state.auth);
   const { data: edu } = useGetItemProfileQuery({
-    type: "education",
-    profile_id: user?.id,
+    type: "education"
   });
   const highestEducation = edu?.reduce((highest, current) => {
     return current.education_id > highest.education_id ? current : highest;
@@ -63,7 +62,7 @@ export default function JobSeekerProfile() {
     error,
     refetch,
   } = useGetItemProfileQuery(
-    { type: "Basic", profile_id: user?.id },
+    { type: "Basic"},
     {
       skip: !user?.id,
       refetchOnMountOrArgChange: true,
@@ -183,7 +182,6 @@ export default function JobSeekerProfile() {
       await updateItemProfile({
         type: "Basic",
         data: {
-          profile_id: user?.id,
           ...expectedJob,
         },
       }).unwrap();
@@ -200,7 +198,6 @@ export default function JobSeekerProfile() {
       await updateItemProfile({
         type: "Basic",
         data: {
-          profile_id: user?.id,
           ...updateProfileData,
         },
       }).unwrap();
@@ -220,7 +217,6 @@ export default function JobSeekerProfile() {
 
     try {
       await updateProfileImage({
-        id: user?.id,
         image: image,
       }).unwrap();
       toast.success("Cập nhật ảnh đại diện thành công!");

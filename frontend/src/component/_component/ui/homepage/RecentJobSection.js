@@ -1,16 +1,14 @@
 import { NavLink } from "react-router-dom";
 import JobCard from "../JobCard.js";
 import "./MainCategorySection.css";
-import { useSelector } from "react-redux";
 import { useAddJobSavingMutation,useDeleteJobSavingMutation } from "../../../../redux_toolkit/jobseekerApi.js";
 import {toast} from "react-toastify";
 const RecentJobSection = ({ job }) => {
-  const { isLogin, user } = useSelector((state) => state.auth);
   const [addJobSaving] = useAddJobSavingMutation();
   const [deleteJobSaving] = useDeleteJobSavingMutation();
   const handleSaveJob = async (jobId) => {
     try {
-      const response = await addJobSaving({profile_id: user?.id, job_id: jobId });
+      const response = await addJobSaving({job_id: jobId });
       if (response?.data?.success) {
         toast.success("Lưu việc làm thành công!");
       } else {
@@ -23,7 +21,7 @@ const RecentJobSection = ({ job }) => {
 
   const handleRemoveSaveJob = async (jobId) => {
     try {
-      const response = await deleteJobSaving({profile_id: user?.id, job_id: jobId });
+      const response = await deleteJobSaving({job_id: jobId });
       if (response?.data?.success) {
         toast.success("Xóa việc làm khỏi danh sách lưu thành công!");        
       } else {

@@ -20,10 +20,9 @@ export default function HomePage() {
 
   const { isLogin, user } = useSelector((state) => state.auth);
   const {data: generalInfo} = useGetGeneralInfoQuery();
-  const [currentPage, setCurrentPage] = useState(1);
   const { data: latestWorkResponse, isLoading, isError, error } = useGetLatestWorkQuery({paging_size:8});
   const JobCountByIndustry = generalInfo?.JobCountByIndustry || [] ;
-  const {data: listsaving} = useGetJobsavingQuery( user?.id,{skip:!user  });   // const leadingCompany = generalInfo?.leadingcompany || [];
+  const {data: listsaving} = useGetJobsavingQuery(user?.id, {skip: !user || user?.role !== 3});   // const leadingCompany = generalInfo?.leadingcompany || [];
   const latestWork = latestWorkResponse?.jobs || [];
   const [processedJobs, setProcessedJobs] = useState([]);
 

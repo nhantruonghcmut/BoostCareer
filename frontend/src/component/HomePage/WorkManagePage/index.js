@@ -62,7 +62,7 @@ const JobListing = () => {
   const [deleteJobSaving] = useDeleteJobSavingMutation();
 
   const { isLogin, user } = useSelector((state) => state.auth);
-  const { data: listsaving } = useGetJobsavingQuery(user?.id, { skip: !user });
+  const { data: listsaving } = useGetJobsavingQuery({ skip: !user });
   const { data: cata_benefit } = useGetBenefitsQuery();
   const { data: cata_level } = useGetLevelsQuery();
   const { data: cata_tag } = useGetTagsQuery();
@@ -205,7 +205,6 @@ const JobListing = () => {
   const handleSaveJob = async (jobId) => {
     try {
       const response = await addJobSaving({
-        profile_id: user?.id,
         job_id: jobId,
       });
       if (response?.data?.success) {
@@ -220,7 +219,6 @@ const JobListing = () => {
   const handleRemoveSaveJob = async (jobId) => {
     try {
       const response = await deleteJobSaving({
-        profile_id: user?.id,
         job_id: jobId,
       });
       if (response?.data?.success) {

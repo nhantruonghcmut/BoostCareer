@@ -59,14 +59,14 @@ export const guestApi = createApi({
     }),
     // Get post detail by ID
     getJobDetail: builder.query({
-      query: (id) => ({
+      query: (job_id) => ({
         url: "/guest/job-detail",
-        params: { id },
+        params: { job_id },
       }),
       transformResponse: (response) => { return response.data;},
     }),
     // Get all posts by user ID
-    getJobByUser: builder.query({
+    getJobOfCompanyById: builder.query({
       query: (id) => ({
         url: "/guest/jobs-of-company",
         params: { id },
@@ -82,7 +82,7 @@ export const guestApi = createApi({
     getRelatedJobs: builder.query({
       query: (job_id) => ({
         url: "/guest/related-jobs",
-        params: { job_id },
+        params:  {job_id} ,
       }),
       transformResponse: (response) => { return response.data;},
     }),
@@ -97,7 +97,7 @@ export const {
  useGetLatestWorkQuery,
  useGetJobSearchQuery,
  useGetJobDetailQuery,
- useGetJobByUserQuery,
+ useGetJobOfCompanyByIdQuery,
  useGetGeneralInfoQuery,
  useGetRelatedJobsQuery
 } = guestApi;

@@ -15,13 +15,16 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
         (COALESCE ((select 
               JSON_ARRAYAGG(
                       JSON_OBJECT(
+                          'education_title', ce.education_title,
                           'major', pe.major,
                           'school', pe.school,
                           'from_', pe.from_,
                           'to_', pe.to_
                       )
                 )
-              from  profile_education pe where js.jobseeker_id = pe.profile_id),JSON_ARRAY())) 
+              from  profile_education pe
+              join catalog_education ce on pe.education_id = ce.education_id
+               where js.jobseeker_id = pe.profile_id),JSON_ARRAY())) 
           AS education_info,
         (COALESCE ((select 
               JSON_ARRAYAGG(
@@ -88,7 +91,7 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
         `,
         [jobseeker_id]
       );  
-      return jobseeker_detail || null; // Return the first result or null if not found
+      return jobseeker_detail[0] || null; // Return the first result or null if not found
     } catch (error) {
       console.error("Error getting jobseeker detail:", error);
       return null;
@@ -149,7 +152,7 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
                   'metric_display', ctl.metric_display )
             ), JSON_ARRAY())
         FROM
-          (select * from job_require_language where job_require_language.job_id = j.job_id) as jrl 
+          (select * from job_require_language jrl2 where jrl2.job_id = j.job_id) as jrl 
         JOIN
           catalog_language ctl ON ctl.language_id = jrl.language_id) AS languages,
        (SELECT COALESCE(
@@ -177,7 +180,7 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
         `,
         [ job_id]
       );
-      return Job;
+      return Job[0];
     } catch (error) {
       console.error("Error getting list job by user:", error);
       throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm

@@ -9,10 +9,9 @@ import { toast } from "react-toastify";
 
 export default function CompanyYouFollow() {
   const { user } = useSelector((state) => state.auth);
-  const profile_id = user?.id;
   const [deleteFollowingCompany] = useDeleteFollowingCompanyMutation();
   // Using RTK Query hook instead of dispatch + useEffect
-  const { data: listFollowEmployer, isLoading } = useGetFollowingCompanyQuery( profile_id);
+  const { data: listFollowEmployer, isLoading } = useGetFollowingCompanyQuery( );
 console.log("listFollowEmployer", listFollowEmployer);  
   if (isLoading) {
     return <div className="text-center">Loading...</div>;
@@ -32,7 +31,6 @@ console.log("listFollowEmployer", listFollowEmployer);
     try 
     {
       const response = await deleteFollowingCompany({
-        profile_id: profile_id,
         company_id: company_id,
       }).unwrap();
       if (response.success) {

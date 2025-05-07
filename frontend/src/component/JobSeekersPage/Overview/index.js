@@ -1,33 +1,88 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useGetItemProfileQuery } from "../../../redux_toolkit/jobseekerApi.js";
+import { useSelector } from "react-redux";
 import SkillsContainer from "../../../component/_component/ui/jobseeker/PercentContainer.js";
 import LineChartComponent from "../../../component/_component/ui/LineChart.js";
 import {
-  useGetOverviewMutation,
+  useGetOverviewJobseekerMutation,
   useGetJobsSuggestionQuery,
 } from "../../../redux_toolkit/jobseekerApi.js";
 import { format } from "date-fns";
 
 export default function JobSeekerOverview() {
-  // const dispatch = useDispatch();
   const { isLogin, user } = useSelector((state) => state.auth);
+  const [
+    getOverviewJobseeker,
+    { data: overviewData, isLoading: isLoadingOverview, error: overviewError },
+  ] = useGetOverviewJobseekerMutation();
+  const navigate = useNavigate();
   const [days, setDays] = useState(7);
   const [endDate] = useState(new Date());
-  const [getOverviewData] = useGetOverviewMutation();
-  //****** * tạm thời chưa gợi ý job cho jobseeker (vì trước đó cũng chưa có làm)
-  const navigate = useNavigate();
 
-  // Khởi tạo states cho dữ liệu biểu đồ
-  const [rangeLabel, setRangeLabel] = useState(null);
-  const [labelTitle, setLabelTitle] = useState([]); //["Việc làm đã ứng tuyển", "Lượt xem hồ sơ", "Lượt lưu hồ sơ"];
-  const [overviewData, setOverviewData] = useState(null);
-  const [dataValue, setDataValue] = useState(null);
+  // Tạo dateRange với useMemo
+  const dateRange = useMemo(() => {
+    const result = [];
+    let step;
 
-  const renderSuitableWork = () => {
+    if (days === 7) {
+      step = 1;
+    } else if (days === 14 || days === 30) {
+      step = Math.floor(days / 5);
+    } else {
+      step = Math.floor(days / 5);
+    }
+
+    for (let i = 4; i >= 0; i--) {
+      const date = new Date(endDate);
+      date.setDate(endDate.getDate() - i * step);
+      result.push(format(date, "dd/MM/yyyy"));
+    }
+
+    return result;
+  }, [days, endDate]);
+
+  // Trigger the mutation when component mounts or dateRange changes
+  useEffect(() => {
+    getOverviewJobseeker({ days: dateRange });
+  }, [dateRange, getOverviewJobseeker]);
+
+  // Dữ liệu cho công việc phù hợp
+  const { data: listjobData, isLoading: isLoadingSuitable } = useGetJobsSuggestionQuery(
+    { skip: !user?.id }
+  );
+
+  const suitablePosts = listjobData?.jobs || [];
+
+  // Xử lý dữ liệu biểu đồ với useMemo
+  const { labelTitle, dataValue } = useMemo(() => {
+    if (!overviewData?.chart) {
+      return { labelTitle: [], dataValue: [] };
+    }
+
+    const keys = Object.keys(overviewData.chart).slice(0, 3);
+    const values = keys.map(key => overviewData.chart[key]);
+
+    return { 
+      labelTitle: keys, 
+      dataValue: values 
+    };
+  }, [overviewData]);
+
+  // Format function
+  const formatNumberToTr = useCallback((number) => 
+    `${(number / 1e6).toFixed(0)}tr`, []
+  );
+
+  // Authentication check
+  useEffect(() => {
+    if (!isLogin || user?.role !== 3) {
+      navigate("/login");
+    }
+  }, [isLogin, navigate, user]);
+
+  // Render suitable jobs
+  const renderSuitableWork = useCallback(() => {
     if (!Array.isArray(suitablePosts)) {
-      console.error("suitablePosts không phải là mảng:", suitablePosts);
       return (
         <div className="alert alert-warning w-100">
           Có lỗi khi hiển thị dữ liệu
@@ -36,7 +91,7 @@ export default function JobSeekerOverview() {
     }
 
     return suitablePosts.map((work, index) => {
-      if (!work) return null; // Bỏ qua các phần tử null/undefined
+      if (!work) return null;
 
       return (
         <div
@@ -90,113 +145,32 @@ export default function JobSeekerOverview() {
         </div>
       );
     });
-  };
-
-  // Hàm xử lý khoảng thời gian cho biểu đồ
-  const handleChangeChartTime = () => {
-    console.log("handleChangeChartTime with days:", days);
-    const dateRange = [];
-
-    // Xác định bước nhảy theo số ngày đã chọn
-    let step;
-    if (days === 7) {
-      step = 1;
-    } else if (days === 14 || days === 30) {
-      step = Math.floor(days / 5);
-    } else {
-      step = Math.floor(days / 5); // fallback
-    }
-
-    // Lấy 5 mốc thời gian, từ hiện tại lùi về trước
-    for (let i = 4; i >= 0; i--) {
-      const date = new Date(endDate);
-      date.setDate(endDate.getDate() - i * step);
-      dateRange.push(format(date, "dd/MM/yyyy"));
-    }
-
-    setRangeLabel(dateRange);
-  };
-
-  const getDataOverview = async () => {
-    try {
-      if (rangeLabel) {
-        const response = await getOverviewData({
-          profile_id: user?.id,
-          days: rangeLabel,
-        }).unwrap();
-        console.log("Overview data:", response);
-        setOverviewData(response);
-      }
-    } catch (error) {
-      console.error("Error fetching overview data:", error);
-    }
-  };
-
-  const { data: listjob, isLoading: isLoadingSuitable } =
-    useGetJobsSuggestionQuery(
-      { profile_id: user?.id },
-      {
-        skip: !user?.id,
-      }
-    );
-  const suitablePosts = listjob?.jobs || []; // Giả sử data.data chứa danh sách công việc phù hợp
-
-  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)}tr`;
-
-  // Xử lý dữ liệu overviewData khi có
-  useEffect(() => {
-    if (overviewData) {
-      console.log("Received overview data:", overviewData);
-      // Cập nhật các state với dữ liệu từ API
-      if (overviewData.chart) {
-        setLabelTitle(Object.keys(overviewData.chart).slice(0, 3));
-        const tempdata = [];
-        Object.keys(overviewData.chart).forEach((key, index) => {
-          tempdata.push(overviewData.chart[key]);
-        });
-        setDataValue(tempdata);
-      }
-    }
-  }, [overviewData]);
-
-  // Effect xử lý khi mount component và khi days thay đổi
-  useEffect(() => {
-    handleChangeChartTime();
-  }, [days, endDate]);
-
-  useEffect(() => {
-    getDataOverview();
-  }, [rangeLabel]);
-
-  // Kiểm tra authentication
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
+  }, [suitablePosts, formatNumberToTr]);
 
   return (
     <>
       <div className="bg-light rounded-2 me-2 my-2 p-2">
         <h5 className="fw-bold">Tổng quan</h5>
-        <SkillsContainer percent={overviewData?.percent_complete || 0} />
+        {isLoadingOverview ? (
+          <div>Loading overview data...</div>
+        ) : overviewError ? (
+          <div className="alert alert-danger">Error loading overview data</div>
+        ) : overviewData ? (
+          <SkillsContainer percent={overviewData?.percent_complete || 0} />
+        ) : (
+          <div>No data available</div>
+        )}
       </div>
 
       <div className="bg-light rounded-2 me-2 my-2 p-2">
         <h5 className="fw-bold">Hoạt động của bạn</h5>
         <div className="row justify-content-md-around ">
           <div className="col-md-8">
-            {/* {isLoadingOverview ? (
-              <div className="text-center py-3">Đang tải dữ liệu...</div>
-            ) : ( */}
             <>
               <LineChartComponent
                 labelTitle={labelTitle}
-                labelChoice={rangeLabel}
+                labelChoice={dateRange}
                 dataValue={dataValue}
-                // data1={overviewData?.chart?.labelTitle[0]}
-                // data2={overviewData?.chart?.labelTitle[1]}
-                // data3={overviewData?.chart?.labelTitle[2]}
               />
               <select
                 className="form-select form-select-sm w-auto"
@@ -210,7 +184,6 @@ export default function JobSeekerOverview() {
                 <option value={30}>30 ngày</option>
               </select>
             </>
-            {/* )} */}
           </div>
           <div className="col-md-4 d-flex justify-content-md-around justify-content-sm-center text-center flex-column">
             <div className="col-sm-11 border border-primary p-2 d-flex justify-content-center align-items-center flex-column">

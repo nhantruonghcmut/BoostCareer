@@ -12,7 +12,6 @@ export default function JobSeekerNotification() {
   const { isLogin, user } = useSelector((state) => state.auth);
 
   const { data: notificationData, refetch } = useGetNotificationQuery(
-    user?.id,
     {
       skip: !user?.id, // Skip the query if user ID is not available
     }
@@ -28,12 +27,10 @@ export default function JobSeekerNotification() {
     setIsUpdating(true);
     try {
       console.log("Sending update request with:", {
-        profile_id: user?.id,
         notification_id: notification_id,
       });
 
       const response = await updateReadNotification({
-        profile_id: user?.id,
         notification_id: notification_id,
       }).unwrap();
 

@@ -9,7 +9,7 @@ import "./style.css";
 
 export default function EmployerManageInvitation() {
   const { isLogin, user } = useSelector((state) => state.auth);
-  const {data: candidatesData, isLoading} = useGetListInvitationQuery(  user?.id ,{ skip: !user?.id } ) || [];
+  const {data: candidatesData, isLoading} = useGetListInvitationQuery( {},{ skip: !user?.id } ) || [];
   console.log("candidatesData", candidatesData);
   const navigate = useNavigate();
   
@@ -17,7 +17,7 @@ export default function EmployerManageInvitation() {
   const [rateCandidate] = useRateCandidateMutation();
   const handleRemoveInvitation = async (invitation) => {
     try {
-      const response = await deleteInvitation({ employer_id: user?.id, jobseeker_id:invitation.profile_id, job_id: invitation.job_id }).unwrap();
+      const response = await deleteInvitation({ jobseeker_id:invitation.profile_id, job_id: invitation.job_id }).unwrap();
       if (response?.success)
       {
         toast.success("Xóa bỏ lời mời thành công!");
@@ -85,7 +85,6 @@ export default function EmployerManageInvitation() {
         const response = await rateCandidate({
         type: type,
         application_id:item.profile_id, 
-        employer_id: user?.id, 
         rating:value, 
         content:item.content || ""}
       ).unwrap(); // Gọi API để đánh giá ứng viên

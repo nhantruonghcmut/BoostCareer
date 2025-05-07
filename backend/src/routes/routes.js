@@ -1,5 +1,4 @@
 const express = require("express");
-
 const authencationRoutes = require("./authencationRoutes.js");
 const categoryRoutes = require("./categoryRoutes.js");
 const jobseekerRoutes = require("./jobseekerRoutes.js");

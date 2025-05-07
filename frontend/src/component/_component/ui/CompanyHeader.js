@@ -15,15 +15,13 @@ export default function ComPanyHeard({
   showFollowButton = true,
 }) {
   const { isLogin, user } = useSelector((state) => state.auth);
-  const { data: listfollowCompany } = useGetFollowingCompanyQuery(user?.id);
+  const { data: listfollowCompany } = useGetFollowingCompanyQuery();
   console.log("list followCompany", listfollowCompany);
   const [followed, setFollowed] = useState(false);
   const [followCompany] = useAddFollowingCompanyMutation();
   const [deleteFollowCompany] = useDeleteFollowingCompanyMutation();
-  const handdleFollowCompany = async () => {
-    if (user?.role === 3 && user?.id) {
+  const handdleFollowCompany = async () => { 
       const response = await followCompany({
-        profile_id: user?.id,
         company_id: companyInformation?.company_id,
       });
       console.log("response", response);
@@ -31,32 +29,30 @@ export default function ComPanyHeard({
         toast.success("Theo dõi công ty thành công!");
         setFollowed(true);
       } else toast.error("Theo dõi công ty thất bại!");
-    }
+
   };
   const handdleUnFollowCompany = async () => {
-    if (user?.role === 3 && user?.id&& followed) {
+    if (user?.role === 3 && user?.id && followed) {
       const response = await deleteFollowCompany({
-        profile_id: user?.id,
         company_id: companyInformation?.company_id,
       });
       console.log("response", response);
       if (response?.data?.success) {
         toast.success("Bỏ theo dõi công ty thành công!");
-        setFollowed(true);
+        setFollowed(false); // Changed to FALSE
       } else toast.error("Bỏ theo dõi công ty thất bại!");
     }
   };
+
   useEffect(() => {
-    if (Array.isArray(listfollowCompany))
-    {
-      setFollowed(false);
-      for (const item of listfollowCompany) {
-        if (item?.company_id === companyInformation?.company_id) {
-          setFollowed(true);
-          break;
-        } 
-      }
-  }}, [listfollowCompany]);
+    if (Array.isArray(listfollowCompany) && companyInformation?.company_id) {
+      // Check if the current company is in the followed list
+      const isFollowed = listfollowCompany.some(
+        item => item?.company_id === companyInformation?.company_id
+      );
+      setFollowed(isFollowed);
+    }
+  }, [listfollowCompany, companyInformation?.company_id]); // Added company_id as dependency
 
   return (
     <div className="card">

@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, ListGroup } from "react-bootstrap";
 import { useParams, NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-// import { getPostDetails } from "../../redux/actions/postAction.js";
+import ColorBar from "../../_component/ui/colorbar.js";
 import {
   useGetJobDetailQuery,
   useGetRelatedJobsQuery,
@@ -14,6 +14,7 @@ import {
   useGetJobApplyQuery,
   useGetJobsavingQuery,
 } from "../../../redux_toolkit/jobseekerApi.js";
+
 import formatDateToDDMMYYYY from "../../../utils/formatDate.js";
 import calculateDaysRemaining from "../../../utils/calculateDaysRemaining.js";
 import CompanyHeader from "../../../component/_component/ui/CompanyHeader.js";
@@ -26,10 +27,11 @@ import { use } from "react";
 import { ca } from "date-fns/locale";
 
 export default function WorkDetail() {
+  const [value, setValue] = useState(90);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  console.log("user", user);
   const { id } = useParams();
   const [addJobApply] = useAddJobApplyMutation();
   const [addJobSaving] = useAddJobSavingMutation();
@@ -43,7 +45,7 @@ export default function WorkDetail() {
   });
 
   const { data: jobApply } =
-    useGetJobApplyQuery(user?.id, {
+    useGetJobApplyQuery({
       skip: !user?.id,
     }) || [];
   const { data: jobSaving } =
@@ -53,7 +55,7 @@ export default function WorkDetail() {
   console.log("jobApply", jobApply);
   console.log("jobSaving", jobSaving);
   const { data: relatedJobs, isLoading: isLoadingRelatedJobs } =
-    useGetRelatedJobsQuery(id);
+    useGetRelatedJobsQuery(id, { skip: !id });
 
   const handleSaveJob = async () => {
     try {
@@ -68,7 +70,6 @@ export default function WorkDetail() {
         }
         const response = await addJobSaving({
           job_id: postDetail?.job_id,
-          profile_id: user?.id,
         }).unwrap();
         if (response?.success) {
           toast.success("Lưu công việc thành công!");
@@ -97,7 +98,6 @@ export default function WorkDetail() {
         }
         const response = await deleteJobSaving({
           job_id: postDetail?.job_id,
-          profile_id: user?.id,
         }).unwrap();
         if (response?.success) {
           toast.success("Xóa công việc thành công!");
@@ -125,7 +125,6 @@ export default function WorkDetail() {
         }
         const response = await addJobApply({
           job_id: postDetail?.job_id,
-          profile_id: user?.id,
         }).unwrap();
         if (response?.success) {
           toast.success("Ứng tuyển thành công!");
@@ -212,51 +211,62 @@ export default function WorkDetail() {
                 </p>
                 {user?.role === 3 ? (
                   <>
-                    {applied ? (
-                      <button className="btn btn-danger me-2" disabled>
-                        Đã ứng tuyển
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-danger me-2"
-                        onClick={handleApplyJob}
-                      >
-                        Ứng tuyển
-                      </button>
-                    )}
+                    <div className="d-flex justify-content-between align-items-end mb-3">
+                      <div style={{ width: "48%" }} className="d-flex">
+                        {applied ? (
+                          <button className="btn btn-danger flex-fill me-2" disabled>
+                            Đã ứng tuyển
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-danger flex-fill me-2"
+                            onClick={handleApplyJob}
+                          >
+                            Ứng tuyển
+                          </button>
+                        )}
 
-                    {saved ? (
-                      <button
-                        className="btn btn-outline-danger"
-                        onClick={handleDeleteJobSaving}
-                      >
-                        Bỏ Lưu
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn-outline-secondary"
-                        onClick={handleSaveJob}
-                      >
-                        Lưu
-                      </button>
-                    )}
+                        {saved ? (
+                          <button
+                            className="btn btn-outline-danger flex-fill"
+                            onClick={handleDeleteJobSaving}
+                          >
+                            Bỏ Lưu
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-outline-secondary flex-fill"
+                            onClick={handleSaveJob}
+                          >
+                            Lưu
+                          </button>
+                        )}
+                      </div>
+                      <div style={{ width: "48%", textAlign: "right" }}>
+                           <ColorBar value={value} />
+                      </div>
+                    </div>
                   </>
                 ) : (
                   <>
-                    <button
-                      className="btn btn-danger me-2"
-                      data-bs-toggle="modal"
-                      data-bs-target="#LoginModal"
-                    >
-                      Ứng tuyển
-                    </button>
-                    <button
-                      className="btn btn-outline-secondary"
-                      data-bs-toggle="modal"
-                      data-bs-target="#LoginModal"
-                    >
-                      Lưu
-                    </button>
+                    <div className="d-flex justify-content-between align-items-end mb-3">
+                      <div style={{ width: "48%" }} className="d-flex">
+                        <button
+                          className="btn btn-danger flex-fill me-2"
+                          data-bs-toggle="modal"
+                          data-bs-target="#LoginModal"
+                        >
+                          Ứng tuyển
+                        </button>
+                        <button
+                          className="btn btn-outline-secondary flex-fill"
+                          data-bs-toggle="modal"
+                          data-bs-target="#LoginModal"
+                        >
+                          Lưu
+                        </button>
+                      </div>
+                    </div>
                   </>
                 )}
 

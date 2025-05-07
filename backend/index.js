@@ -2,8 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const routes = require("./src/routes/routes.js");
-const session = require("express-session");
-
+const cookieParser = require('cookie-parser');
 // Import middleware
 const responseHandler = require('./src/middlewares/responseHandler');
 const { errorConverter, errorHandler } = require('./src/middlewares/errorHandler');
@@ -14,15 +13,12 @@ dotenv.config();
 //Cors
 const corsConfig = require("./src/config/corsConfig.js");
 
-//Session
-const sessionConfig = require("./src/config/sessionConfig.js");
-
 //Khởi tạo app express
 const app = express();
 
 app.use(express.json());
 app.use(cors(corsConfig));
-app.use(session(sessionConfig));
+app.use(cookieParser());
 app.use("/uploads", express.static("uploads"));
 
 // Apply middlewares (thêm vào trước các routes)

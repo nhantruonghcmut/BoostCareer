@@ -43,7 +43,6 @@ export default function EmployerOverview() {
     try {
       if (rangeLabel !== null) {
         const response = await getOverviewData({
-          employer_id: user?.id,
           days: rangeLabel,
         }).unwrap();
         console.log("Overview data:", response);

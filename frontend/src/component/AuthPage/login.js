@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, checkLoginStatus } from "../../redux_toolkit/AuthSlice.js";
+import { login } from '../../redux_toolkit/AuthSlice';
 import { validateField } from "../../utils/validateField";
 
 export default function Login() {
@@ -52,21 +52,25 @@ export default function Login() {
     if (hasError) {
       return; // Prevent submission if there are validation errors
     }
-    const response = await dispatch(loginUser(dataLogin)); // Dispatch login action
-    console.log("response", response);
-    if (response.success) {
-      // toast.success("Đăng nhập thành công!");
-      navigate("/"); // Redirect to home page on success
+    
+    try {
+      const result = await dispatch(login(dataLogin)).unwrap();
+      if (result.success) {
+        navigate("/"); // Redirect to home page on success
+      }
+    } catch (error) {
+      // Error handling already done in the thunk
+      console.error("Login failed:", error);
     }
   };
 
   useEffect(() => {
+    // Nếu người dùng đã đăng nhập và đang cố truy cập trang đăng nhập
+    // thì chuyển hướng họ đến trang chính
     if (isLogin) {
       navigate("/");
-    } else {
-      dispatch(checkLoginStatus());
     }
-  }, [isLogin, navigate, dispatch]);
+  }, [isLogin, navigate]);
 
   useEffect(() => {
     // Enable submit button if no errors and fields are filled

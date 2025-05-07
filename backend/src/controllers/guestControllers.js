@@ -13,7 +13,7 @@ const {
 
 const getPublicJobDetail = async (req, res, next) => {
   try {
-    const job_id = req.query.id;
+    const {job_id} = req.query;
 
     if (!job_id) {
       return next(new ApiError("Thiếu ID bài đăng", 400));
@@ -145,7 +145,7 @@ const getGeneralInfo = async (req, res, next) => {
 };
 const getRelatedJobs = async (req, res, next) => {
 try {
-  const job_id = req.query.job_id;
+  const {job_id} = req.query;
   if (!job_id) {
     return next(new ApiError("Thiếu ID bài đăng", 400));
   }
@@ -153,10 +153,10 @@ try {
   // if (!data || data.length === 0) {
   //   return next(new ApiError("Không tìm thấy bài đăng", 404));
   // }
-  return res.success(data||[], "Lấy chi tiết bài đăng thành công");
+  return res.success(data||[], " getRelatedJobs thành công");
 }
 catch (err) {
-  return next(new ApiError("Lỗi khi lấy chi tiết bài đăng", 500));
+  return next(new ApiError("Lỗi khi getRelatedJobs", 500));
 }
 };
 

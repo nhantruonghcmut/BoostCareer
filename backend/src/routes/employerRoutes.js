@@ -28,11 +28,12 @@ const {
   getNotification,
   updateReadNotification
 } = require("../controllers/employerControllers.js");
-
+const { verifyToken, verifyRole } = require('../middlewares/authMiddleware');
 const { upload } = require("../middlewares/imageUpload.js");
 
 const employerRoutes = express.Router();
-
+employerRoutes.use(verifyToken);
+employerRoutes.use(verifyRole(2)); // Role 2 là employer
 employerRoutes.get("/jobseekers", getListJobseekerBySearch);   // lấy danh sách
 employerRoutes.get("/jobseeker-detail", getJobseekerDetail); // lấy thông tin chi tiết ứng viên 
 // employerRoutes.get("/jobseeker-cv", getJobseekerCV); // tải CV ứng viên

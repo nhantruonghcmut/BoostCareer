@@ -55,13 +55,12 @@ const getListJobseekerBySearch = async (req, res, next) => {
 
 const getJobseekerDetail = async (req, res, next) => {
   try {
-    const {employer_id,jobseeker_id} = req.query;
-    // console.log("getJobseekerDetail", req.query);
+    const employer_id = req.user.id;
+    const {jobseeker_id} = req.query;
     
-    if (!jobseeker_id) {
+    if (!jobseeker_id || !employer_id) {
       return next(new ApiError("Thiếu ID ứng viên", 400));
     }
- ///////// lưu ý check quyền + login
     const data = await queryGetJobseekerDetail(employer_id,jobseeker_id);
 
     if (!data) {
@@ -81,8 +80,6 @@ const getJobseekerCV = async (req, res, next) => {
     if (!jobseeker_id) {
       return next(new ApiError("Thiếu ID ứng viên", 400));
     }
-
-    ///////// lưu ý check quyền + login
     const data = await queryGetJobseekerCV(jobseeker_id);
 
     if (!data) {
@@ -97,17 +94,11 @@ const getJobseekerCV = async (req, res, next) => {
 
 const getListJobByUser = async (req, res, next) => {
   try {
-    const employer_id = req.query.employer_id;
+    const employer_id = req.user.id;
     
     if (!employer_id) {
       return next(new ApiError("Thiếu ID nhà tuyển dụng", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
-
     const data = await queryGetListJobByUser(employer_id);
 
     return res.success(
@@ -121,17 +112,13 @@ const getListJobByUser = async (req, res, next) => {
 
 const getJobDetailByUser = async (req, res, next) => {
   try {
-    const { job_id, employer_id } = req.query;
+    const employer_id = req.user.id;
+    const { job_id } = req.query;
     
     if (!job_id || !employer_id) {
       return next(new ApiError("Thiếu thông tin ID bài đăng hoặc nhà tuyển dụng", 400));
     }
     
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
-
     const data = await queryGetJobDetailByUser(job_id, employer_id);
 
     if (!data) {
@@ -146,19 +133,14 @@ const getJobDetailByUser = async (req, res, next) => {
 
 const addJobByUser = async (req, res, next) => {
   try {
-    // console.log("addJobByUser", req.body);
+    const employer_id = req.user.id;
     const data = req.body;
     
-    if (!data || !data.employer_id) {
+    if (!data || !employer_id) {
       return next(new ApiError("Thiếu thông tin bài đăng", 400));
-    }
+    }    
     
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.id !== parseInt(data.company_id)) {
-    //   return next(new ApiError("Không có quyền đăng bài", 403));
-    // }
-    
-    const job_id = await queryAddJobByUser(data);
+    const job_id = await queryAddJobByUser({...data, employer_id});
     
     if (!job_id) {
       return next(new ApiError("Đăng bài thất bại", 500));
@@ -172,13 +154,14 @@ const addJobByUser = async (req, res, next) => {
 
 const updateJobByUser = async (req, res, next) => {
   try {
+    const employer_id = req.user.id;
     const data = req.body;
     
     if (!data) {
       return next(new ApiError("Thiếu thông tin bài đăng", 400));
     }  
     
-    const result = await queryUpdateJobByUser(data);
+    const result = await queryUpdateJobByUser({...data, employer_id});
     if (!result) {
       return next(new ApiError("Cập nhật bài đăng thất bại", 500));
     }
@@ -191,18 +174,13 @@ const updateJobByUser = async (req, res, next) => {
 
 const deleteJobByUser = async (req, res, next) => {
   try {
-    
-    const { employer_id,job_id } = req.body;
+    const employer_id = req.user.id;
+    const {job_id } = req.body;
     // console.log("deleteJobByUser", req.query);
     if (!job_id || !employer_id) {
       return next(new ApiError("Thiếu thông tin ID bài đăng hoặc nhà tuyển dụng", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền xóa bài đăng này", 403));
-    // }
-    
+        
     const result = await queryDeleteJobByUser(employer_id,job_id);
     
     if (!result) {
@@ -217,7 +195,7 @@ const deleteJobByUser = async (req, res, next) => {
 
 const getCompanyInformation = async (req, res, next) => {
   try {
-    const company_id = req.query.employer_id;
+    const company_id = req.user.id;
     
     if (!company_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
@@ -237,19 +215,14 @@ const getCompanyInformation = async (req, res, next) => {
 
 const addItemCompanyProfile = async (req, res, next) => {
   try {
+    const  company_id= req.user.id;
     const {type,data} = req.body;
-    const { company_id } = data;
     
     if (!company_id || !type) {
       return next(new ApiError("Thiếu thông tin công ty hoặc loại hồ sơ", 400));
     }
     
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền thêm thông tin hồ sơ này", 403));
-    // }
-    
-    const result = await queryAddItemCompanyProfile(type,data);
+    const result = await queryAddItemCompanyProfile(type,{...data,company_id});
     
     if (!result) {
       return next(new ApiError("Thêm thông tin hồ sơ thất bại", 500));
@@ -263,19 +236,14 @@ const addItemCompanyProfile = async (req, res, next) => {
 
 const updateItemCompanyProfile = async (req, res, next) => {
   try {
+    const company_id= req.user.id;
     const {type,data} = req.body;
-    const { company_id } = data;
     
     if (!company_id|| !type) {
       return next(new ApiError("Thiếu thông tin công ty hoặc ID hồ sơ", 400));
     }
     
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền cập nhật hồ sơ này", 403));
-    // }
-    
-    const result = await queryUpdateItemCompanyProfile(type,data);
+    const result = await queryUpdateItemCompanyProfile(type,{...data,company_id});
     
     if (!result) {
       return next(new ApiError("Cập nhật hồ sơ thất bại", 500));
@@ -289,17 +257,14 @@ const updateItemCompanyProfile = async (req, res, next) => {
 
 const deleteItemCompanyProfile = async (req, res, next) => {
   try {
-    const {type,company_id,id} = req.query;
+    const company_id= req.user.id;
+    const {type,id} = req.query;
     // console.log("deleteItemCompanyProfile", req.query);
     
     if (!company_id|| !type||!id) {
       return next(new ApiError("Thiếu thông tin ID hồ sơ hoặc công ty", 400));
     }
     
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền xóa hồ sơ này", 403));
-    // }
     
     const result = await queryDeleteItemCompanyProfile(type,company_id,id);
     // console.log("result tai controller", result);
@@ -315,7 +280,7 @@ const deleteItemCompanyProfile = async (req, res, next) => {
 
 const updateLogoImage = async (req, res, next) => {
   try {
-    const { company_id } = req.body;
+    const company_id= req.user.id;
     const logoFile = req.file;
     
     if (!company_id) {
@@ -325,12 +290,7 @@ const updateLogoImage = async (req, res, next) => {
     if (!logoFile) {
       return next(new ApiError("Không có file ảnh được tải lên", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền cập nhật logo công ty", 403));
-    // }
-    
+        
     // Upload ảnh lên S3
     const logoUrl = await uploadToS3(logoFile, 'company-logos');
     
@@ -353,7 +313,7 @@ const updateLogoImage = async (req, res, next) => {
 
 const updateBackgroundImage = async (req, res, next) => {
   try {
-    const { company_id } = req.body;
+    const company_id= req.user.id;
     const bgFile = req.file;
     
     if (!company_id) {
@@ -364,11 +324,7 @@ const updateBackgroundImage = async (req, res, next) => {
       return next(new ApiError("Không có file ảnh được tải lên", 400));
     }
     
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền cập nhật ảnh bìa công ty", 403));
-    // }
-    
+   
     // Upload ảnh lên S3
     const bgUrl = await uploadToS3(bgFile, 'company-backgrounds');
     
@@ -391,17 +347,12 @@ const updateBackgroundImage = async (req, res, next) => {
 
 const getListCandidate = async (req, res, next) => {
   try {
-    const { employer_id } = req.query;
+    const employer_id= req.user.id;
     
     if (!employer_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
-    
+       
     const data = await queryGetListCandidateSaving(employer_id);
     
     return res.success(
@@ -415,17 +366,13 @@ const getListCandidate = async (req, res, next) => {
 
 const saveCandidate = async (req, res, next) => {
   try {
-    const { employer_id, jobseeker_id } = req.body;
+    const employer_id= req.user.id;
+    const { jobseeker_id } = req.body;
     
     if (!employer_id || !jobseeker_id) {
       return next(new ApiError("Thiếu thông tin công ty hoặc ứng viên", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền thực hiện hành động này", 403));
-    // }
-    
+       
     const result = await querySaveCandidate(employer_id, jobseeker_id);
     
     if (!result) {
@@ -440,17 +387,13 @@ const saveCandidate = async (req, res, next) => {
 
 const rateCandidate = async (req, res, next) => {
   try {
-    const {type, application_id, employer_id, rating, content } = req.body;
+    const employer_id= req.user.id;
+    const {type, application_id, rating, content } = req.body;
     
     if (!application_id || !employer_id || rating === undefined || !type) {
       return next(new ApiError("Thiếu thông tin đánh giá", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền đánh giá ứng viên này", 403));
-    // }
-    
+        
     const result = await queryRateCandidate(type, application_id, employer_id, rating, content);
     
     if (!result) {
@@ -465,16 +408,12 @@ const rateCandidate = async (req, res, next) => {
 
 const deleteCandidate = async (req, res, next) => {
   try {
-    const { employer_id, jobseeker_id } = req.body;
+    const employer_id= req.user.id;
+    const { jobseeker_id } = req.body;
     
     if (!employer_id || !jobseeker_id) {
       return next(new ApiError("Thiếu thông tin công ty hoặc ứng viên", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền thực hiện hành động này", 403));
-    // }
     
     const result = await queryDeleteCandidate(employer_id, jobseeker_id);
     
@@ -490,16 +429,11 @@ const deleteCandidate = async (req, res, next) => {
 
 const getListJobApplication = async (req, res, next) => {
   try {
-    const { employer_id } = req.query;
+    const employer_id= req.user.id;
     
     if (!employer_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
     
     const data = await queryGetListJobApplication(employer_id);
     
@@ -514,17 +448,13 @@ const getListJobApplication = async (req, res, next) => {
 
 const rejectJobApplication = async (req, res, next) => {
   try {
-    const { employer_id, job_id,jobseeker_id} = req.body;
+    const employer_id= req.user.id;
+    const { job_id,jobseeker_id} = req.body;
     
     if (!jobseeker_id || !employer_id) {
       return next(new ApiError("Thiếu thông tin đơn ứng tuyển hoặc công ty", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền từ chối đơn ứng tuyển này", 403));
-    // }
-    
+ 
     const result = await queryRejectJobApplication(employer_id,job_id,jobseeker_id);
     
     if (!result) {
@@ -541,17 +471,13 @@ const rejectJobApplication = async (req, res, next) => {
 
 const inviteCandidateApply = async (req, res, next) => {
   try {
-    const { employer_id, jobseeker_id, job_ids } = req.body;
+    const employer_id= req.user.id;
+    const { jobseeker_id, job_ids } = req.body;
     
     if (!employer_id || !jobseeker_id || !job_ids) {
       return next(new ApiError("Thiếu thông tin công ty hoặc ứng viên hoặc job_id", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền thực hiện hành động này", 403));
-    // }
-    
+   
     const result = await queryInviteJobseekerApply(employer_id, jobseeker_id, job_ids);
     
     if (!result) {
@@ -566,18 +492,13 @@ const inviteCandidateApply = async (req, res, next) => {
 
 const deleteInvitation = async (req, res, next) => {
   try{
-    const { employer_id, jobseeker_id, job_id } = req.body;
+    const employer_id= req.user.id;
+    const { jobseeker_id, job_id } = req.body;
     
-    // console.log("deleteInvitation", req.body);
     if (!employer_id || !jobseeker_id || !job_id) {
       return next(new ApiError("Thiếu thông tin công ty hoặc ứng viên hoặc job_id", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền thực hiện hành động này", 403));
-    // }
-    
+        
     const result = await queryDeleteInvitation(employer_id, jobseeker_id, job_id);
     
     if (!result) {
@@ -594,16 +515,12 @@ const deleteInvitation = async (req, res, next) => {
 
 const getOverview = async (req, res, next) => {
   try {
-    const { employer_id,days } = req.body;
+    const employer_id= req.user.id;
+    const { days } = req.body;
     
     if (!employer_id || !days) {
       return next(new ApiError("Thiếu ID công ty/ ngày thống kê", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
     
     const data = await queryGetOverview(employer_id, days);
     
@@ -618,17 +535,13 @@ const getOverview = async (req, res, next) => {
 
 const getListJobForInvite = async (req, res, next) => {
   try {
-    const { employer_id, jobseeker_id } = req.query;
+    const employer_id= req.user.id;
+    const { jobseeker_id } = req.query;
     
     if (!employer_id, !jobseeker_id) {
       return next(new ApiError("Thiếu ID công ty/ ứng viên", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
-    
+   
     const data = await queryGetListJobForInvite(employer_id, jobseeker_id);
     
     return res.success(
@@ -643,16 +556,10 @@ const getListJobForInvite = async (req, res, next) => {
 
 const getListInvitaion = async (req, res, next) => {
   try {
-    const { employer_id } = req.query;
-    console.log("getListInvitaion", req.query);
+    const employer_id= req.user.id;
     if (!employer_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
     
     const data = await queryGetListInvitaion(employer_id);
     
@@ -668,16 +575,11 @@ const getListInvitaion = async (req, res, next) => {
 
 const getNotification = async (req, res, next) => {
   try {
-    const { employer_id } = req.query;
+    const employer_id= req.user.id;
     
     if (!employer_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
     
     const data = await queryGetNotification(employer_id);
     
@@ -692,17 +594,12 @@ const getNotification = async (req, res, next) => {
 
 const updateReadNotification = async (req, res, next) => {
   try {
-    console.log("updateReadNotification", req.body);
-    const { employer_id, notification_id } = req.body;
+    const employer_id= req.user.id;
+    const { notification_id } = req.body;
     
     if (!employer_id || !notification_id) {
       return next(new ApiError("Thiếu ID công ty/ thông báo", 400));
     }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền thực hiện hành động này", 403));
-    // }
     
     const result = await queryUpdateReadNotification(employer_id, notification_id);
     
@@ -713,7 +610,6 @@ const updateReadNotification = async (req, res, next) => {
   } catch (err) {
     return next(new ApiError("Lỗi khi cập nhật thông báo", 500));
   } 
-
 }
 
 

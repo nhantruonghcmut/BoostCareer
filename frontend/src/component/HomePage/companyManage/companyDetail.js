@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import calculateDaysRemaining from "../../../utils/calculateDaysRemaining.js";
 import {
   useGetCompanyInformationQuery,
-  useGetJobByUserQuery,
+  useGetJobOfCompanyByIdQuery,
 } from "../../../redux_toolkit/guestApi.js";
 import {
   useGetCompanyReviewQuery,
@@ -25,19 +25,18 @@ export default function CompanyDetail() {
   const navigate = useNavigate();
   const { isLogin, user } = useSelector((state) => state.auth);
   const [applyJob] = useAddJobApplyMutation();
-  const [addFollowingCompany] = useAddFollowingCompanyMutation();
-  const [deleteFollowingCompany] = useDeleteFollowingCompanyMutation();
-  const [addReviewCompany] = useAddCompanyReviewMutation();
-  const [deleteReviewCompany] = useDeleteCompanyReviewMutation();
-  const { data: jobApply, refetch: refetchJobApply } = useGetJobApplyQuery(
-    user?.id,
+  // const [addFollowingCompany] = useAddFollowingCompanyMutation();
+  // const [deleteFollowingCompany] = useDeleteFollowingCompanyMutation();
+  // const [addReviewCompany] = useAddCompanyReviewMutation();
+  // const [deleteReviewCompany] = useDeleteCompanyReviewMutation();
+  const { data: jobApply, refetch: refetchJobApply } = useGetJobApplyQuery({},
     { skip: !isLogin }
   ); // Add refetch function
   const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)}tr`;
   const { companyId } = useParams();
   const { data: city } = useGetCitiesQuery(84); // 84 là mã quốc gia Việt Nam
   const { data: companyInformation } = useGetCompanyInformationQuery(companyId);
-  const { data } = useGetJobByUserQuery(companyId);
+  const { data } = useGetJobOfCompanyByIdQuery(companyId);
   const postsByUser = data?.jobs || [];
 
   // Filter
@@ -55,7 +54,6 @@ export default function CompanyDetail() {
     try {
       if (user?.role === 3) {
         const response = await applyJob({
-          profile_id: user?.id,
           job_id: id,
         }).unwrap();
 

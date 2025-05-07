@@ -1,5 +1,32 @@
 const db = require("../config/databaseConfig.js");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
+
+const generateTokens = (userLogin) => {
+  // Access token chứa thông tin cần thiết cho xác thực
+  const accessToken = jwt.sign(
+    {
+      id: userLogin.user_id,
+      role: userLogin.role_id,
+      // Không nên đưa thông tin nhạy cảm vào token
+    }, 
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' } // Token hết hạn sau 1h
+  );
+
+  // Refresh token để cấp mới access token
+  const refreshToken = jwt.sign(
+    { id: userLogin.user_id },
+    process.env.JWT_REFRESH_SECRET, 
+    { expiresIn: '7d' } // Refresh token tồn tại 7 ngày
+  );
+
+  return {
+    accessToken,
+    refreshToken
+  };
+};
 // Tìm người dùng bằng tên đăng nhập
 const findUserByUsername = async (username) => {
   const [rows] = await db.query("SELECT * FROM user_ WHERE username = ?", [
@@ -12,27 +39,32 @@ const findUserByUsername = async (username) => {
 const loginExecute = async (username, password) => {
   try {
     const [rows] = await db.query(
-      `SELECT    *    
-      FROM user_ WHERE username = ? and password_ = ?`,
-      [username, password]
+      `SELECT * FROM user_ WHERE username = ?`,
+      [username]
     );
-    if (rows.length === 0) {
-      return null; // Không tìm thấy người dùng với tên đăng nhập và mật khẩu này
-    }
-    if (Number(rows[0].role_id) === 2) {
+    
+    if (rows.length === 0) return null;
+    
+    const user = rows[0];
+    const validPassword = await bcrypt.compare(password, user.password_);
+    if (!validPassword) return null;
+    const { password_, ...userWithoutPassword } = user;
+    // console.log("userWithoutPassword", userWithoutPassword);
+    if (Number(userWithoutPassword.role_id) === 2) {
       const [avatar] = await db.query(
         `SELECT  logo    
         FROM company WHERE company_id = ?`,
-        [rows[0].user_id]
+        [user.user_id]
       );
-      return { ...rows[0], logo: avatar[0]?.logo }; // Trả về người dùng đầu tiên nếu tìm thấy
-    } else if (Number(rows[0].role_id) === 3) {
+      return { ...userWithoutPassword, logo: avatar[0]?.logo }; // Trả về người dùng đầu tiên nếu tìm thấy
+    } else if (Number(userWithoutPassword.role_id) === 3) {
       const [avatar] = await db.query(
         `SELECT  avatar  as logo  
         FROM user_jobseeker WHERE jobseeker_id = ?`,
-        [rows[0].user_id]
+        [user.user_id]
       );
-      return { ...rows[0], logo: avatar[0]?.logo }; // Trả về người dùng đầu tiên nếu tìm thấy
+      // console.log("tra ve frontend");
+      return { ...userWithoutPassword, logo: avatar[0]?.logo }; // Trả về người dùng đầu tiên nếu tìm thấy
     }
   } catch (error) {
     console.error("Lỗi khi thực hiện truy vấn:", error);
@@ -49,6 +81,9 @@ const registerExecute = async (
   phone
 ) => {
   // console.log("role", role);
+  const salt = await bcrypt.genSalt(Number(process.env.PASSWORD_SALT_ROUNDS));
+  const hashedPassword = await bcrypt.hash(password, salt);
+  
   let connection;
   try {
     connection = await db.getConnection(); // Lấy kết nối từ pool
@@ -56,7 +91,7 @@ const registerExecute = async (
     const create_at = new Date();
     const [user] = await db.query(
       `INSERT INTO user_ (username,password_,email, phone_number, create_at, role_id) VALUES (?, ?, ?, ?, ?, ?)`,
-      [username, password, email, phone, create_at, role]
+      [username, hashedPassword, email, phone, create_at, role]
     );
     if (!user.insertId) {
       throw new Error("Không thể tạo người dùng mới");
@@ -111,4 +146,4 @@ const registerExecute = async (
   }
 };
 
-module.exports = { findUserByUsername, loginExecute, registerExecute };
+module.exports = { findUserByUsername, loginExecute, registerExecute,generateTokens };

@@ -27,21 +27,19 @@ export default function EmployerPost() {
   const [postNewWork] = useAddJobMutation();
   const [editPostByUser] = useUpdateJobMutation();
   const { isLogin, user } = useSelector((state) => state.auth);
-  const employer_id = user?.id;
   const { data: tags } = useGetTagsQuery();
   const { data: jobFunction } = useGetJobFunctionQuery();
   const { data: industry } = useGetIndustriesQuery();
   const { data: city } = useGetCitiesQuery(84);
   const { data: edu } = useGetEducationQuery();
   const { data: lang } = useGetLanguagesQuery();
-  const { data } = useGetJobByUserQuery(employer_id);
+  const { data } = useGetJobByUserQuery();
   console.log("data: ", data);
   const postsByUser = data?.jobs || [];
   const [isAddPost, setIsAddPost] = useState(true);
 
   const [newPost, setNewPost] = useState({
     job_id: "0",
-    employer_id: user?.id,
     title: "",
     date_post: new Date().toISOString(),
     industry_id: 20,
@@ -150,7 +148,6 @@ export default function EmployerPost() {
           setNewPost({
             ...newPost,
             job_id: 0,
-            employer_id: user?.id,
             title: "",
             date_post: new Date().toISOString(),
             industry_id: 20,
@@ -185,7 +182,6 @@ export default function EmployerPost() {
           setNewPost({
             ...newPost,
             job_id: 0,
-            employer_id: user?.id,
             title: "",
             date_post: new Date().toISOString(),
             industry_id: 20,
@@ -238,7 +234,6 @@ export default function EmployerPost() {
 
       // Gửi request xóa với tham số đúng
       const response = await deletePostByUser({
-        employer_id: employer_id,
         job_id: postID, // Đảm bảo tên field khớp với API
       });
 
@@ -276,7 +271,6 @@ export default function EmployerPost() {
         ":" +
         String(newExpDate.getSeconds()).padStart(2, "0");
       const response = await editPostByUser({
-        employer_id: employer_id,
         job_id: job_id,
         date_expi: formattedDate,
       });
@@ -294,7 +288,6 @@ export default function EmployerPost() {
   const handleShowHide = async (job_id, status) => {
     try {
       const response = await editPostByUser({
-        employer_id: employer_id,
         job_id: job_id,
         status_: status,
       });
@@ -1053,7 +1046,6 @@ export default function EmployerPost() {
             setIsAddPost(true);
             setNewPost({
               job_id: "0",
-              employer_id: user?.id,
               title: "",
               date_post: new Date().toISOString(),
               industry_id: 20,

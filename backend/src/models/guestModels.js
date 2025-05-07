@@ -631,7 +631,7 @@ const queryGetRelatedJobs = async (job_id) => {
         job_function_id,
         employer_id,
         work_location
-    from job j where job_id = ? AND  j.status_ = 1 AND j.date_expi >= NOW();`,
+    from job j where job_id = ? AND  j.status_ = 1 ;`, //AND j.date_expi >= NOW()
       [job_id]);
     if (job.length === 0) {
       throw new Error("Không tìm thấy job");
@@ -684,9 +684,22 @@ const queryGetRelatedJobs = async (job_id) => {
       ORDER BY j.create_at DESC
       LIMIT 5;`,[`%${job[0].title}%`,job[0].work_location,job_id]
     );
-    const data =  [...related_1, ...related_2, ...related_3];
-    const result = data.sort(() => 0.5 - Math.random()).slice(0, 5);
-    return result; 
+    const data = [];
+    if (related_1.length !== 0) {
+      data.push(...related_1);
+    }
+    if (related_2.length !== 0) {
+      data.push(...related_2);
+    }
+    if (related_3.length !== 0) {
+      data.push(...related_3);
+    }
+    if (data.length > 5) {
+      const result = data.sort(() => 0.5 - Math.random()).slice(0, 5);
+      return result; 
+    }
+    return data; // Trả về danh sách việc làm liên quan
+   
  
   } catch (error) {
     console.error("Error fetching related jobs:", error);

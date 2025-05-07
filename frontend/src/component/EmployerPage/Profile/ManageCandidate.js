@@ -9,7 +9,7 @@ import "./style.css";
 
 export default function EmployerManageCandidate() {
   const { isLogin, user } = useSelector((state) => state.auth);
-  const {data: candidatesData, isLoading} = useGetListCandidateQuery(user?.id, { skip: !user?.id }) || [];
+  const {data: candidatesData, isLoading} = useGetListCandidateQuery() || [];
   const navigate = useNavigate();
   
   const [deleteCandidate] = useDeleteCandidateMutation();
@@ -23,7 +23,7 @@ export default function EmployerManageCandidate() {
 
   const handleRemoveCandidate = async (profile_id) => {
     try {
-      const response = await deleteCandidate({ employer_id: user?.id, jobseeker_id:profile_id }).unwrap();
+      const response = await deleteCandidate({jobseeker_id:profile_id }).unwrap();
       if (response?.success)
       {
         toast.success("Bỏ lưu ứng viên thành công!");
@@ -87,7 +87,6 @@ export default function EmployerManageCandidate() {
       const response = await rateCandidate({
         type: type,
         application_id: item.profile_id, 
-        employer_id: user?.id, 
         rating: value, 
         content: item.content || ""
       }).unwrap();

@@ -4,7 +4,6 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout, checkLoginStatus } from "../../redux_toolkit/AuthSlice.js";
 import { toast } from "react-toastify"; 
-import NotificationHeader from "./ui/NotificationHeader.js";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -45,10 +44,18 @@ const Header = () => {
     }
   };
 
-
+  // Single authentication check hook
   useEffect(() => {
+    // Check auth on initial mount
     dispatch(checkLoginStatus());
-  }, [isLogin]);
+    
+    // Set up periodic checks if needed
+    const interval = setInterval(() => {
+      dispatch(checkLoginStatus());
+    }, 15 * 60 * 1000); // Every 15 minutes
+    
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   return (
     <>

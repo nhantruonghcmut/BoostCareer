@@ -9,14 +9,14 @@ import "./style.css";
 
 export default function EmployerManageApplication() {
   const { isLogin, user } = useSelector((state) => state.auth);
-  const {data: candidatesData, isLoading} = useGetJobApplicationQuery( { employer_id: user?.id },{ skip: !user?.id } ) || [];
+  const {data: candidatesData, isLoading} = useGetJobApplicationQuery( { },{ skip: !user?.id } ) || [];
   const navigate = useNavigate();
   
   const [rejectApplication] = useRejectJobApplicationMutation();
   const [rateCandidate] = useRateCandidateMutation();
   const handleReject = async (application) => {
     try {
-      const response = await rejectApplication({ employer_id: user?.id, jobseeker_id:application.profile_id, job_id: application.job_id }).unwrap();
+      const response = await rejectApplication({ jobseeker_id:application.profile_id, job_id: application.job_id }).unwrap();
       if (response?.success)
       {
         toast.success("Từ chối ứng viên thành công!");
@@ -84,7 +84,6 @@ export default function EmployerManageApplication() {
         const response = await rateCandidate({
         type: type,
         application_id:item.profile_id, 
-        employer_id: user?.id, 
         rating:value, 
         content:item.content || ""}
       ).unwrap(); // Gọi API để đánh giá ứng viên

@@ -34,7 +34,7 @@ const CandidateDetail = ({
   // Lấy danh sách job cho employer hiện tại và jobseeker cụ thể
   const { data: jobData, isLoading: isLoadingJobs } =
     useGetListJobForInvitationQuery(
-      { employer_id: user?.id, jobseeker_id: basic?.profile_id },
+      { jobseeker_id: basic?.profile_id },
       { skip: !user?.id || !basic?.profile_id }
     );
   console.log("jobData", jobData);
@@ -53,7 +53,6 @@ const CandidateDetail = ({
       try {
         // Gọi API để gửi thư mời
         const response = await inviteCandidateApplyJob({
-          employer_id: user?.id,
           jobseeker_id: basic?.profile_id,
           job_ids: selectedJobIds,
         }).unwrap();
@@ -82,10 +81,7 @@ const CandidateDetail = ({
     // console.log("Follow candidate clicked!");
     // Add your follow candidate logic here
     try {
-      const response = await addCandidate({
-        employer_id: user?.id,
-        jobseeker_id: basic?.profile_id,
-      }).unwrap();
+      const response = await addCandidate({  jobseeker_id: basic?.profile_id,   }).unwrap();
       if (response.success) {
         // setSaveStatus(true);
         toast.success("Đã lưu hồ sơ ứng viên thành công!");
@@ -101,10 +97,7 @@ const CandidateDetail = ({
   };
   const handleUnSaveCandidate = async () => {
     try {
-      const response = await deleteCandidate({
-        employer_id: user?.id,
-        jobseeker_id: basic?.profile_id,
-      }).unwrap();
+      const response = await deleteCandidate({ jobseeker_id: basic?.profile_id}).unwrap();
       if (response.success) {
         // setSaveStatus(false);
         toast.success("Đã xóa hồ sơ ứng viên thành công!");

@@ -15,7 +15,7 @@ export default function YourApply() {
   const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)}tr`;
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { data: listJobApply } = useGetJobApplyQuery(user?.id);
+  const { data: listJobApply } = useGetJobApplyQuery();
   console.log("List job apply:", listJobApply);
   return (
     <>

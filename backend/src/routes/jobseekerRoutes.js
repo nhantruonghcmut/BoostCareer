@@ -25,8 +25,13 @@ const {
 } = require("../controllers/jobseekerControllers.js");
 
 const { upload } = require("../middlewares/imageUpload.js");
+const { verifyToken, verifyRole } = require('../middlewares/authMiddleware');
 
 const jobseekerRoutes = express.Router();
+
+// Bảo vệ routes với token và role
+jobseekerRoutes.use(verifyToken);
+jobseekerRoutes.use(verifyRole(3)); // Role 3 là jobseeker
 
 jobseekerRoutes.get("/profile", getItemProfile);
 jobseekerRoutes.post("/profile", addItemProfile);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { registerUser } from "../../redux_toolkit/AuthSlice";
+import { register } from '../../redux_toolkit/AuthSlice';
 import { toast } from "react-toastify";
 import { validateField } from "../../utils/validateField";
 
@@ -64,21 +64,25 @@ export default function Register() {
       return;
     }
 
-    const response = await dispatch(registerUser(dataRegister));
-    console.log("response register", response.payload);
+    try {
+      const result = await dispatch(register(dataRegister)).unwrap();
+      console.log("response register", result);
 
-    if (response.payload.success) {
-      toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-      setDataRegister({
-        username: "",
-        name: "",
-        phone: "",
-        email: "",
-        password: "",
-        role: "3",
-      });
-      navigate("/login");
-    } else {
+      if (result.success) {
+        toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
+        setDataRegister({
+          username: "",
+          name: "",
+          phone: "",
+          email: "",
+          password: "",
+          role: "3",
+        });
+        navigate("/login");
+      } else {
+        toast.error("Đăng ký thất bại! Vui lòng thử lại.");
+      }
+    } catch (error) {
       toast.error("Đăng ký thất bại! Vui lòng thử lại.");
     }
   };
