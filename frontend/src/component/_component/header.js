@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
-import { logout, checkLoginStatus } from "../../redux_toolkit/AuthSlice.js";
+import { logout } from "../../redux_toolkit/AuthSlice.js";
 import { toast } from "react-toastify"; 
 
 const Header = () => {
@@ -37,25 +37,12 @@ const Header = () => {
       navigate("/login");
     } else {
       if (user?.role === 2) {
-        navigate("/employer-overview");
+        navigate("/employer/overview");
       } else if (user?.role === 3) {
-        navigate("/jobseeker-overview");
+        navigate("/jobseeker/overview");
       }
     }
   };
-
-  // Single authentication check hook
-  useEffect(() => {
-    // Check auth on initial mount
-    dispatch(checkLoginStatus());
-    
-    // Set up periodic checks if needed
-    const interval = setInterval(() => {
-      dispatch(checkLoginStatus());
-    }, 15 * 60 * 1000); // Every 15 minutes
-    
-    return () => clearInterval(interval);
-  }, [dispatch]);
 
   return (
     <>

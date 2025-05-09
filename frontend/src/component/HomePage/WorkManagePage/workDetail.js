@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Card, ListGroup } from "react-bootstrap";
-import { useParams, NavLink, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useParams, NavLink } from "react-router-dom";
+import { useSelector  } from "react-redux";
 import ColorBar from "../../_component/ui/colorbar.js";
+import AIAnalysisModal from "../../_component/ui/AIAnalysisModal";
 import {
   useGetJobDetailQuery,
   useGetRelatedJobsQuery,
@@ -13,49 +14,115 @@ import {
   useAddJobSavingMutation,
   useGetJobApplyQuery,
   useGetJobsavingQuery,
+  useGetAI_scoreQuery,
 } from "../../../redux_toolkit/jobseekerApi.js";
 
-import formatDateToDDMMYYYY from "../../../utils/formatDate.js";
+
 import calculateDaysRemaining from "../../../utils/calculateDaysRemaining.js";
 import CompanyHeader from "../../../component/_component/ui/CompanyHeader.js";
 import TitleComponent from "../../_component/ui/TitleComponent.js";
 import { toast } from "react-toastify";
 import LoginModal from "../../_component/ui/LoginModal.js";
 import { format } from "date-fns";
-import { get } from "jquery";
-import { use } from "react";
-import { ca } from "date-fns/locale";
 
 export default function WorkDetail() {
-  const [value, setValue] = useState(90);
-
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { id } = useParams();
   const [addJobApply] = useAddJobApplyMutation();
   const [addJobSaving] = useAddJobSavingMutation();
   const [deleteJobSaving] = useDeleteJobSavingMutation();
-  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)}tr`;
-  const [saved, setSaved] = React.useState(false);
-  const [applied, setApplied] = React.useState(false);
+  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)} triệu vnđ`;
 
-  const { data: postDetail, isLoading } = useGetJobDetailQuery(id, {
-    refetchOnMountOrArgChange: true,
-  });
 
-  const { data: jobApply } =
-    useGetJobApplyQuery({
-      skip: !user?.id,
-    }) || [];
-  const { data: jobSaving } =
-    useGetJobsavingQuery(user?.id, {
-      skip: !user?.id,
-    }) || [];
+/////// KHU VỰC LẤY DATA
+// Public data - always fetch
+const { data: postDetail, isLoading: isLoadingJobdetail } = useGetJobDetailQuery(id, {
+  refetchOnMountOrArgChange: true
+});
+console.log("Post detail:", postDetail);
+// User-specific data - only fetch when user exists
+const skipUserQueries = !user?.id;
+
+// Get result objects
+const jobApplyResult = useGetJobApplyQuery(undefined, { 
+  skip: skipUserQueries 
+});
+const jobSavingResult = useGetJobsavingQuery(undefined, { 
+  skip: skipUserQueries 
+});
+const aiScoreResult = useGetAI_scoreQuery({job_id: id}, { 
+  skip: skipUserQueries 
+});
+const relatedJobsResult = useGetRelatedJobsQuery(id, { 
+  skip: skipUserQueries 
+});
+
+// Extract data with fallbacks
+const jobApply = jobApplyResult.data || [];
+const jobSaving = jobSavingResult.data || [];
+const ai_score = aiScoreResult.data || 0;
+const relatedJobs = relatedJobsResult.data || [];
+const isLoadingRelatedJobs = relatedJobsResult.isLoading;
+
+// Debug logs
+console.log("User-specific queries skipped:", skipUserQueries);
+
   console.log("jobApply", jobApply);
   console.log("jobSaving", jobSaving);
-  const { data: relatedJobs, isLoading: isLoadingRelatedJobs } =
-    useGetRelatedJobsQuery(id, { skip: !id });
+  console.log("ai_score", ai_score);
+  
+
+  /////// KHU VỰC STATE
+  const [value, setValue] = useState(90);
+
+  // Add state for modal visibility
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  // Add sample analysis data (replace with real data in production)
+
+
+  const [saved, setSaved] = React.useState(false);
+  const [applied, setApplied] = React.useState(false);
+  // Handle modal open/close
+  const handleOpenAnalysisModal = () => setShowAnalysisModal(true);
+  const handleCloseAnalysisModal = () => {
+    console.log("Closing modal...");
+    setShowAnalysisModal(false);
+  };
+
+
+
+  //##
+  
+// Log to verify API calls are skipped
+// console.log("Job apply query skipped:", skipJobApplyQuery);
+// console.log("Job saving query skipped:", skipJobSavingQuery);
+// const { data: ai_analyze,isLoading:isLoadinganalyze } = useGetAI_AnalyzeQuery({job_id:id}, { skip: !id }) ||{};
+// const ai_score =0;
+// const ai_analyze = {
+//   "strengths": [
+//       "Số năm kinh nghiệm: 3 năm",
+//       "Học vấn: Thạc sỹ Quản lý an toàn thông tin và Đại học Computer Science",
+//       "Kỹ năng: Java Programming",
+//       "Ngôn ngữ: ENGLISH (TOEIC 700-900)"
+//   ],
+//   "weaknesses": [
+//       "Thiếu kinh nghiệm với ERP development (D365FO)",
+//       "Không có kỹ năng X++ và SQL Server",
+//       "Không có kinh nghiệm với Power BI report development",
+//       "Thiếu hiểu biết về OOP (Object-Oriented Programming) và clean code practices",
+//       "Không có kinh nghiệm với .NET (C#/ASP.NET, ASP.NET Core) development",
+//   ],
+//   "suggestions": [
+//       "Học và nắm vững OOP (Object-Oriented Programming) và clean code practices",
+//       "Học và nắm vững X++ và SQL Server",
+//       "Học và nắm vững Power BI report development",
+//       "Học và nắm vững .NET (C#/ASP.NET, ASP.NET Core) development",
+//   ]
+// };
+const ai_analyze = {};
+const [analysisData, setAnalysisData] = useState(ai_analyze);
+
+/////// KHU VỰC HANDLE
 
   const handleSaveJob = async () => {
     try {
@@ -140,32 +207,36 @@ export default function WorkDetail() {
     }
   };
 
-  useEffect(() => {
-    if (user?.role === 3) {
-      // Check if jobSaving is an array before using .some()
-      setSaved(
-        Array.isArray(jobSaving) &&
-          jobSaving.some((item) => item.job_id === postDetail?.job_id)
-      );
 
-      // Check if jobApply is an array before using .some()
-      setApplied(
-        Array.isArray(jobApply) &&
-          jobApply.some((item) => item.job_id === postDetail?.job_id)
-      );
+  /////// KHU VỰC USEEFFECT
+  useEffect(() => {
+    if (user?.role === 3 && postDetail) {
+      const isSaved = Array.isArray(jobSaving) &&
+        jobSaving.some((item) => item.job_id === postDetail?.job_id);
+      if (saved !== isSaved) setSaved(isSaved);
+  
+      const isApplied = Array.isArray(jobApply) &&
+        jobApply.some((item) => item.job_id === postDetail?.job_id);
+      if (applied !== isApplied) setApplied(isApplied);
     }
   }, [user, jobSaving, jobApply, postDetail]);
 
-  // useEffect( () => {
-  //   if (user?.role === 2) {
-  //     toast.error("Vui lòng đăng nhập vai trò người tìm việc!");
-  //     navigate("/");
+  // useEffect(() => {
+  //   if (ai_analyze && (analysisData !== ai_analyze)) {
+  //     setAnalysisData(ai_analyze);
   //   }
-  // }, [navigate, user]);
+  // }, [ai_analyze]);
 
   return (
     <>
       <LoginModal />
+      <AIAnalysisModal 
+  show={showAnalysisModal} // Use the correct state here
+  handleClose={handleCloseAnalysisModal} // This function will update the state
+  analyze={analysisData}
+  score = {ai_score}
+  
+/>
       <TitleComponent title={"Chi Tiết Việc Làm"} description={""} />
       <div className="container my-5">
         <nav aria-label="breadcrumb mt-3">
@@ -197,7 +268,7 @@ export default function WorkDetail() {
                           postDetail?.salary_min
                         )} - ${formatNumberToTr(
                           postDetail?.salary_max
-                        )} đ/tháng`}
+                        )} /tháng`}
                   </strong>{" "}
                   • <i className="bi bi-stopwatch-fill me-1"></i>
                   {calculateDaysRemaining(postDetail?.date_expi)
@@ -211,7 +282,7 @@ export default function WorkDetail() {
                 </p>
                 {user?.role === 3 ? (
                   <>
-                    <div className="d-flex justify-content-between align-items-end mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
                       <div style={{ width: "48%" }} className="d-flex">
                         {applied ? (
                           <button className="btn btn-danger flex-fill me-2" disabled>
@@ -243,13 +314,13 @@ export default function WorkDetail() {
                         )}
                       </div>
                       <div style={{ width: "48%", textAlign: "right" }}>
-                           <ColorBar value={value} />
+                           <ColorBar value={ai_score} handleOpenModal={handleOpenAnalysisModal} />
                       </div>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="d-flex justify-content-between align-items-end mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-3">
                       <div style={{ width: "48%" }} className="d-flex">
                         <button
                           className="btn btn-danger flex-fill me-2"
@@ -265,12 +336,15 @@ export default function WorkDetail() {
                         >
                           Lưu
                         </button>
+                        </div>
+                      <div style={{ width: "48%", textAlign: "right" }}>
+                           <ColorBar value={ai_score} handleOpenModal={handleOpenAnalysisModal} />
                       </div>
                     </div>
                   </>
                 )}
 
-                <hr />
+                       <hr />
 
                 <h5 className="mt-3">Mô tả công việc</h5>
                 <ul>
@@ -489,7 +563,7 @@ export default function WorkDetail() {
 
                 <h5 className="mt-3">Địa điểm làm việc</h5>
                 <p>
-                  <i class="fa fa-map-marker fa-lg text-primary me-3 mt-1 ms-2"></i>
+                  <i className="fa fa-map-marker fa-lg text-primary me-3 mt-1 ms-2"></i>
                   {postDetail?.address}
                 </p>
 
@@ -553,72 +627,20 @@ export default function WorkDetail() {
                 />
                 <h5>Thông tin công ty</h5>
                 <ul className="list-unstyled">
-                  {/* <li>
-                    <strong>Ngày đăng:</strong>{" "}
-                    {formatDateToDDMMYYYY(postDetail?.date_post)}
-                  </li> */}
                   <li>
                     <strong>Lĩnh vực:</strong> {postDetail?.industry_name}
                   </li>
                   <li>
                     <strong>Ngành nghề:</strong> {postDetail?.job_function_name}
                   </li>
-                  {/* <li>
-                    <strong>Kỹ năng:</strong>{" "}
-                    {postDetail?.job_skills
-                      ? postDetail.job_skills
-                          ?.slice() // Create a copy of the array to avoid mutating the original
-                          .sort(
-                            (a, b) => a.skill_name.length - b.skill_name.length
-                          ) // Sort by name length (shortest first)
-                          .map((item) => (
-                            <NavLink
-                              key={item.skill_id}
-                              to={`/post?skill_id=${item.skill_id}`}
-                              className="badge bg-secondary me-2 mb-2 text-decoration-none skill-badge"
-                            >
-                              {item.skill_name}
-                            </NavLink>
-                          ))
-                      : "Chưa có thông tin"}
-                  </li> */}
-                  {/* <li>
-                    <strong>Giờ làm việc:</strong>{" "}
-                    {postDetail?.working_time
-                      ? postDetail?.working_time
-                      : "Chưa có thông tin"}
-                  </li> */}
-
-                  <li>
+                     <li>
                     <strong>Địa chỉ:</strong> {postDetail?.address}
                   </li>
                 </ul>
               </div>
             </div>
 
-            {/* cụm Related job*/}
-            {/* <div className="card">
-              <div className="card-body">
-                <h5>Việc làm tương tự</h5>
-                <ul className="list-unstyled">
-                  <li>
-                    <a href="#a" className="text-decoration-none">
-                      Junior AI Engineer - Navigos Search
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#a" className="text-decoration-none">
-                      AI Engineer - Samsung Electronics Vietnam
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#a" className="text-decoration-none">
-                      Data Engineer - Công ty TNHH FPT Smart Cloud
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div> */}
+           
             {isLoadingRelatedJobs || relatedJobs?.length === 0 ? (
               <div>
                 {" "}
@@ -654,7 +676,7 @@ export default function WorkDetail() {
                                   job.salary_min
                                 )} - ${formatNumberToTr(
                                   job.salary_max
-                                )} đ/tháng`}
+                                )} /tháng`}
                           </div>
                           <div>
                             <i className="bi bi-geo-alt"></i>{" "}

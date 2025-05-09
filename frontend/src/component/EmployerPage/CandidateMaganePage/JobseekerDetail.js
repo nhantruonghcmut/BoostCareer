@@ -27,12 +27,6 @@ export default function EmployeeDetail() {
   } = data || {};
   // console.log("data", data);
 
-  useEffect(() => {
-    if (!isLogin || user?.role !== 2) {
-      navigate("/login");
-    }
-  }, [navigate, user, isLogin]);
-
   return (
     <>
       <TitleComponent

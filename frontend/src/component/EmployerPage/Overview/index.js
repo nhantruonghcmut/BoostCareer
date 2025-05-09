@@ -73,11 +73,7 @@ export default function EmployerOverview() {
       }
     }
   }, [overviewData]);
-  useEffect(() => {
-    if (!isLogin || user?.role !== 2) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
+
   return (
     <>
       <div className="bg-light rounded-2 me-2 my-2 p-2">

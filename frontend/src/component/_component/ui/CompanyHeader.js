@@ -15,7 +15,10 @@ export default function ComPanyHeard({
   showFollowButton = true,
 }) {
   const { isLogin, user } = useSelector((state) => state.auth);
-  const { data: listfollowCompany } = useGetFollowingCompanyQuery();
+  const skipGetListFollowCompany = !isLogin
+  const { data: listfollowCompany } = useGetFollowingCompanyQuery(undefined, { 
+    skip: skipGetListFollowCompany   });
+    
   console.log("list followCompany", listfollowCompany);
   const [followed, setFollowed] = useState(false);
   const [followCompany] = useAddFollowingCompanyMutation();

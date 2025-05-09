@@ -2,71 +2,37 @@ const db = require("../config/databaseConfig.js");
 const profileTables = require("../config/table_for_jobseeker.js");
 const { queryGetWorkDetail } = require("./employerModels.js");
 
-const queryGetEmployeeDetail = async (id) => {
-  const [employeeDetail] = await db.query(
-    `
-    select
-    js.avatar,
-    pjs.*,
-    u.email,
-    u.phone_number,
-    cl.level_name,
-    cc.city_name as work_expected_place,
-    -- group_concat(concat(pe.major, " ,", pe.school, " ,", pe.from_, " ,", pe.to_)) as education,
-    JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'major', pe.major,
-                'school', pe.school,
-                'from_', pe.from_,
-                'to_', pe.to_
-            )
-        ) AS education_info,
-    JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'certification', pcer.certifications,
-                'month', pcer.month_
-            )
-        ) AS certification_info,  
-    JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'exp_title', pexp.exp_title,
-                'exp_from', pexp.exp_from,
-                'exp_to', pexp.exp_to,
-                'exp_company', pexp.exp_company,
-                'exp_description', pexp.exp_description
-            )
-        ) AS experience_info,
-    JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'project_name', ppro.project_name,
-                'project_from', ppro.project_from,
-                'project_to', ppro.project_to,
-                'project_description', ppro.project_description
-            )
-        ) AS project_info,
-    JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'skill', ctag.tags_content
-            )
-        ) AS skill_info
-    from user_jobseeker js
-    join profile_jobseeker pjs on js.jobseeker_id = pjs.profile_id
-    join user_ u on js.jobseeker_id = u.user_id
-    join catalog_level cl on pjs.level_id = cl.level_id
-    join catalog_city cc on pjs.city_id = cc.city_id
-    left join profile_education pe on js.jobseeker_id = pe.profile_id
-    left join profile_certification pcer on js.jobseeker_id = pcer.profile_id
-    left join profile_experience pexp on js.jobseeker_id = pexp.profile_id
-    left join profile_skill pski on js.jobseeker_id = pski.profile_id
-    left join catalog_tags ctag on pski.skill_id=ctag.tag_id
-    left join profile_project ppro on js.jobseeker_id = ppro.profile_id
-    where js.jobseeker_id = ?;
-    `,
-    [id]
-  );
-  return employeeDetail;
+const queryShowHideResume = async (profile_id, cv_id, type) => {
+  try {
+    if (type === "show") {
+      const [result] = await db.query(
+        `
+        UPDATE profile_cv
+        SET isactive = CASE
+          WHEN cv_id = ? THEN 1
+          ELSE 0
+        END
+        WHERE profile_id = ?;
+        `,
+        [cv_id, profile_id]
+      );
+      return result.affectedRows > 0;
+    } else {
+      const [result] = await db.query(
+        `
+        UPDATE profile_cv
+        SET isactive = 0
+        WHERE profile_id = ? AND cv_id = ?;
+        `,
+        [profile_id, cv_id]
+      );
+      return result.affectedRows > 0;
+    }
+  } catch (error) {
+    console.error("Error show hide CV:", error);
+    throw error;
+  }
 };
-
 const queryJobseekerGetJobDetail = async (profile_id,job_id) => {
   let connection;
   const create_at = new Date();
@@ -1325,6 +1291,7 @@ module.exports = {
   queryAddResume,
   queryGetResume,
   queryDeleteResume,
+  queryShowHideResume,
   queryGetListJobApplication,
   queryApplyToJob,
   queryAddCompanyReview,

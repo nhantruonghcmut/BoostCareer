@@ -13,7 +13,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 const persistConfig = {
   key: "root", // Key dùng để lưu vào localStorage
   storage,
-  blacklist: [categoryApi.reducerPath,guestApi.reducerPath, jobseekerApi.reducerPath, employerApi.reducerPath], // Danh sách các reducer không cần lưu vào localStorage
+  blacklist: [categoryApi.reducerPath,guestApi.reducerPath, jobseekerApi.reducerPath, employerApi.reducerPath, 'isLogin', 'user'], // Danh sách các reducer không cần lưu vào localStorage
 };
 
 const rootReducer = combineReducers({

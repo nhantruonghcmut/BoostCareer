@@ -55,12 +55,6 @@ export default function JobSeekerNotification() {
     setOpenItem(openItem === id ? null : id);
   };
 
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
-
   return (
     <div>
       <div className="bg-light rounded-2 me-2 my-2 p-2">

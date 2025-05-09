@@ -313,11 +313,7 @@ export default function CompanyProfile() {
       toast.error("Xóa phúc lợi thất bại");
     }
   };
-  useEffect(() => {
-    if (!isLogin || user?.role !== 2) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
+
   // Hiển thị trạng thái loading khi đang tải dữ liệu
   if (isLoading) {
     return (

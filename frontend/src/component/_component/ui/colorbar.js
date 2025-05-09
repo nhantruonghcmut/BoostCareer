@@ -1,25 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { Modal, Button } from "react-bootstrap";
 
-const ColorBar = ({ value }) => {
+const ColorBar = ({ value, handleOpenModal, handleopenLoginModal }) => {
+  const { isLogin, user } = useSelector((state) => state.auth);
   const segments = 20;
+
+  // const [showModal, setShowModal] = useState(false);
+
+  // const handleOpenModal = () => setShowModal(true);
+  // const handleCloseModal = () => setShowModal(false);
 
   const getSegmentColor = (index) => {
     const colorSteps = [
-      { start: 0, end: 1, colorStart: [255, 0, 0], colorEnd: [255, 50, 0] }, // Đỏ (2 dải)
-      { start: 2, end: 4, colorStart: [255, 50, 0], colorEnd: [255, 165, 0] }, // Cam (3 dải)
-      { start: 5, end: 9, colorStart: [255, 165, 0], colorEnd: [255, 255, 0] }, // Vàng (5 dải)
+      { start: 0, end: 1, colorStart: [255, 0, 0], colorEnd: [255, 50, 0] }, // Red
+      { start: 2, end: 4, colorStart: [255, 50, 0], colorEnd: [255, 165, 0] }, // Orange
+      { start: 5, end: 9, colorStart: [255, 165, 0], colorEnd: [255, 255, 0] }, // Yellow
       {
         start: 10,
         end: 14,
         colorStart: [255, 255, 0],
         colorEnd: [135, 206, 250],
-      }, // Xanh dương nhạt (5 dải)
+      }, // Light Blue
       {
         start: 15,
         end: 19,
         colorStart: [135, 206, 250],
         colorEnd: [0, 128, 0],
-      }, // Xanh lá (5 dải)
+      }, // Green
     ];
 
     const step = colorSteps.find((r) => index >= r.start && index <= r.end);
@@ -39,22 +47,22 @@ const ColorBar = ({ value }) => {
     return `rgb(${r},${g},${b})`;
   };
 
-  // Tính toán màu cho giá trị value
   const getValueColor = () => {
-    // Chuyển đổi giá trị phần trăm thành chỉ số trong thanh màu
     const valueIndex = Math.floor(value / 5);
-    // Đảm bảo chỉ số không vượt quá segments
     const safeIndex = Math.min(valueIndex, segments - 1);
     return getSegmentColor(safeIndex);
   };
 
   const valueColor = getValueColor();
 
-  return (
+  return isLogin ? (
     <>
       <small className="text-muted d-block mb-1">
-        Mức độ phù hợp với bạn:{" "}
-        <strong style={{ color: valueColor }}>{value}%</strong>
+        Mức độ phù hợp với bạn:
+        <strong style={{ color: valueColor }}>
+          {" "}
+          {value ? value : "Đang phân tích, vui lòng đợi"}%
+        </strong>
       </small>
 
       <div
@@ -78,6 +86,25 @@ const ColorBar = ({ value }) => {
             }}
           />
         ))}
+      </div>
+
+      {/* Button to trigger modal */}
+      <div className="text-center mt-3">
+        <Button variant="primary" onClick={handleOpenModal}>
+          Xem chi tiết AI phân tích
+        </Button>
+      </div>
+    </>
+  ) : (
+    <>
+      <small className="text-muted d-block mb-1">
+        Đăng nhập để xem mức độ phù hợp của công việc với bạn.
+      </small>
+      {/* Button to trigger modal */}
+      <div className="text-center mt-3">
+        <Button variant="primary" onClick={handleopenLoginModal}>
+          Đăng nhập để xem chi tiết AI phân tích
+        </Button>
       </div>
     </>
   );

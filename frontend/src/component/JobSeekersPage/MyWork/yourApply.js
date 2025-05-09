@@ -12,7 +12,7 @@ import formatDateToDDMMYYYY from "../../../utils/formatDate.js";
 import JobCard from "../../../component/_component/ui/JobCard.js";
 
 export default function YourApply() {
-  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)}tr`;
+  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)} triệu vnđ`;
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { data: listJobApply } = useGetJobApplyQuery();

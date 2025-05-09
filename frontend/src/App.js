@@ -1,5 +1,6 @@
 import "./App.css";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
+import ProtectedRoute from "./utils/ProtectedRoute";
 
 import Header from "./component/_component/header.js";
 import Footer from "./component/_component/footer.js";
@@ -17,15 +18,13 @@ import JobSeekerCompany from "./component/JobSeekersPage/MyCompany/index.js";
 import JobSeekerNotification from "./component/JobSeekersPage/MyNotification/index.js";
 import JobseekerAccountSetting from "./component/JobSeekersPage/AccountSetting/index.js";
 
-import yourCV from "./component/JobSeekersPage/Profile/yourCV.js";
-import yourCVwithUs from "./component/JobSeekersPage/Profile/yourCVwithUs.js";
+import YourCV from "./component/JobSeekersPage/Profile/yourCV.js";
+import YourCVwithUs from "./component/JobSeekersPage/Profile/yourCVwithUs.js";
 
 import CompanyYouFollow from "./component/JobSeekersPage/MyCompany/companyYouFollow.js";
 
 import YourApply from "./component/JobSeekersPage/MyWork/yourApply.js";
 import SavedWork from "./component/JobSeekersPage/MyWork/savedWork.js";
-// import Invitation from "./component/JobSeekersPage/MyWork/invitation.js";
-
 
 import EmployerPage from "./component/EmployerPage/index.js";
 import EmployerOverview from "./component/EmployerPage/Overview/index.js";
@@ -62,89 +61,64 @@ function App() {
       <BrowserRouter>
         <Header />
         <Routes>
-          <Route path="/" Component={HomePage} />
+          <Route path="/" element={<HomePage />} />
 
-          <Route path="/login" Component={Login} />
-          <Route path="/register" Component={Register} />
-          <Route path="/reset-password" Component={ResetPassword} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route Component={JobSeekerPage}>
-            <Route path="/jobseeker-overview" Component={JobSeekerOverview} />
-            <Route Component={JobSeekerProfile}>
-              <Route path="/jobseeker-profile" Component={yourCVwithUs} />
-              <Route path="/jobseeker-profile/upload" Component={yourCV} />
+          {/* JobSeeker Routes - Note the nesting structure */}
+          <Route path="/jobseeker" element={
+            <ProtectedRoute allowedRoles={[3]}>
+              <JobSeekerPage />
+            </ProtectedRoute>
+          }>
+            <Route path="overview" element={<JobSeekerOverview />} />
+            <Route path="profile" element={<JobSeekerProfile />}>
+              <Route index element={<YourCVwithUs />} />
+              <Route path="upload" element={<YourCV />} />
             </Route>
-            <Route Component={JobSeekerCompany}>
-              {/* <Route path="/jobseeker-mycompany" Component={CompanySeeYou} /> */}
-              <Route
-                path="/jobseeker-company-follow"
-                Component={CompanyYouFollow}
-              />
+            <Route path="company-follow" element={<CompanyYouFollow />} />
+            <Route path="mywork" element={<JobSeekerWork />}>
+              <Route path="your-apply" element={<YourApply />} />
+              <Route path="saved-work" element={<SavedWork />} />
             </Route>
-            <Route Component={JobSeekerWork}>
-              <Route path="/jobseeker-mywork" Component={YourApply} />
-              <Route path="/jobseeker-savedwork" Component={SavedWork} />
-              {/* <Route path="/jobseeker-invitation" Component={Invitation} /> */}
-            </Route>
-            <Route
-              path="/jobseeker-notification"
-              Component={JobSeekerNotification}
-            />
-
-            <Route
-              path="/jobseeker-account"
-              Component={JobseekerAccountSetting}
-            />
+            <Route path="notification" element={<JobSeekerNotification />} />
+            <Route path="account" element={<JobseekerAccountSetting />} />
           </Route>
 
-          <Route Component={EmployerPage}>
-            <Route path="/employer-overview" Component={EmployerOverview} />
-            <Route Component={EmployerProfile}>
-              <Route path="/employer-profile" Component={CompanyProfile} />
-              <Route
-                path="/employer-manage-application"
-                Component={EmployerManageApplication}
-              />
-              <Route
-                path="/employer-manage-saving-candidate"
-                Component={EmployerManageCandidate}
-              />
-              <Route 
-              path="/employer-manage-invitation"
-              Component={EmployerManageInvitation}
-              />
+          {/* Employer Routes - Now nested under /employer */}
+          <Route path="/employer" element={
+            <ProtectedRoute allowedRoles={[2]}>
+              <EmployerPage />
+            </ProtectedRoute>
+          }>
+            <Route path="overview" element={<EmployerOverview />} />
+            <Route path="profile" element={<EmployerProfile />}>
+              <Route index element={<CompanyProfile />} />
+              <Route path="manage-application" element={<EmployerManageApplication />} />
+              <Route path="manage-saving-candidate" element={<EmployerManageCandidate />} />
+              <Route path="manage-invitation" element={<EmployerManageInvitation />} />
             </Route>
-            <Route path="/employer-post" Component={EmployerPost} />
-            <Route
-              path="/employer-notification"
-              Component={EmployerNotification}
-            />
-
-            <Route
-              path="/employer-account"
-              Component={EmployerAccountSetting}
-            />
+            <Route path="post" element={<EmployerPost />} />
+            <Route path="notification" element={<EmployerNotification />} />
+            <Route path="account" element={<EmployerAccountSetting />} />
           </Route>
 
-          <Route path="/post" Component={WorkMangePage} />
+          {/* Public routes */}
+          <Route path="/post" element={<WorkMangePage />} />
+          <Route path="/post-detail/:id" element={<WorkDetail />} />
+          <Route path="/candidates" element={<ProtectedRoute allowedRoles={[2]}><CandidateMaganePage /></ProtectedRoute>} />
+          <Route path="/candidate-detail/:id" element={ <ProtectedRoute allowedRoles={[2]}><JobseekerDetail /> </ProtectedRoute>} />
+          <Route path="/list-company" element={<ListCompany />} />
+          <Route path="/company-detail/:companyId" element={<CompanyDetail />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/policy" element={<PolicyPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/help" element={<HelpPage />} />
 
-          <Route path="/post-detail/:id" Component={WorkDetail} />
-
-          <Route path="/candidates" Component={CandidateMaganePage} />
-
-          <Route path="/candidate-detail/:id" Component={JobseekerDetail} />
-
-          {/* Anh Đạt làm 2 cái này */}
-          <Route path="/list-company" Component={ListCompany} />
-          <Route path="/company-detail/:companyId" Component={CompanyDetail} />
-
-          <Route path="/contact" Component={ContactPage} />
-          <Route path="/policy" Component={PolicyPage} />
-          <Route path="/about" Component={AboutPage} />
-          <Route path="/terms" Component={TermsPage} />
-          <Route path="/help" Component={HelpPage} />
-
-          <Route path="*" Component={PageNotFound} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
         <Footer />
       </BrowserRouter>

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  login,
-  checkLoginStatus,
+ loginUser
 } from "../../../redux_toolkit/AuthSlice.js";
 import { validateField } from "../../../utils/validateField";
 
@@ -56,7 +55,7 @@ const LoginModal = ({ title }) => {
       return; // Prevent submission if there are validation errors
     }
 
-    dispatch(login({params:dataLogin})); // Proceed with login if no errors
+    dispatch(loginUser({params:dataLogin})); // Proceed with login if no errors
   };
 
   useEffect(() => {

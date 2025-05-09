@@ -1,4 +1,7 @@
 export function validateField(name, value, formValues = {}) {
+  if (typeof value !== "string") {
+    return "";
+  }
   if (typeof value === "string" && value.trim() === "") {
     return `${name} không được để trống`;
   }

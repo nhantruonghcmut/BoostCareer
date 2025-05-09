@@ -7,6 +7,7 @@ import {
   useGetCompanyInformationQuery,
   useGetJobOfCompanyByIdQuery,
 } from "../../../redux_toolkit/guestApi.js";
+import Rating from "../../_component/ui/RatingSection.js";
 import {
   useGetCompanyReviewQuery,
   useAddFollowingCompanyMutation,
@@ -32,7 +33,7 @@ export default function CompanyDetail() {
   const { data: jobApply, refetch: refetchJobApply } = useGetJobApplyQuery({},
     { skip: !isLogin }
   ); // Add refetch function
-  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)}tr`;
+  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)} triệu vnđ`;
   const { companyId } = useParams();
   const { data: city } = useGetCitiesQuery(84); // 84 là mã quốc gia Việt Nam
   const { data: companyInformation } = useGetCompanyInformationQuery(companyId);
@@ -97,7 +98,7 @@ export default function CompanyDetail() {
 
   const currentJobs = filteredJobs.slice(indexOfFirstPost, indexOfLastPost);
   const totalPages = Math.ceil(filteredJobs.length / postsPerPage);
-
+  const ratingData = {};
   useEffect(() => {
     if (user?.role === 2) {
       toast.error("Vui lòng đăng nhập vai trò người tìm việc!");
@@ -201,7 +202,7 @@ export default function CompanyDetail() {
                                   option.salary_min
                                 )} - ${formatNumberToTr(
                                   option.salary_max
-                                )} đ/tháng`}
+                                )}/tháng`}
                           </span>
                           {user?.role === 3 ? (
                             option.is_apply ? (
@@ -254,6 +255,14 @@ export default function CompanyDetail() {
                   )}
                 </div>
               </div>
+            </div>
+
+            <div className="card mt-2">
+              <Rating
+                ratingData={ratingData}
+                profile_id={companyId}
+                isRateCompany={true}
+              />
             </div>
           </div>
 

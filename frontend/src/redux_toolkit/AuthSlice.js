@@ -1,9 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import domain from '../config/domain';
-// import { toast } from 'react-toastify';
-
-
 
 export const loginUser = createAsyncThunk('auth/login',
     async ({username, password},{ rejectWithValue }) => {
@@ -21,27 +18,6 @@ export const loginUser = createAsyncThunk('auth/login',
     }
 );
 
-export const checkLoginStatus = createAsyncThunk('auth/check',
-    async (_,{rejectWithValue}) => {
-      console.log("checkLoginStatus chay");
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-              console.log("Not logged in");
-                return rejectWithValue('Not logged in');
-            }
-            const response = await axios.get(`${domain}/auth/check`, 
-                {   withCredentials: true, 
-                    // headers: {Authorization: `Bearer ${token}`}
-                  } );
-            return response.data;
-        }        
-        catch (error) {
-            return rejectWithValue(error.response?.data?.message || 'Lỗi xác thực!');
-        }
-    }
-);
-
 export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
@@ -51,12 +27,11 @@ export const logout = createAsyncThunk(
       });
       
       // Always remove token regardless of response to ensure user is logged out locally
-      localStorage.removeItem('token');
+     
       
       return response.data;
     } catch (error) {
       // Still remove token even if API call fails
-      localStorage.removeItem('token');
       return rejectWithValue(error.response?.data?.message || 'Đăng xuất thất bại');
     }
   }
@@ -107,24 +82,7 @@ export const logout = createAsyncThunk(
           state.error = action.payload;
         })
         
-        // Check login status
-        .addCase(checkLoginStatus.fulfilled, (state, action) => {
-          state.isLogin = true;
-          console.log("checkLoginStatus chay reducer", action);
-          state.user = action.payload.data.user;
-        })
-        .addCase(checkLoginStatus.rejected, (state) => {
-          state.isLogin = false;
-          state.user = null;
-        })
-        
-        // Logout
-        .addCase(logout.fulfilled, (state) => {
-          console.log('Logout success');
-          state.isLogin = false;
-          state.user = null;
-        })
-        
+               
         // Register
         .addCase(registerUser.pending, (state) => {
           state.loading = true;
@@ -139,7 +97,21 @@ export const logout = createAsyncThunk(
         .addCase(registerUser.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
+        })
+
+        .addCase(logout.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(logout.fulfilled, (state, action) => {
+          state.loading = false;
+          state.isLogin = false;
+          state.user = null;
         });
+
+
+
+
     }
   });
   

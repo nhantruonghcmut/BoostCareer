@@ -1,30 +1,42 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import domain from "../config/domain";
-import axiosInstance from '../config/axiosConfig';
+import { logout } from "./AuthSlice";
+const baseQuery = fetchBaseQuery({
+  baseUrl: domain, // URL của backend
+  credentials: 'include', // Gửi cookie cùng với request
+});
 
-// Create a custom baseQuery using axios instance
-const axiosBaseQuery = () => async ({ url, method, body, params }) => {
-  try {
-    const result = await axiosInstance({
-      url,
-      method,
-      data: body,
-      params,
-    });
-    return { data: result.data };
-  } catch (axiosError) {
-    return {
-      error: {
-        status: axiosError.response?.status,
-        data: axiosError.response?.data || axiosError.message,
-      },
-    };
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  // Nếu nhận lỗi 401 (access token hết hạn hoặc không tồn tại)
+  if (result.error && result.error.status === 401) {
+    const errorCode = result.error.data?.errorCode;
+
+    if (errorCode === 'TOKEN_EXPIRED') {
+      // Gửi request đến /refresh để làm mới token
+      const refreshResult = await baseQuery('auth/refresh', api, extraOptions);
+      console.log("refreshResult", refreshResult);
+
+      if (refreshResult.data) {
+        // Nếu làm mới token thành công, gửi lại request ban đầu
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        // Nếu refresh token không hợp lệ, chuyển đến trang login
+        await api.dispatch(logout());
+      }
+    } else if (errorCode === 'TOKEN_MISSING') {
+      // Nếu access token và refresh token đều không tồn tại, chuyển đến trang login
+      await api.dispatch(logout());
+    }
   }
+
+  return result;
 };
 
 export const employerApi = createApi({
   reducerPath: "employerApi",
-  baseQuery: axiosBaseQuery(),
+  baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     getOverview: builder.mutation({
       query: ({ days }) => ({

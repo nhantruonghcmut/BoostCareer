@@ -141,7 +141,7 @@ const CandidateDetail = ({
                 basic?.is_open_for_job === 0 ? "bg-danger" : "bg-success"
               }`}
             >
-              {basic?.is_open_for_job === 0 ? "Hoạt động" : "Đang tìm việc"}
+              {basic?.is_open_for_job === 0 ? "Chưa tìm việc" : "Đang tìm việc"}
             </span>
           </div>
           <div className="text-muted small mt-2">
@@ -154,6 +154,15 @@ const CandidateDetail = ({
           </div>
         </div>
         <div className="ms-auto">
+        {basic.cv_name && basic.cv_link && (
+            <a
+              className="btn btn-success me-2"
+              href={basic.cv_link}
+              download={basic.cv_name}
+            >
+              Tải CV
+            </a>
+          )}
           <button
             className="btn btn-primary me-2"
             onClick={handleSendInviteJob}

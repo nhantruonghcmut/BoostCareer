@@ -1,27 +1,51 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import domain from '../config/domain';
+import { logout } from "./AuthSlice";
+import { use } from 'react';
+const baseQuery = fetchBaseQuery({
+    baseUrl: domain, // URL của backend
+    credentials: 'include', // Gửi cookie cùng với request
+  });
+  
+
+const baseQueryWithReauth = async (args, api, extraOptions) => {
+  let result = await baseQuery(args, api, extraOptions);
+
+  // Nếu nhận lỗi 401 (access token hết hạn hoặc không tồn tại)
+  if (result.error && result.error.status === 401) {
+    const errorCode = result.error.data?.errorCode;
+
+    if (errorCode === 'TOKEN_EXPIRED') {
+      // Gửi request đến /refresh để làm mới token
+      const refreshResult = await baseQuery('auth/refresh', api, extraOptions);
+      console.log("refreshResult", refreshResult);
+
+      if (refreshResult.data) {
+        // Nếu làm mới token thành công, gửi lại request ban đầu
+        result = await baseQuery(args, api, extraOptions);
+      } else {
+        // Nếu refresh token không hợp lệ, chuyển đến trang login
+        await api.dispatch(logout());
+      }
+    } else if (errorCode === 'TOKEN_MISSING') {
+      // Nếu access token và refresh token đều không tồn tại, chuyển đến trang login
+      await api.dispatch(logout());
+    }
+  }
+
+  return result;
+};
 
 export const jobseekerApi = createApi({
     reducerPath: 'jobseekerApi',
-    baseQuery: fetchBaseQuery({
-        baseUrl: domain,
-        // prepareHeaders: (headers) => {
-        //     const token = localStorage.getItem('token');
-        //     // if (token) {
-        //     //     headers.set('Authorization', `Bearer ${token}`);
-        //     // }
-        //     headers.set('Authorization');
-        //     return headers;
-        // },
-        credentials: 'include'
-    }), 
+    baseQuery: baseQueryWithReauth,
     tagTypes: ['Basic', 'Experience', 'Education', 'Project', 'Skill', 'Language', 'Certification', 'Overview'],
     endpoints: (builder) => ({
-        getOverview: builder.mutation({
-            query: ({profile_id, days}) => ({
+        getOverviewJobseeker: builder.mutation({
+            query: ({days}) => ({
                 url: '/jobseeker/overview',
                 method: 'POST',
-                body: { profile_id, days },
+                body: { days },
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -30,9 +54,8 @@ export const jobseekerApi = createApi({
         }),
 
         getJobsSuggestion: builder.query({
-            query: ({profile_id}) => ({
+            query: () => ({
                 url: '/jobseeker/jobs-suggestion',
-                params: { profile_id },
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -40,9 +63,9 @@ export const jobseekerApi = createApi({
             providesTags: ['JobSuggestion'],
         }),
         getItemProfile: builder.query({
-            query: ({type,profile_id}) => ({
+            query: ({type}) => ({
                 url:`/jobseeker/profile`,
-                params: { type, profile_id},
+                params: { type },
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -54,10 +77,9 @@ export const jobseekerApi = createApi({
         
         // Thêm endpoint updateProfileImage
         updateProfileImage: builder.mutation({
-            query: ({ id, image }) => {
+            query: ({ image }) => {
                 // Tạo FormData để upload file
                 const formData = new FormData();
-                formData.append("id", id);
                 formData.append("image", image);
                 
                 return {
@@ -70,8 +92,8 @@ export const jobseekerApi = createApi({
             },
             // Transform response để trả về dữ liệu như action cũ
             transformResponse: (response) => response.data,
-            invalidatesTags: (result, error, { id }) => [
-                { type: 'Basic', id }
+            invalidatesTags: (result, error) => [
+                { type: 'Basic'}
             ]
         }),
         
@@ -104,7 +126,6 @@ export const jobseekerApi = createApi({
         getJobsaving: builder.query({
             query: (profile_id) => ({
                 url: '/jobseeker/job-saving',
-                params: { profile_id },
             }),
             transformResponse: (response) => {
                 console.log("getJobsaving APIIIIIIIIIII", response);
@@ -129,9 +150,8 @@ export const jobseekerApi = createApi({
             invalidatesTags: ['JobSaving'],
         }),
         getFollowingCompany: builder.query({
-            query: (profile_id) => ({
+            query: () => ({
                 url: '/jobseeker/company-following',
-                params: { profile_id },
             }),
             transformResponse: (response) => {
                 console.log("getFollowingCompany APIIIIIIIIIII", response);
@@ -140,10 +160,10 @@ export const jobseekerApi = createApi({
             providesTags: ['FollowingCompany'],
         }),
         addFollowingCompany: builder.mutation({
-            query: ({company_id, profile_id}) => ({
+            query: ({company_id}) => ({
                 url: '/jobseeker/company-following',
                 method: 'POST',
-                body: {company_id, profile_id},
+                body: {company_id },
             }),
             transformResponse: (response) => {
                 return response;
@@ -178,9 +198,8 @@ export const jobseekerApi = createApi({
             invalidatesTags: ['CompanyReview'],
         }),
         getCompanyReview: builder.query({
-            query: (profile_id) => ({
+            query: () => ({
                 url: '/jobseeker/company-rating',
-                params: { profile_id },
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -188,9 +207,8 @@ export const jobseekerApi = createApi({
             providesTags: ['CompanyReview'],
         }),
         getJobApply: builder.query({
-            query: (profile_id) => ({
+            query: (profie_id) => ({
                 url: '/jobseeker/job-applications',
-                params: { profile_id },
             }),
             transformResponse: (response) => {
                 return response.data?.jobs || [];
@@ -198,17 +216,17 @@ export const jobseekerApi = createApi({
             providesTags: ['JobApply'],
         }),
         addJobApply: builder.mutation({
-            query: ({profile_id,job_id}) => ({
+            query: ({job_id}) => ({
                 url: '/jobseeker/job-application',
                 method: 'POST',
-                body: {profile_id,job_id},
+                body: {job_id},
             }),
             invalidatesTags: ['JobApply'],
         }),
         getProfileCV: builder.query({
-            query: (profile_id) => ({
+            query: () => ({
                 url: '/jobseeker/profile-cv',
-                params: { profile_id },
+                params: { },
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -216,9 +234,8 @@ export const jobseekerApi = createApi({
             providesTags: ['CV'],
         }),
         addProfileCV: builder.mutation({
-            query: ({ profile_id, file }) => {
+            query: ({ file }) => {
                 const formData = new FormData();
-                formData.append('profile_id', profile_id);
                 formData.append('file', file);
                 
                 return {
@@ -230,28 +247,24 @@ export const jobseekerApi = createApi({
             invalidatesTags: ['CV'],
         }),
         deleteProfileCV: builder.mutation({
-            query: ({profile_id,cv_id}) => ({
+            query: ({cv_id}) => ({
                 url: '/jobseeker/profile-cv',
                 method: 'DELETE',
-                body: { profile_id, cv_id },
+                body: {  cv_id },
             }),
             invalidatesTags: ['CV'],
         }),
-
+        ShowHideProfileCV: builder.mutation({
+            query: ({ profile_id, cv_id, type }) => ({
+                url: "/jobseeker/show-hide-profile-cv",
+                method: "POST",
+                body: { profile_id, cv_id, type },
+              }),
+              invalidatesTags: ["CV"],
+            }),            
         getNotification: builder.query({
-            query: (profile_id) => ({
+            query: () => ({
                 url: '/jobseeker/notification',
-                params: { profile_id },
-            }),
-            transformResponse: (response) => {
-                return response.data;
-            },
-            providesTags: ['Notification'],
-        }),
-        getNotification: builder.query({
-            query: (profile_id) => ({
-                url: '/jobseeker/notification',
-                params: { profile_id },
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -259,22 +272,42 @@ export const jobseekerApi = createApi({
             providesTags: ['Notification'],
         }),
         updateReadNotification: builder.mutation({
-            query: ({ profile_id, notification_id }) => ({
+            query: ({ notification_id }) => ({
                 url: '/jobseeker/notification',
                 method: 'PUT',
-                body: { profile_id, notification_id  },
+                body: { notification_id  },
             }),
             transformResponse: (response) => {
                 return response;
             },
             invalidatesTags: ['Notification'],
         }),
+
+        getAI_score: builder.query({
+            query: ({ job_id }) => ({
+                url: '/AIservice/score-matching',
+                params: {job_id},
+            }),
+            transformResponse: (response) => {
+                return response.data;
+            },
+        }),
+        getAI_Analyze: builder.query({
+            query: ({ job_id }) => ({
+                url: '/AIservice/analyze',    
+                params: {job_id},
+            }),
+            transformResponse: (response) => {
+                return response.data;
+            },
+        }),
+
     })   
 });
 
 // Export hooks for usage in components
 export const {    
-    useGetOverviewMutation,
+    useGetOverviewJobseekerMutation,
     useGetJobsSuggestionQuery,
     useGetItemProfileQuery,
     useUpdateProfileImageMutation,
@@ -300,8 +333,12 @@ export const {
     useGetProfileCVQuery,
     useAddProfileCVMutation,
     useDeleteProfileCVMutation,   
-    
+    useShowHideProfileCVMutation,
+
     useGetNotificationQuery,
-    useUpdateReadNotificationMutation
+    useUpdateReadNotificationMutation,
+
+    useGetAI_scoreQuery,
+    useGetAI_AnalyzeQuery,
 
 } = jobseekerApi;

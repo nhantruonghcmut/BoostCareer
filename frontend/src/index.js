@@ -5,23 +5,21 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
 import { Provider } from "react-redux";
-import store, { persistor } from "./redux_toolkit/store";
+// import store, { persistor } from "./redux/store";
+import store, { persistor } from "./redux_toolkit/store"; // Import the store and persistor from redux_toolkit/store.js
 import { PersistGate } from "redux-persist/integration/react";
-import { setupTokenRefreshSubscription } from './redux_toolkit/AuthSlice';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "jquery/dist/jquery.min.js";
 import "popper.js/dist/umd/popper.min.js";
 import "bootstrap/dist/js/bootstrap.min.js";
 
 import "font-awesome/css/font-awesome.min.css";
+
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 //Toastify message
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
-
-// Setup token refresh subscription
-setupTokenRefreshSubscription(store);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -30,6 +28,7 @@ root.render(
       <ToastContainer position="bottom-right" autoClose={2000} />
       <App />
     </PersistGate>
+
   </Provider>
 );
 reportWebVitals();

@@ -11,6 +11,7 @@ const {
   queryAddResume,
   queryGetResume,
   queryDeleteResume,
+  queryShowHideResume,
   queryGetListJobApplication,
   queryApplyToJob,
   queryAddCompanyReview,
@@ -118,7 +119,7 @@ const updateItemProfile = async (req, res, next) => {
     
     data.create_at = new Date();
     
-    const result = await queryUpdateItemProfile(type, {data,profile_id});
+    const result = await queryUpdateItemProfile(type, {...data,profile_id});
     
     if (!result) {
       return next(new ApiError("Cập nhật hồ sơ không thành công", 400));
@@ -307,6 +308,7 @@ const deleteResume = async (req, res, next) => {
 };
 
 const getListJobApplication = async (req, res, next) => {
+  console.log("getListJobApplication");
   try {
     const profile_id = req.user.id;
   // const profile_id = req.query.profile_id;
@@ -576,6 +578,27 @@ const updateReadNotification = async (req, res, next) => {
 
 }
 
+
+const showHideResume = async (req, res, next) => {
+  try {
+  const { profile_id, cv_id, type } = req.body;
+  if (!type || !profile_id || !cv_id) {
+    return next(new ApiError("Thiếu thông tin cần thiết", 400));
+  }
+
+  if (!profile_id) {
+    return next(new ApiError("Thiếu thông tin ID hồ sơ", 400));
+  }
+
+  const result = await queryShowHideResume(profile_id, cv_id, type);
+  if (!result) {
+    return next(new ApiError("Show/Hide CV thất bại", 500));
+  }
+  return res.success({}, "Show/Hide CV thành công");
+} catch (err) {
+  return next(new ApiError("Lỗi khi cShow/Hide CV", 500));
+}
+};
 module.exports = {
   jobseekerGetJobDetail,
   getItemProfile,
@@ -586,6 +609,7 @@ module.exports = {
   addResume,
   getResume,
   deleteResume,
+  showHideResume,
 
   getListJobApplication,
   applyToJob,

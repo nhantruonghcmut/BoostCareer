@@ -160,6 +160,8 @@ const queryGetPublicJobDetail = async (job_id) => {
       FROM 
       (select * from job_require_skill where job_require_skill.job_id = j.job_id) as js
       JOIN catalog_tags cta on cta.tag_id = js.skill_id) AS job_skills,
+      cs.scale_min,cs.scale_max,
+      (select count(*) from logs_jobseeker_follow_employer ljfe where ljfe.employer_id = c.company_id) as count_follower      ,
     (SELECT COALESCE(
         JSON_ARRAYAGG(
             JSON_OBJECT(
@@ -191,6 +193,8 @@ const queryGetPublicJobDetail = async (job_id) => {
       catalog_city loc ON j.work_location = loc.city_id    
   JOIN
       catalog_level lvl ON j.level_id = lvl.level_id
+  JOIN 
+      catalog_scale cs ON cs.scale_id = c.scale_id
   JOIN
       catalog_education edu ON j.require_education = edu.education_id;
     `,

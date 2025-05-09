@@ -9,12 +9,6 @@ export default function JobSeekerWork() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
-
   return (
     <div>
       <div className="bg-light rounded-2 me-2 my-2 p-2">
@@ -23,18 +17,13 @@ export default function JobSeekerWork() {
 
       <div className="bg-light rounded-2 me-2 my-2 p-2">
         <div className="">
-          <NavLink to="/jobseeker-mywork" className="text-decoration-none">
+          <NavLink to="/jobseeker/mywork" className="text-decoration-none">
             <span className="me-3">Việc làm đã ứng tuyển</span>
           </NavLink>
-          <NavLink to="/jobseeker-savedwork" className="text-decoration-none">
+          <NavLink to="/jobseeker/savedwork" className="text-decoration-none">
             <span className="me-3">Việc làm đã lưu</span>
           </NavLink>
-
-          {/* <NavLink to="/jobseeker-invitation" className="text-decoration-none">
-            <span>Thư mời ứng tuyển</span>
-          </NavLink> */}
         </div>
-
         <div
           className="background-opacity .bg-gradient rounded-2 me-2 my-2 p-2 d-flex justify-content-center"
           style={{ minHeight: "300px" }}

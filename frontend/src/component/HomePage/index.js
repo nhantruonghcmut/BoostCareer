@@ -42,7 +42,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (isLogin && user?.role === 2) {
-      navigate("/employer-overview");
+      navigate("/employer/overview");
     }
   }, [dispatch]);
 

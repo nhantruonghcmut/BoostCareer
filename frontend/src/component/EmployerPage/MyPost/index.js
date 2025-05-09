@@ -54,7 +54,7 @@ export default function EmployerPost() {
     work_location: "",
     address: "",
     describle: "",
-    more_requirement: "",
+    more_requirements: "",
     require_experience: 0,
     require_age_min: 18,
     require_age_max: 18,
@@ -124,8 +124,8 @@ export default function EmployerPost() {
     }));
   };
 
-  const handleAddPost = async (e) => {
-    e.preventDefault(); // Ngăn chặn hành vi mặc định của form
+  const handleAddPost = async () => {
+    // e.preventDefault(); // Ngăn chặn hành vi mặc định của form
 
     try {
       console.log("newPost: ", newPost);
@@ -169,7 +169,7 @@ export default function EmployerPost() {
             level_id: 1,
             working_type: "full-time",
             working_time: "",
-            more_requirement: "",
+            more_requirements: "",
             require_certification: [],
           });
         } else {
@@ -203,7 +203,7 @@ export default function EmployerPost() {
             level_id: 1,
             working_type: "full-time",
             working_time: "",
-            more_requirement: "",
+            more_requirements: "",
             require_certification: [],
           });
         } else {
@@ -329,19 +329,13 @@ export default function EmployerPost() {
     ];
 
     const allFieldsFilled = requiredFields.every(
-      (field) => newPost[field] && newPost[field].trim() !== ""
+      (field) => newPost[field] && newPost[field].toString().trim() !== ""
     );
 
     const noErrors = Object.values(errorsPost).every((err) => err === "");
 
     setValidPost(allFieldsFilled && noErrors);
   }, [newPost, errorsPost]);
-
-  useEffect(() => {
-    if (!isLogin || user?.role !== 2) {
-      navigate("/login");
-    }
-  }, [navigate, user, isLogin]);
 
   return (
     <>
@@ -371,7 +365,7 @@ export default function EmployerPost() {
                 <div className="row mb-3">
                   <div className="">
                     <label htmlFor="title" className="form-label">
-                      Tiêu đề bài đăng
+                      Tiêu đề bài đăng*
                     </label>
                     <input
                       type="text"
@@ -504,34 +498,7 @@ export default function EmployerPost() {
                       })
                     }
                     onBlur={handleBlurPost}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault(); // Ngăn textarea xuống dòng
-
-                        const textarea = e.target;
-                        const start = textarea.selectionStart;
-                        const end = textarea.selectionEnd;
-
-                        setNewPost((prev) => {
-                          const currentValue = prev.describle || "";
-                          const newValue =
-                            currentValue.slice(0, start) +
-                            "%00endl" +
-                            currentValue.slice(end);
-
-                          // Cập nhật lại vị trí con trỏ sau render
-                          setTimeout(() => {
-                            textarea.selectionStart = textarea.selectionEnd =
-                              start + "%00endl".length;
-                          }, 0);
-
-                          return {
-                            ...prev,
-                            describle: newValue,
-                          };
-                        });
-                      }
-                    }}
+                    
                   />
                   {errorsPost.describle && (
                     <div className="alert alert-danger mt-2">
@@ -694,9 +661,9 @@ export default function EmployerPost() {
                       ))}
                   </ul>
                   <div className="mt-2">
-                    {newPost.require_language.map((language) => (
+                  {newPost.require_language.map((language, index) => (
                       <span
-                        key={language.language_id}
+                        key={index}
                         className="badge bg-primary me-2"
                         style={{ cursor: "pointer" }}
                         onClick={() => handleRemoveLanguage(language)}
@@ -813,7 +780,7 @@ export default function EmployerPost() {
                 <div className="row mb-3">
                   <div className="">
                     <label htmlFor="working_time" className="form-label">
-                      Thời gian làm việc
+                      Thời gian làm việc*
                     </label>
                     <input
                       type="text"
@@ -894,70 +861,27 @@ export default function EmployerPost() {
 
                 <div className="row mb-3">
                   <div className="">
-                    <label htmlFor="more_requirement" className="form-label">
+                    <label htmlFor="more_requirements" className="form-label">
                       Yêu cầu khác
                     </label>
                     <textarea
                       rows={3}
                       type="text"
                       className="form-control"
-                      id="more_requirement"
-                      name="more_requirement"
+                      id="more_requirements"
+                      name="more_requirements"
                       placeholder="Nhập yêu cầu khác nếu có"
-                      value={newPost.more_requirement.replace(/%00endl/g, "\n")}
+                      value={newPost.more_requirements.replace(/%00endl/g, "\n")}
                       onChange={(e) =>
                         setNewPost({
                           ...newPost,
-                          more_requirement: e.target.value.replace(
+                          more_requirements: e.target.value.replace(
                             /\n/g,
                             "%00endl"
                           ),
                         })
-                      }
-                      // onBlur={handleBlurPost}
-                      // onKeyDown={(e) => {
-                      //   if (e.key === "Enter") {
-                      //     e.preventDefault(); // Ngăn không cho xuống dòng (đối với textarea) hoặc submit form
-                      //     setNewPost((prev) => ({
-                      //       ...prev,
-                      //       more_requirement: prev.more_requirement + "%00endl",
-                      //     }));
-                      //   }
-                      // }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault(); // Ngăn không cho xuống dòng
-
-                          const textarea = e.target;
-                          const start = textarea.selectionStart;
-                          const end = textarea.selectionEnd;
-
-                          setNewPost((prev) => {
-                            const currentValue = prev.more_requirement || "";
-                            const newValue =
-                              currentValue.slice(0, start) +
-                              "%00endl" +
-                              currentValue.slice(end);
-
-                            // Cập nhật lại vị trí con trỏ sau khi render
-                            setTimeout(() => {
-                              textarea.selectionStart = textarea.selectionEnd =
-                                start + "%00endl".length;
-                            }, 0);
-
-                            return {
-                              ...prev,
-                              more_requirement: newValue,
-                            };
-                          });
-                        }
-                      }}
-                    />
-                    {/* {errorsPost.more_requirement && (
-                      <div className="alert alert-danger mt-2">
-                        {errorsPost.more_requirement}
-                      </div>
-                    )} */}
+                      }                      
+                    />                   
                   </div>
                 </div>
               </div>
@@ -971,11 +895,11 @@ export default function EmployerPost() {
                   Hủy
                 </button>
                 <button
-                  type="submit"
+                  type="button"
                   className="btn btn-primary"
                   data-bs-dismiss="modal"
                   aria-label="Close"
-                  // onClick={handleAddPost}
+                  onClick={handleAddPost}
                   disabled={!validPost}
                 >
                   {isAddPost === true ? "Đăng bài" : "Cập nhật bài đăng"}
@@ -1060,7 +984,7 @@ export default function EmployerPost() {
               work_location: "",
               address: "",
               describle: "",
-              more_requirement: "",
+              more_requirements: "",
               require_experience: 0,
               require_age_min: 18,
               require_age_max: 18,
@@ -1092,8 +1016,8 @@ export default function EmployerPost() {
               </tr>
             </thead>
             <tbody>
-              {postsByUser?.map((post) => (
-                <tr key={post.job_id}>
+            {postsByUser?.map((post, index) => (
+                <tr key={index}>
                   <td className="text-start">
                     <NavLink to={`/post-detail/${post.job_id}`}>
                       {post.title}
@@ -1117,9 +1041,18 @@ export default function EmployerPost() {
                         salary_min: post.salary_min,
                         salary_max: post.salary_max,
                         describle: post.describle,
-                        require_experience: post.require_experience,
-                        // require_skill: post.require_skill,
-                        // require_language: post.require_language,
+                        require_experience: post.require_experience
+                        ? post.require_experience
+                        : [],
+                        more_requirements: post.more_requirements,
+                        require_skill: post.job_skills
+                          ? post.job_skills.map((s) => ({
+                              tag_id: s.skill_id,
+                              tags_content: s.skill_name,
+                            }))
+                          : [],
+                        require_language: post.languages,
+                        working_time: post.working_time,
                         require_age_min: post.require_age_min,
                         require_age_max: post.require_age_max,
                         address: post.address,

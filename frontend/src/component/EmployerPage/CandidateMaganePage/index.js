@@ -95,11 +95,6 @@ export default function CandidatesMaganePage() {
   const total_count = data?.total_count || 0;
   const totalPages = data?.totalPages || 0;
 
-  useEffect(() => {
-    if (!isLogin || user?.role !== 2) {
-      navigate("/login");
-    }
-  }, [navigate, user, isLogin]);
 
   // Apply filters - updated to handle async
   const handleApplyFilters = () => {

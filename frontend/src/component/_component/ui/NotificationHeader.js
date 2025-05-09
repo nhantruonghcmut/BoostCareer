@@ -96,13 +96,13 @@ const NotificationHeader = () => {
         <div className="dropdown">
           <div
             // type="button"
-            class="rounded-circle "
+            className="rounded-circle "
             id="dropdownMenuButton1"
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
             <i
-              class="fa fa-bell fa-lg"
+              className="fa fa-bell fa-lg"
               width="40"
               height="40"
               aria-hidden="true"
@@ -126,7 +126,7 @@ const NotificationHeader = () => {
             }}
           >
             <li>
-              <h6 class="dropdown-header">Thông báo</h6>
+              <h6 className="dropdown-header">Thông báo</h6>
             </li>
 
             <li className="">

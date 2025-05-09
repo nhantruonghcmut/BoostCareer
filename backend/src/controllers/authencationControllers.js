@@ -18,7 +18,7 @@ const generateAccessToken = (user) => {
 
     },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: process.env.JWT_ACCESS_EXPIRES || '15m' }
+    { expiresIn: '15m' } //process.env.JWT_ACCESS_EXPIRES || 
   );
 };
 
@@ -31,17 +31,18 @@ const generateRefreshToken = (user) => {
       logo: user.logo || ''
     },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES || '7d' }
+    { expiresIn:  '7d' } //process.env.JWT_REFRESH_EXPIRES ||
   );
 };
 
 const setTokenCookies = (res, accessToken, refreshToken) => {
+console.log("env ", process.env.JWT_REFRESH_EXPIRES);
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    path: '/',
-    maxAge: (parseInt(process.env.JWT_ACCESS_EXPIRES) || 900) * 1000 // 15 minutes
+    path: '/'   ,
+    maxAge: (parseInt(process.env.JWT_ACCESS_EXPIRES) || 900) * 1000
   });
 
   res.cookie('refreshToken', refreshToken, {
@@ -49,7 +50,7 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: (parseInt(process.env.JWT_REFRESH_EXPIRES) || 604800) * 1000 // 7 days
+    maxAge: (parseInt(process.env.JWT_REFRESH_EXPIRES) || 604800) * 1000
   });
 };
 
@@ -59,7 +60,7 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
 const login = async (req, res, next) => {
   console.log("Login request received", req.body);
   try {
-    const { username, password } = req.body;
+    const { username, password } = req.body.params;
 
     // Kiểm tra dữ liệu đầu vào
     if (!username || !password) {
@@ -81,7 +82,11 @@ const login = async (req, res, next) => {
 
     const accessToken = generateAccessToken(userLogin);
     const refreshToken = generateRefreshToken(userLogin);
-
+   const  decoded1 = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+   console.log("Decoded accessToken", decoded1);
+   const  decoded2 = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+   console.log("Decoded refreshToken", decoded2);
+console.log("Access token in login", accessToken);
     setTokenCookies(res, accessToken, refreshToken);
     
     return res.success(
@@ -287,7 +292,7 @@ const register = async (req, res, next) => {
  * Refresh token
  */
 const refreshToken = async (req, res, next) => {
-  console.log("Refresh token request received", req.body.params);
+  console.log("Refresh token request received", req.cookies.refreshToken);
   try {
     const refreshToken = req.cookies.refreshToken;
     
@@ -303,9 +308,9 @@ const refreshToken = async (req, res, next) => {
     }
 
     const newAccessToken = generateAccessToken(user);
-    const newRefreshToken = generateRefreshToken(user);
+    // const newRefreshToken = generateRefreshToken(user);
 
-    setTokenCookies(res, newAccessToken, newRefreshToken);
+    setTokenCookies(res, newAccessToken, refreshToken);
 
     return res.success(
       { message: "Token đã được làm mới" },
@@ -320,48 +325,10 @@ const refreshToken = async (req, res, next) => {
   }
 };
 
-// Check login status controller
-const checkLoginStatus = async (req, res, next) => {
-  try {
-    const accessToken = req.cookies.accessToken;
-    
-    if (!accessToken) {
-      return res.success({ isLogin: false }, "Not logged in");
-    }
-
-    try {
-      const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-      const user = await findUserByUsername(decoded.username);
-
-      if (!user) {
-        return res.success({ isLogin: false }, "Invalid token");
-      }
-
-      return res.success({
-        isLogin: true,
-        user: {
-          id: user.user_id,
-          username: user.username,
-          role: user.role_id,
-          logo: user.logo || ''
-        }
-      }, "Logged in");
-    } catch (tokenError) {
-      if (tokenError.name === 'TokenExpiredError') {
-        return res.success({ isLogin: false }, "Token expired");
-      }
-      return res.success({ isLogin: false }, "Invalid token");
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   isLogin,
   login,
   logout,
   register,
-  refreshToken,
-  checkLoginStatus
+  refreshToken  
 };

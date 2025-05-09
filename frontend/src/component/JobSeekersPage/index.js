@@ -13,32 +13,32 @@ export default function JobSeekerPage() {
   const data = [
     {
       title: "Tổng quan",
-      path: "/jobseeker-overview",
+      path: "/jobseeker/overview", // Updated paths
       icon: "bi bi-nut",
     },
     {
       title: "Hồ sơ cá nhân",
-      path: "/jobseeker-profile",
+      path: "/jobseeker/profile",
       icon: "bi bi-person-video3",
     },
     {
       title: "Nhà tuyển dụng của tôi",
-      path: "/jobseeker-company-follow",
+      path: "/jobseeker/company-follow",
       icon: "bi bi-buildings",
     },
     {
       title: "Quản lý việc làm",
-      path: "/jobseeker-mywork",
+      path: "/jobseeker/mywork",
       icon: "bi bi-briefcase",
     },
     {
       title: "Thông báo",
-      path: "/jobseeker-notification",
+      path: "/jobseeker/notification",
       icon: "bi bi-bell",
     },
     {
       title: "Quản lý tài khoản",
-      path: "/jobseeker-account",
+      path: "/jobseeker/account",
       icon: "bi bi-person-gear",
     },
   ];
@@ -55,11 +55,6 @@ export default function JobSeekerPage() {
     }
   );
   console.log("data tại JobSeekerPage:", userInformation);
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
 
   // Hiển thị loading khi đang tải dữ liệu
   if (isLoading) {

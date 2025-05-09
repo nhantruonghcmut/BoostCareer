@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from '../../redux_toolkit/AuthSlice';
+import { loginUser } from '../../redux_toolkit/AuthSlice';
 import { validateField } from "../../utils/validateField";
 
 export default function Login() {
@@ -54,7 +54,7 @@ export default function Login() {
     }
     
     try {
-      const result = await dispatch(login(dataLogin)).unwrap();
+      const result = await dispatch(loginUser(dataLogin)).unwrap();
       if (result.success) {
         navigate("/"); // Redirect to home page on success
       }

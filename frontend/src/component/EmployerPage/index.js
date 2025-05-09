@@ -1,48 +1,44 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { useGetCompanyInformationQuery } from "../../redux_toolkit/guestApi";
+import React from "react";
+import { useSelector } from "react-redux";
 import SidebarLayout from "../../component/_component/sidebar";
 
 export default function EmployerPage() {
-  const dispatch = useDispatch();
   const { isLogin, user } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
-  const { data: companyInformation } = useGetCompanyInformationQuery(
-    user?.id
-  );
+  console.log("User at EmployerPage:", user);
 
-  const sidebar = [
+  const data = [
     {
       title: "Tổng quan",
-      path: "/employer-overview",
-      icon: "bi bi-nut",
+      path: "/employer/overview",
+      icon: "bi bi-bar-chart-line",
     },
     {
-      title: "Quản lý hồ sơ",
-      path: "/employer-profile",
-      icon: "bi bi-person-video3",
+      title: "Hồ sơ công ty",
+      path: "/employer/profile",
+      icon: "bi bi-building",
     },
     {
       title: "Quản lý tin tuyển dụng",
-      path: "/employer-post",
-      icon: "bi bi-postcard",
+      path: "/employer/post",
+      icon: "bi bi-briefcase",
     },
     {
       title: "Thông báo",
-      path: "/employer-notification",
+      path: "/employer/notification",
       icon: "bi bi-bell",
     },
     {
-      title: "Quản lý tài khoản",
-      path: "/employer-account",
-      icon: "bi bi-person-gear",
+      title: "Cài đặt tài khoản",
+      path: "/employer/account",
+      icon: "bi bi-gear",
     },
   ];
 
+  // You might want to fetch employer data here
+
   return (
     <div className="container-fluid">
-      <SidebarLayout data={sidebar} />
+      <SidebarLayout data={data} />
     </div>
   );
 }

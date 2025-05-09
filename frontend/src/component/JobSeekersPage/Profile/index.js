@@ -139,13 +139,6 @@ export default function JobSeekerProfile() {
     setValidExpectedJob(noErrors);
   }, [errorsExpectedJob]);
 
-  // Kiểm tra đăng nhập
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [isLogin, user]);
-
   // Cập nhật form data khi có thông tin user - đảm bảo đưa cả birthday vào
   useEffect(() => {
     if (userInformation) {
@@ -993,17 +986,18 @@ export default function JobSeekerProfile() {
           <ul className="nav nav-tabs">
             <li className="nav-item">
               <NavLink
-                to="/jobseeker-profile"
+                to="/jobseeker/profile"
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "active" : ""}`
                 }
+                end
               >
                 <span className="me-3">Hồ sơ với Boost Career</span>
               </NavLink>
             </li>
             <li className="nav-item">
               <NavLink
-                to="/jobseeker-profile/upload"
+                to="/jobseeker/profile/upload"
                 className={({ isActive }) =>
                   `nav-link ${isActive ? "active" : ""}`
                 }
@@ -1014,7 +1008,7 @@ export default function JobSeekerProfile() {
           </ul>
         </div>
       </div>
-      <div className="container">
+      <div className="container" style={{ minHeight: 'auto', overflow: 'visible' }}>
         <Outlet />
       </div>
     </div>

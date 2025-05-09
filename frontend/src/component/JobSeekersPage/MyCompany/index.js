@@ -6,11 +6,6 @@ export default function JobSeekerCompany() {
   const { isLogin, user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
 
   return (
     <div>
@@ -21,7 +16,7 @@ export default function JobSeekerCompany() {
       <div className="bg-light rounded-2 me-2 my-2 p-2">
         <div className="">
           <NavLink
-            to="/jobseeker-company-follow"
+            to="/jobseeker/company-follow"
             className="text-decoration-none"
           >
             <span>Công ty đã theo dõi</span>

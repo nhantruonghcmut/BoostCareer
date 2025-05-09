@@ -23,11 +23,6 @@ export default function EmployerAccountSetting() {
     console.log("user: ", user?.id, " passwordchange: ", data.password);
   };
 
-  useEffect(() => {
-    if (!isLogin || user?.role !== 2) {
-      navigate("/login");
-    }
-  }, [navigate, user, isLogin]);
 
   return (
     <div>

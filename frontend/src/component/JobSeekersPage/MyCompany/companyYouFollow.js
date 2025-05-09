@@ -100,7 +100,7 @@ console.log("listFollowEmployer", listFollowEmployer);
                     {company.working_type}
                   </span>
                   <span className="badge bg-light text-dark">
-                    <i class="bi bi-people-fill"></i>{" "}
+                    <i className="bi bi-people-fill"></i>{" "}
                     {company.count_follower ? company.count_follower : "0"}
                   </span>
                   {company.company_location.length > 0 ? company.company_location.map((location, index) => (

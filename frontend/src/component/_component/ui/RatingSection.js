@@ -1,9 +1,13 @@
+import { ca, vi } from "date-fns/locale"; //
 import React, { useState, useEffect } from "react";
 import { formatDistanceToNow} from "date-fns";
 import { useRateCandidateMutation } from "../../../redux_toolkit/employerApi.js";
 import { toast } from "react-toastify";
+import LoginModal from "./LoginModal.js";
+import { useDispatch, useSelector } from "react-redux";
 
-const Rating = ({ ratingData, profile_id }) => {
+const Rating = ({ ratingData, profile_id, isRateCompany }) => {
+  const { user } = useSelector((state) => state.auth);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   console.log("profile_id", profile_id);
@@ -54,20 +58,29 @@ const Rating = ({ ratingData, profile_id }) => {
     }
   };
 
+
+
+  const handleRateCompany = () => {
+    console.log("abc");
+  };
+
   return (
     <div className="container mt-1 mb-2">
+      <LoginModal title="Bạn cần đăng nhập" />
       <h2 className="mb-3">Đánh giá chung</h2>
       <div className="card">
         <div className="card-body">
           <div className="row">
             <div className="col-md-4 text-center">
-              <h1 className="display-4 mt-3 mb-4">{ratingData.averageScore}</h1>
+            <h1 className="display-4 mt-3 mb-4">
+                {ratingData?.averageScore || 0}
+              </h1>
               <div className="star-rating-overall mb-3">
                 {[1, 2, 3, 4, 5].map((num) => (
                   <i
                     key={num}
                     className={`bi ${
-                      ratingData.averageScore >= num
+                      (ratingData?.averageScore || 0) >= num
                         ? "bi-star-fill"
                         : "bi-star"
                     } rating-star`}
@@ -82,37 +95,84 @@ const Rating = ({ ratingData, profile_id }) => {
                 ))}
               </div>
               <h6 className="text-muted">
-                Dựa trên {ratingData.total_ratings} đánh giá
+              Dựa trên {ratingData?.total_ratings || 0} đánh giá
               </h6>
             </div>
             <div className="col-md-8">
-              {ratingData.score.map((item, index) => (
-                <div className="rating-bar mb-3" key={index}>
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span>{item.score} stars</span>
-                    <small className="text-muted">
-                      {/* {(item.count_ratings / ratingData.total_ratings) * 100}% */}
-                      {item.count_ratings}
-                    </small>
-                  </div>
-                  <div className="progress" style={{ height: "10px" }}>
-                    <div
-                      className="progress-bar bg-warning"
-                      role="progressbar"
-                      style={{
-                        width: `${
-                          (item.count_ratings / ratingData.total_ratings) * 100
-                        }%`,
-                      }}
-                      aria-valuenow={
-                        (item.count_ratings / ratingData.total_ratings) * 100
-                      }
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    ></div>
-                  </div>
-                </div>
-              ))}
+            {ratingData?.score
+                ? ratingData?.score.map((item, index) => (
+                    <div className="rating-bar mb-3" key={index}>
+                      <div className="d-flex justify-content-between align-items-center mb-1">
+                        <span>{item.score || 0} stars</span>
+                        <small className="text-muted">
+                          {/* {(item.count_ratings / ratingData.total_ratings) * 100}% */}
+                          {item.count_ratings}
+                        </small>
+                      </div>
+                      <div className="progress" style={{ height: "10px" }}>
+                        <div
+                          className="progress-bar bg-warning"
+                          role="progressbar"
+                          style={{
+                            width: `${
+                              (item.count_ratings / ratingData.total_ratings) *
+                              100
+                            }%`,
+                          }}
+                          aria-valuenow={
+                            (item.count_ratings / ratingData.total_ratings) *
+                            100
+                          }
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                        ></div>
+                      </div>
+                    </div>
+                  ))
+                : [
+                    {
+                      score: 1,
+                      count: 0,
+                    },
+                    {
+                      score: 2,
+                      count: 0,
+                    },
+                    {
+                      score: 3,
+                      count: 0,
+                    },
+                    {
+                      score: 4,
+                      count: 0,
+                    },
+                    {
+                      score: 5,
+                      count: 0,
+                    },
+                  ].map((item, index) => (
+                    <div className="rating-bar mb-3" key={index}>
+                      <div className="d-flex justify-content-between align-items-center mb-1">
+                        <span>{item.score || 0} stars</span>
+                        <small className="text-muted">
+                          {/* {(item.count_ratings / ratingData.total_ratings) * 100}% */}
+                          {item.count_ratings}
+                        </small>
+                      </div>
+                      <div className="progress" style={{ height: "10px" }}>
+                        <div
+                          className="progress-bar bg-warning"
+                          role="progressbar"
+                          style={{
+                            width: `${(item.count_ratings / 1) * 100}%`,
+                          }}
+                          aria-valuenow={(item.count_ratings / 1) * 100}
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
             </div>
           </div>
           <hr />
@@ -133,19 +193,29 @@ const Rating = ({ ratingData, profile_id }) => {
             <p className="mb-2">{ratingData?.employer_coment}</p>
           </div>
           <div className="text-center mt-4">
-            <button
-              className={
-                ratingData?.employer_coment
-                  ? "btn btn-warning"
-                  : "btn btn-primary"
-              }
-              data-bs-toggle="modal"
-              data-bs-target="#ratingModal"
-            >
-              {ratingData?.employer_coment
-                ? "Chỉnh sửa nhận xét"
-                : "Viết nhận xét"}
-            </button>
+          {user?.role ? (
+              <button
+                className={
+                  ratingData?.employer_coment
+                    ? "btn btn-warning"
+                    : "btn btn-primary"
+                }
+                data-bs-toggle="modal"
+                data-bs-target="#ratingModal"
+              >
+                {ratingData?.employer_coment
+                  ? "Chỉnh sửa nhận xét"
+                  : "Viết nhận xét"}
+              </button>
+            ) : (
+              <button
+                className={"btn btn-primary"}
+                data-bs-toggle="modal"
+                data-bs-target="#LoginModal"
+              >
+                Viết nhận xét
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -222,7 +292,9 @@ const Rating = ({ ratingData, profile_id }) => {
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={handleRateCandidate}
+                onClick={
+                  isRateCompany ? handleRateCompany : handleRateCandidate
+                }
                 data-bs-dismiss="modal"
               >
                 {ratingData?.employer_coment

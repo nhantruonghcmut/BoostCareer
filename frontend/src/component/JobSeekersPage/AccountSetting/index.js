@@ -27,11 +27,6 @@ export default function JobSeekerAccountSetting() {
     console.log("user: ", user?.id, " passwordchange: ", data.password);
   };
 
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [navigate, user, isLogin]);
 
   return (
     <div>

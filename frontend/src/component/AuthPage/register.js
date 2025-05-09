@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { register } from '../../redux_toolkit/AuthSlice';
+import { registerUser } from '../../redux_toolkit/AuthSlice';
 import { toast } from "react-toastify";
 import { validateField } from "../../utils/validateField";
 
@@ -65,7 +65,7 @@ export default function Register() {
     }
 
     try {
-      const result = await dispatch(register(dataRegister)).unwrap();
+      const result = await dispatch(registerUser(dataRegister)).unwrap();
       console.log("response register", result);
 
       if (result.success) {

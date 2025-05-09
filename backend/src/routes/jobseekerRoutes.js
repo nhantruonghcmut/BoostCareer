@@ -10,6 +10,7 @@ const {
   addResume,
   getResume,
   deleteResume,
+  showHideResume,
   getListJobApplication,
   applyToJob,
   addCompanyReview,
@@ -37,11 +38,15 @@ jobseekerRoutes.get("/profile", getItemProfile);
 jobseekerRoutes.post("/profile", addItemProfile);
 jobseekerRoutes.put("/profile", updateItemProfile);
 jobseekerRoutes.delete("/profile", deleteItemProfile);
-jobseekerRoutes.post("/avatar-imagine", upload.single("image"), updateJobseekerProfileImage);
-
+jobseekerRoutes.post(
+  "/avatar-imagine",
+  upload.single("image"),
+  updateJobseekerProfileImage
+);
 jobseekerRoutes.post("/profile-cv", upload.single("resume"), addResume);
 jobseekerRoutes.get("/profile-cv", getResume);
 jobseekerRoutes.delete("/profile-cv", deleteResume);
+jobseekerRoutes.post("/show-hide-profile-cv", showHideResume);
 
 jobseekerRoutes.post("/job", jobseekerGetJobDetail);
 jobseekerRoutes.get("/job-applications", getListJobApplication); // lấy

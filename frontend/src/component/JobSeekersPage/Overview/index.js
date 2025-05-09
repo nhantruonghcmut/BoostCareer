@@ -70,15 +70,8 @@ export default function JobSeekerOverview() {
 
   // Format function
   const formatNumberToTr = useCallback((number) => 
-    `${(number / 1e6).toFixed(0)}tr`, []
+    `${(number / 1e6).toFixed(0)} triệu vnđ`, []
   );
-
-  // Authentication check
-  useEffect(() => {
-    if (!isLogin || user?.role !== 3) {
-      navigate("/login");
-    }
-  }, [isLogin, navigate, user]);
 
   // Render suitable jobs
   const renderSuitableWork = useCallback(() => {
@@ -132,7 +125,7 @@ export default function JobSeekerOverview() {
                     {work.salary_min && work.salary_max
                       ? `${formatNumberToTr(
                           work.salary_min
-                        )}-${formatNumberToTr(work.salary_max)} đ/tháng`
+                        )}-${formatNumberToTr(work.salary_max)} /tháng`
                       : "Thương lượng"}
                   </p>
                   <p className="card-text text-truncate">

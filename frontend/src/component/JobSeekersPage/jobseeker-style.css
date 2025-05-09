@@ -2,3 +2,8 @@
 .active{
     border: 2px solid rgb(13 110 253) !important;
 }
+.container-fluid, .container {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }

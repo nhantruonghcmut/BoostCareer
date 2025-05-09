@@ -8,7 +8,7 @@ import formatDateToDDMMYYYY from "../../../utils/formatDate.js";
 import JobCard from "../../../component/_component/ui/JobCard.js";
 import { toast } from "react-toastify";
 export default function SavedWork() {
-  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)}tr`;
+  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)} triệu vnđ`;
   const { user } = useSelector((state) => state.auth);
   const [deleteJobSaving] = useDeleteJobSavingMutation();
   const { data:listJobSave } = useGetJobsavingQuery( user?.id );
