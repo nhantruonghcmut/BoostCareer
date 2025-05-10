@@ -291,14 +291,24 @@ export const jobseekerApi = createApi({
             transformResponse: (response) => {
                 return response.data;
             },
-        }),
-        getAI_Analyze: builder.query({
+        }),        getAI_Analyze: builder.query({
             query: ({ job_id }) => ({
                 url: '/AIservice/analyze',    
                 params: {job_id},
+                // Tăng thời gian timeout lên 30 giây (mặc định là 10 giây)
+                responseHandler: (response) => response.json(),
+                timeout: 30000, // 30 giây
             }),
             transformResponse: (response) => {
                 return response.data;
+            },
+            // Cấu hình cách xử lý lỗi và thử lại
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                } catch (error) {
+                    console.log("Lỗi khi gọi AI_Analyze API:", error);
+                }
             },
         }),
 

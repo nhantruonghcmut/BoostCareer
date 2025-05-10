@@ -42,7 +42,6 @@ const loginExecute = async (username, password) => {
       `SELECT * FROM user_ WHERE username = ?`,
       [username]
     );
-    
     if (rows.length === 0) return null;
     
     const user = rows[0];

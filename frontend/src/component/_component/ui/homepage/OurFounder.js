@@ -18,14 +18,14 @@ export default function FounderSection() {
       title: "Sự Đơn Giản Là Chìa Khóa",
       text: "Chúng tôi tin rằng, sự đơn giản mang lại hiệu quả vượt trội. Mọi thứ được tối giản để bạn có thể dễ dàng tiếp cận và tận hưởng trải nghiệm tốt nhất.",
     },
-    {
-      name: "Thanh Dat Nguyen",
-      role: "support member",
-      avatar: url,
-      rating: 5,
-      title: "Thật Tuyệt Vời, Cảm Ơn Bạn!",
-      text: "Chúng tôi luôn trân trọng và cảm ơn sự đồng hành của bạn. Sự đóng góp của bạn chính là nguồn động lực để chúng tôi phát triển và hoàn thiện hơn mỗi ngày.",
-    },
+    // {
+    //   name: "Thanh Dat Nguyen",
+    //   role: "support member",
+    //   avatar: url,
+    //   rating: 5,
+    //   title: "Thật Tuyệt Vời, Cảm Ơn Bạn!",
+    //   text: "Chúng tôi luôn trân trọng và cảm ơn sự đồng hành của bạn. Sự đóng góp của bạn chính là nguồn động lực để chúng tôi phát triển và hoàn thiện hơn mỗi ngày.",
+    // },
   ];
 
   return (

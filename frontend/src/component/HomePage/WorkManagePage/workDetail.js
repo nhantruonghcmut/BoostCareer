@@ -15,6 +15,7 @@ import {
   useGetJobApplyQuery,
   useGetJobsavingQuery,
   useGetAI_scoreQuery,
+  useGetAI_AnalyzeQuery
 } from "../../../redux_toolkit/jobseekerApi.js";
 
 
@@ -53,6 +54,13 @@ const jobSavingResult = useGetJobsavingQuery(undefined, {
 const aiScoreResult = useGetAI_scoreQuery({job_id: id}, { 
   skip: skipUserQueries 
 });
+const aiAnalyzeResult = useGetAI_AnalyzeQuery({job_id: id}, {
+  skip: skipUserQueries,
+  // Cấu hình cho API đợi lâu
+  pollingInterval: 0, // Không tự động gọi lại API
+  refetchOnMountOrArgChange: true, // Gọi lại khi component mount hoặc tham số thay đổi
+  refetchOnReconnect: true, // Gọi lại khi kết nối mạng được khôi phục
+});
 const relatedJobsResult = useGetRelatedJobsQuery(id, { 
   skip: skipUserQueries 
 });
@@ -63,6 +71,10 @@ const jobSaving = jobSavingResult.data || [];
 const ai_score = aiScoreResult.data || 0;
 const relatedJobs = relatedJobsResult.data || [];
 const isLoadingRelatedJobs = relatedJobsResult.isLoading;
+const isLoadingAiAnalyze = aiAnalyzeResult.isLoading;
+const aiAnalyzeError = aiAnalyzeResult.error;
+console.log("aiAnalyzeResult:", aiAnalyzeResult);
+
 
 // Debug logs
 console.log("User-specific queries skipped:", skipUserQueries);
@@ -81,9 +93,12 @@ console.log("User-specific queries skipped:", skipUserQueries);
 
 
   const [saved, setSaved] = React.useState(false);
-  const [applied, setApplied] = React.useState(false);
-  // Handle modal open/close
-  const handleOpenAnalysisModal = () => setShowAnalysisModal(true);
+  const [applied, setApplied] = React.useState(false);  // Handle modal open/close
+  const handleOpenAnalysisModal = () => {
+    setIsAnalysisLoading(isLoadingAiAnalyze);
+    setShowAnalysisModal(true);
+  };
+  
   const handleCloseAnalysisModal = () => {
     console.log("Closing modal...");
     setShowAnalysisModal(false);
@@ -119,8 +134,9 @@ console.log("User-specific queries skipped:", skipUserQueries);
 //       "Học và nắm vững .NET (C#/ASP.NET, ASP.NET Core) development",
 //   ]
 // };
-const ai_analyze = {};
+const ai_analyze = aiAnalyzeResult.data || {};
 const [analysisData, setAnalysisData] = useState(ai_analyze);
+const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
 
 /////// KHU VỰC HANDLE
 
@@ -219,23 +235,31 @@ const [analysisData, setAnalysisData] = useState(ai_analyze);
         jobApply.some((item) => item.job_id === postDetail?.job_id);
       if (applied !== isApplied) setApplied(isApplied);
     }
-  }, [user, jobSaving, jobApply, postDetail]);
-
-  // useEffect(() => {
-  //   if (ai_analyze && (analysisData !== ai_analyze)) {
-  //     setAnalysisData(ai_analyze);
-  //   }
-  // }, [ai_analyze]);
+  }, [user, jobSaving, jobApply, postDetail]);  useEffect(() => {
+    // Cập nhật dữ liệu phân tích khi nhận được từ API
+    if (aiAnalyzeResult.data && (JSON.stringify(analysisData) !== JSON.stringify(aiAnalyzeResult.data))) {
+      setAnalysisData(aiAnalyzeResult.data);
+    }
+    
+    // Cập nhật trạng thái loading
+    setIsAnalysisLoading(isLoadingAiAnalyze);
+    
+    // Hiển thị thông báo lỗi nếu có
+    if (aiAnalyzeError) {
+      console.error("Lỗi khi lấy phân tích AI:", aiAnalyzeError);
+    }
+    
+  }, [aiAnalyzeResult.data, isLoadingAiAnalyze, aiAnalyzeError]);
 
   return (
     <>
-      <LoginModal />
-      <AIAnalysisModal 
-  show={showAnalysisModal} // Use the correct state here
-  handleClose={handleCloseAnalysisModal} // This function will update the state
+      <LoginModal />      <AIAnalysisModal 
+  show={showAnalysisModal}
+  handleClose={handleCloseAnalysisModal}
   analyze={analysisData}
-  score = {ai_score}
-  
+  score={ai_score}
+  isLoading={isAnalysisLoading}
+  error={aiAnalyzeError}
 />
       <TitleComponent title={"Chi Tiết Việc Làm"} description={""} />
       <div className="container my-5">
@@ -310,11 +334,14 @@ const [analysisData, setAnalysisData] = useState(ai_analyze);
                             onClick={handleSaveJob}
                           >
                             Lưu
-                          </button>
-                        )}
+                          </button>                        )}
                       </div>
                       <div style={{ width: "48%", textAlign: "right" }}>
-                           <ColorBar value={ai_score} handleOpenModal={handleOpenAnalysisModal} />
+                           <ColorBar 
+                             value={ai_score} 
+                             handleOpenModal={handleOpenAnalysisModal}
+                             isLoading={isLoadingAiAnalyze} 
+                           />
                       </div>
                     </div>
                   </>
@@ -333,12 +360,15 @@ const [analysisData, setAnalysisData] = useState(ai_analyze);
                           className="btn btn-outline-secondary flex-fill"
                           data-bs-toggle="modal"
                           data-bs-target="#LoginModal"
-                        >
-                          Lưu
+                        >                          Lưu
                         </button>
                         </div>
                       <div style={{ width: "48%", textAlign: "right" }}>
-                           <ColorBar value={ai_score} handleOpenModal={handleOpenAnalysisModal} />
+                           <ColorBar 
+                             value={ai_score} 
+                             handleOpenModal={handleOpenAnalysisModal}
+                             isLoading={isLoadingAiAnalyze} 
+                           />
                       </div>
                     </div>
                   </>

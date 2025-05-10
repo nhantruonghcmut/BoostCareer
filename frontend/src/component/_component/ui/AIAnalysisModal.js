@@ -1,8 +1,8 @@
 import React from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-const AIAnalysisModal = ({ show, handleClose, score, analyze}) => {
+const AIAnalysisModal = ({ show, handleClose, score, analyze, isLoading, error }) => {
   const navigate = useNavigate();
   // Default data if none provided
   const handleUpdateCV = () => {
@@ -25,14 +25,30 @@ const AIAnalysisModal = ({ show, handleClose, score, analyze}) => {
           Phân tích độ phù hợp với công việc
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <div className="text-center mb-4">
-          <h5 className="mt-3">Điểm đánh giá độ phù hợp: {score? score: "Đang phân tích, xin vui lòng đợi hoặc thử lại sau"}%</h5>
+      <Modal.Body>        <div className="text-center mb-4">
+          <h5 className="mt-3">
+            {isLoading ? (
+              <span>Đang tính toán điểm đánh giá <Spinner animation="border" size="sm" /></span>
+            ) : (
+              <span>Điểm đánh giá độ phù hợp: {score ? score : "Chưa có dữ liệu"}%</span>
+            )}
+          </h5>
           <p className="text-muted">Dựa trên phân tích CV của bạn và yêu cầu công việc</p>
         </div>
-        {!analyze ? (
+        
+        {isLoading ? (
           <div className="text-center mb-4">
-            <p>Đang tải phân tích chi tiết...</p>
+            <Spinner animation="border" />
+            <p className="mt-3">Hệ thống AI đang phân tích CV của bạn và yêu cầu công việc.<br />Quá trình này có thể mất 15-25 giây, xin vui lòng đợi...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center mb-4 alert alert-warning">
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            <span>Đã xảy ra lỗi khi tải phân tích chi tiết. Vui lòng thử lại sau.</span>
+          </div>
+        ) : !analyze || Object.keys(analyze).length === 0 ? (
+          <div className="text-center mb-4">
+            <p>Chưa có dữ liệu phân tích chi tiết.</p>
           </div>
         ) : (
           <>
@@ -111,15 +127,21 @@ const AIAnalysisModal = ({ show, handleClose, score, analyze}) => {
             </div>
           </>
         )}
-      </Modal.Body>
-      <Modal.Footer>
+      </Modal.Body>      <Modal.Footer>
         <Button variant="outline-secondary" onClick={handleClose}>
           Đóng
         </Button>
-        <Button variant="primary"
-        onClick={handleUpdateCV}>
-          Cập nhật CV để tăng điểm phù hợp
-        </Button>
+        {!isLoading && (
+          <Button variant="primary" onClick={handleUpdateCV}>
+            Cập nhật CV để tăng điểm phù hợp
+          </Button>
+        )}
+        {isLoading && (
+          <Button variant="primary" disabled>
+            <Spinner animation="border" size="sm" className="me-2" />
+            Đang phân tích...
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Spinner } from "react-bootstrap";
 
-const ColorBar = ({ value, handleOpenModal, handleopenLoginModal }) => {
+const ColorBar = ({ value, handleOpenModal, handleopenLoginModal, isLoading }) => {
   const { isLogin, user } = useSelector((state) => state.auth);
   const segments = 20;
 
@@ -56,13 +56,16 @@ const ColorBar = ({ value, handleOpenModal, handleopenLoginModal }) => {
   const valueColor = getValueColor();
 
   return isLogin ? (
-    <>
-      <small className="text-muted d-block mb-1">
+    <>      <small className="text-muted d-block mb-1">
         Mức độ phù hợp với bạn:
-        <strong style={{ color: valueColor }}>
-          {" "}
-          {value ? value : "Đang phân tích, vui lòng đợi"}%
-        </strong>
+        {isLoading ? (
+          <strong> <Spinner animation="border" size="sm" /> Đang phân tích...</strong>
+        ) : (
+          <strong style={{ color: valueColor }}>
+            {" "}
+            {value ? value : "Chưa có dữ liệu"}%
+          </strong>
+        )}
       </small>
 
       <div
@@ -86,12 +89,21 @@ const ColorBar = ({ value, handleOpenModal, handleopenLoginModal }) => {
             }}
           />
         ))}
-      </div>
-
-      {/* Button to trigger modal */}
+      </div>      {/* Button to trigger modal */}
       <div className="text-center mt-3">
-        <Button variant="primary" onClick={handleOpenModal}>
-          Xem chi tiết AI phân tích
+        <Button 
+          variant="primary" 
+          onClick={handleOpenModal} 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Spinner animation="border" size="sm" className="me-2" />
+              Đang phân tích...
+            </>
+          ) : (
+            "Xem chi tiết AI phân tích"
+          )}
         </Button>
       </div>
     </>
