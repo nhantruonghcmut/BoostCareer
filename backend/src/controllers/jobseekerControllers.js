@@ -534,13 +534,8 @@ const getNotification = async (req, res, next) => {
     
     if (!profile_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
-    }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền truy cập dữ liệu này", 403));
-    // }
-    
+    }    
+     
     const data = await queryGetNotification(profile_id);
     
     return res.success(
@@ -559,13 +554,8 @@ const updateReadNotification = async (req, res, next) => {
     
     if (!profile_id || !notification_id) {
       return next(new ApiError("Thiếu ID công ty/ thông báo", 400));
-    }
-    
-    // Kiểm tra quyền
-    // if (req.session?.userLogin?.company_id !== parseInt(company_id)) {
-    //   return next(new ApiError("Không có quyền thực hiện hành động này", 403));
-    // }
-    
+    }    
+      
     const result = await queryUpdateReadNotification(profile_id, notification_id);
     
     if (!result) {
