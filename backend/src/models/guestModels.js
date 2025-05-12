@@ -647,6 +647,7 @@ const queryGetRelatedJobs = async (job_id) => {
         j.salary_min,
         j.salary_max,        
         c.company_name,
+        c.company_id,
         c.logo as company_logo,
         (select city_name from catalog_city where city_id = j.work_location) as work_location_name
       FROM job j
@@ -662,7 +663,8 @@ const queryGetRelatedJobs = async (job_id) => {
         j.title,
         j.salary_min,
         j.salary_max,
-        c.company_name,
+        c.company_name,        
+        c.company_id,
         c.logo as company_logo,
         (select city_name from catalog_city where city_id = j.work_location) as work_location_name
       FROM job j
@@ -679,6 +681,7 @@ const queryGetRelatedJobs = async (job_id) => {
         j.salary_min,
         j.salary_max,
         c.company_name,
+        c.company_id,
         c.logo as company_logo,
         (select city_name from catalog_city where city_id = j.work_location) as work_location_name
       FROM job j

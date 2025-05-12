@@ -663,21 +663,28 @@ const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
                     CÁC CÔNG VIỆC TƯƠNG TỰ
                   </Card.Title>
                   <ListGroup variant="flush">
-                    {relatedJobs?.map((job, index) => (
-                      <ListGroup.Item
+                    {relatedJobs?.map((job, index) => (                      <ListGroup.Item
                         key={index}
                         className="d-flex align-items-start"
                       >
-                        <img
-                          src={job.company_logo}
-                          alt={job.company_name}
-                          width="100"
-                          height="100"
-                          className="me-3"
-                        />
-                        <div>
-                          <h6 className="mb-1">{job.title}</h6>
-                          <div>{job.company_name}</div>
+                        <NavLink to={`/company-detail/${job?.company_id}`}>
+                          <img
+                            src={job.company_logo}
+                            alt={job.company_name}
+                            width="100"
+                            height="100"
+                            className="me-3"
+                          />
+                        </NavLink><div>                          <h6 className="mb-1">
+                            <NavLink to={`/post-detail/${job?.job_id}`} className="text-decoration-none">
+                              {job.title}
+                            </NavLink>
+                          </h6>
+                          <div>
+                            <NavLink to={`/company-detail/${job?.company_id}`} className="text-decoration-none custom-hover-3">
+                              {job.company_name}
+                            </NavLink>
+                          </div>
                           <div>
                             <strong>Lương:</strong>{" "}
                             {job.salary_max === 0 && job.salary_min === 0
