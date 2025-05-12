@@ -665,13 +665,13 @@ const queryGetItemProfile = async (type, profile_id) => {
 // Resume related queries
 const queryAddResume = async (profile_id, resumeData) => { 
   try {
-    const { cv_name, cv_link } = resumeData;
+    const { cv_name, cv_link, s3_key } = resumeData;
     const create_at = new Date();
     
     const [result] = await db.query(
-      `INSERT INTO profile_cv (profile_id, cv_name, cv_link, create_at) 
-       VALUES (?, ?, ?, ?)`,
-      [profile_id, cv_name, cv_link, create_at]
+      `INSERT INTO profile_cv (profile_id, cv_name, cv_link, s3_key, create_at) 
+       VALUES (?, ?, ?, ?, ?)`,
+      [profile_id, cv_name, cv_link, s3_key, create_at]
     );
     
     return result.insertId >0;
@@ -686,7 +686,7 @@ const queryAddResume = async (profile_id, resumeData) => {
 const queryGetResume = async (profile_id) => {
   try {
     const [resumes] = await db.query(
-      `SELECT cv_id, cv_name, cv_link, create_at
+      `SELECT cv_id, cv_name, cv_link, s3_key, create_at, isactive
        FROM profile_cv
        WHERE profile_id = ?
        ORDER BY create_at DESC`,

@@ -1,5 +1,5 @@
 const { uploadToS3, uploadToS3CV, deleteFileFromS3 } = require("../middlewares/imageUpload.js");
-
+const path = require('path');
 const ApiError = require('../utils/ApiError');
 const {
   queryJobseekerGetJobDetail,
@@ -273,7 +273,7 @@ const deleteResume = async (req, res, next) => {
     
     // First get the resume to retrieve the S3 key
     const [resume] = await db.query(
-      `SELECT s3_key FROM profile_cv WHERE cv_id = ? AND profile_id = ?`,
+      `SELECT cv_id, cv_name, cv_link, s3_key FROM profile_cv WHERE cv_id = ? AND profile_id = ?`,
       [cv_id, profile_id]
     );
     
@@ -283,13 +283,18 @@ const deleteResume = async (req, res, next) => {
     
     // Delete from S3 using the stored key
     try {
-      await deleteFileFromS3(resume[0].s3_key);
+      if (resume[0].s3_key) {
+        await deleteFileFromS3(resume[0].s3_key);
+      } else if (resume[0].cv_link) {
+        // Fallback to URL if key not available
+        await deleteFileFromS3(resume[0].cv_link);
+      }
     } catch (s3Error) {
       console.error("Error deleting file from S3:", s3Error);
       // Continue with database deletion even if S3 deletion fails
     }
     
-    const deleted = await queryDeleteResume(profile_id,cv_id);
+    const deleted = await queryDeleteResume(profile_id, cv_id);
     
     if (!deleted) {
       return next(new ApiError("Resume not found or you don't have permission to delete it", 404));

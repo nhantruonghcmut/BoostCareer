@@ -23,6 +23,7 @@ const setupAxiosInterceptors = () => {
         ) {
           console.log("Phát hiện lỗi xác thực, tiến hành đăng xuất tự động");          
           // Dispatch action forceLogout để cập nhật Redux store ngay lập tức 
+          // thay vì gọi API logout mà có thể thất bại do token không hợp lệ
           store.dispatch(forceLogout());
         }
       }

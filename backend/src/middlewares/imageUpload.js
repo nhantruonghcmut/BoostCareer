@@ -60,11 +60,16 @@ const uploadToS3CV = async (file, userId) => {
 };
 
 
-const deleteFileFromS3 = async (fileUrl) => {
+const deleteFileFromS3 = async (fileKey) => {
   try {
-    // Extract the key from the file URL
-    const urlParts = fileUrl.split('/');
-    const key = urlParts.slice(3).join('/'); // Skip protocol and bucket name
+    let key = fileKey;
+    
+    // If fileKey is a URL, extract the key
+    if (fileKey.startsWith('http')) {
+      const urlParts = fileKey.split('/');
+      // Skip protocol and bucket name
+      key = urlParts.slice(3).join('/');
+    }
     
     const params = {
       Bucket: process.env.AWS_BUCKET_NAME,

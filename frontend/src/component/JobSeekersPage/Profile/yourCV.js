@@ -72,7 +72,6 @@ export default function YourCV() {
       console.log("Cần gửi cv này lên server: ", cv);
       try {
         await addProfileCV({
-          profile_id: user?.id,
           file: cv,
         }).unwrap();
         toast.success("Upload cv thành công!");
