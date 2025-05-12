@@ -945,9 +945,33 @@ const queryDeleteItemCompanyProfile = async (type, company_id, id) => {
   }
 };
 
-const queryUpdateLogoImage = async (company_id, imageData) => {};
+const queryUpdateLogoImage = async (company_id, imageData) => {
+try {
+  const [result] = await db.query(
+    `UPDATE company SET logo = ? WHERE company_id = ?;`,
+    [imageData, company_id]
+  );
+  return result.affectedRows > 0;
+}
+catch (error) {
+  console.error("Error updating logo image:", error);
+  throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
+}
+};
 
-const queryUpdateBackgroundImage = async (company_id, imageData) => {};
+const queryUpdateBackgroundImage = async (company_id, imageData) => {
+  try {
+  const [result] = await db.query(
+    `UPDATE company SET background = ? WHERE company_id = ?;`,
+    [imageData, company_id]
+  );
+  return result.affectedRows > 0;
+}
+catch (error) {
+  console.error("Error updating logo image:", error);
+  throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
+}
+};
 
 // Candidate Queries
 const queryGetListCandidateSaving = async (employer_id) => {
@@ -1435,7 +1459,18 @@ const queryUpdateReadNotification = async (employer_id, notification_id) => {
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 }
-
+ const queryChangePassword = async (employer_id, newPassword) => {
+  try {
+    const [result] = await db.query(
+      `UPDATE user_ SET password_ = ? WHERE user_id = ?;`,
+      [newPassword, employer_id]
+    );
+    return result.affectedRows > 0; // Trả về true nếu cập nhật thành công
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
+  }
+};
 module.exports = {
   queryGetListJobseekerBySearch,
   queryGetJobseekerDetail,
@@ -1466,5 +1501,7 @@ module.exports = {
 
   queryGetOverview,
   queryGetNotification,
-  queryUpdateReadNotification
+  queryUpdateReadNotification,
+
+  queryChangePassword
 };

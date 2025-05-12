@@ -15,10 +15,9 @@ export default function YourCV() {
   const [showHideProfileCV] = useShowHideProfileCVMutation();
   const [deleteProfileCV] = useDeleteProfileCVMutation();
   const [addProfileCV] = useAddProfileCVMutation();
-  const handleShowHideCV = async (profile_id, cv_id, type) => {
+  const handleShowHideCV = async (cv_id, type) => {
     try {
       const response = await showHideProfileCV({
-        profile_id: profile_id,
         cv_id: cv_id,
         type: type,
       }).unwrap();
@@ -36,16 +35,12 @@ export default function YourCV() {
   };
 
   //Xóa cv
-  const [cvItem, setCvItem] = useState({
-    profile_id: "",
-    cv_id: "",
-  });
+  const [cvItem, setCvItem] = useState(null);
   const handleDeleteCVItem = async () => {
     console.log(cvItem.profile_id);
     try {
       const response = await deleteProfileCV({
-        profile_id: cvItem.profile_id,
-        cv_id: cvItem.cv_id,
+        cv_id: cvItem,
       }).unwrap();
       if (response.success) {
         // setSaveStatus(true);
@@ -64,15 +59,14 @@ export default function YourCV() {
     if (cvInputRef) {
       cvInputRef.current.click();
     }
-  };
-  const handleCVChange = async (event) => {
+  };  const handleCVChange = async (event) => {
     const cv = event.target.files[0];
     console.log("assadsaxasx", cv);
     if (cv) {
       console.log("Cần gửi cv này lên server: ", cv);
       try {
         await addProfileCV({
-          file: cv,
+          resume: cv,
         }).unwrap();
         toast.success("Upload cv thành công!");
       } catch (error) {
@@ -171,7 +165,7 @@ export default function YourCV() {
                   className="btn btn-success"
                   disabled={item?.isactive === 1 && true}
                   onClick={() =>
-                    handleShowHideCV(item.profile_id, item.cv_id, "show")
+                    handleShowHideCV(item.cv_id, "show")
                   }
                 >
                   Hiện
@@ -180,7 +174,7 @@ export default function YourCV() {
                   className="btn btn-secondary"
                   disabled={item?.isactive === 0 && true}
                   onClick={() =>
-                    handleShowHideCV(item.profile_id, item.cv_id, "hide")
+                    handleShowHideCV(item.cv_id, "hide")
                   }
                 >
                   Ẩn
@@ -190,10 +184,7 @@ export default function YourCV() {
                   data-bs-toggle="modal"
                   data-bs-target="#confirmDeleteCVModal"
                   onClick={() =>
-                    setCvItem({
-                      profile_id: item.profile_id,
-                      cv_id: item.cv_id,
-                    })
+                    setCvItem( item.cv_id)
                   }
                 >
                   Xóa

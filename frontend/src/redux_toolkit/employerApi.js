@@ -332,6 +332,16 @@ export const employerApi = createApi({
       },
       invalidatesTags: ["Notification"],
     }),
+    changePassword: builder.mutation({
+        query: ({  newPassword }) => ({
+            url: '/employer/change-password',
+            method: 'POST',
+            body: {newPassword },
+        }),
+        transformResponse: (response) => {
+            return response;
+        },
+    }),
   }),
 });
 
@@ -365,4 +375,5 @@ export const {
 
   useGetNotificationQuery,
   useUpdateReadNotificationMutation,
+  useChangePasswordMutation,
 } = employerApi;

@@ -1,5 +1,8 @@
-const { uploadToS3, uploadToS3CV, deleteFileFromS3 } = require("../middlewares/imageUpload.js");
+const { uploadImgToS3_jobseeker, uploadToS3CV, deleteFileFromS3 } = require("../middlewares/imageUpload.js");
 const path = require('path');
+const bcrypt = require("bcrypt");
+// const {loginExecute} = require("../models/authencationModels.js");
+const db = require("../config/databaseConfig.js");
 const ApiError = require('../utils/ApiError');
 const {
   queryJobseekerGetJobDetail,
@@ -24,7 +27,8 @@ const {
   queryGetOverview,
   queryGetJobsSuggestion,
   queryGetNotification,
-  queryUpdateReadNotification
+  queryUpdateReadNotification,
+  queryChangePassword
 } = require("../models/jobseekerModels.js");
 
 const jobseekerGetJobDetail = async (req, res, next) => {
@@ -64,7 +68,7 @@ const updateJobseekerProfileImage = async (req, res, next) => {
     }
 
     try {
-      const imageUrl = await uploadToS3(req.file);
+      const imageUrl = await uploadImgToS3_jobseeker(req.file);
       const affectedRows = await queryUpdateJobseekerProfileImage(id, imageUrl);
       
       if (affectedRows === 0) {
@@ -212,10 +216,9 @@ const addResume = async (req, res, next) => {
     
     if (!allowedExtensions.includes(fileExtension)) {
       return next(new ApiError("Only PDF and DOC files are allowed", 400));
-    }
-
+    }    
     try {
-      // Pass the profile_id to the upload function
+
       const fileInfo = await uploadToS3CV(req.file, profile_id);
       
       // Save resume data to database
@@ -230,11 +233,9 @@ const addResume = async (req, res, next) => {
       if (!cvId) {
         return next(new ApiError("Failed to save resume data", 500));
       }
-      // Get updated list of user's resumes
-      const resumes = await queryGetResume(profile_id);
       
       return res.success(
-        { resumes }, 
+        {  }, 
         "Resume uploaded successfully"
       );
     } catch (uploadErr) {
@@ -254,10 +255,10 @@ const getResume = async (req, res, next) => {
       return next(new ApiError("Missing user profile ID", 400));
     }
     
-    const resumes = await queryGetResume(profile_id);
+    const resumes = await queryGetResume(profile_id) || [];
     
     return res.success(
-      { resumes: resumes || [] }, 
+       resumes, 
       "Resumes retrieved successfully"
     );
   } catch (err) {
@@ -270,10 +271,11 @@ const deleteResume = async (req, res, next) => {
   try {
     const profile_id = req.user.id;
     const { cv_id } = req.body;
+    console.log("Delete resume", profile_id, cv_id);
     
     // First get the resume to retrieve the S3 key
     const [resume] = await db.query(
-      `SELECT cv_id, cv_name, cv_link, s3_key FROM profile_cv WHERE cv_id = ? AND profile_id = ?`,
+      `SELECT s3_key FROM profile_cv WHERE cv_id = ? AND profile_id = ?`,
       [cv_id, profile_id]
     );
     
@@ -313,7 +315,7 @@ const deleteResume = async (req, res, next) => {
 };
 
 const getListJobApplication = async (req, res, next) => {
-  console.log("getListJobApplication");
+// console("getListJobApplication");
   try {
     const profile_id = req.user.id;
   // const profile_id = req.query.profile_id;
@@ -339,7 +341,7 @@ const applyToJob = async (req, res, next) => {
   try {
     const profile_id = req.user.id;
   const {job_id} = req.body;
-  console.log("Apply job", profile_id, job_id);
+// console("Apply job", profile_id, job_id);
   if (!job_id || !profile_id) {
     return next(new ApiError("Thiếu thông tin ID bài đăng hoặc ID người dùng", 400));
   }
@@ -576,14 +578,11 @@ const updateReadNotification = async (req, res, next) => {
 
 const showHideResume = async (req, res, next) => {
   try {
-  const { profile_id, cv_id, type } = req.body;
-  if (!type || !profile_id || !cv_id) {
-    return next(new ApiError("Thiếu thông tin cần thiết", 400));
-  }
-
-  if (!profile_id) {
-    return next(new ApiError("Thiếu thông tin ID hồ sơ", 400));
-  }
+    const profile_id = req.user.id;
+    const { cv_id, type } = req.body;
+    if (!type || !cv_id) {
+      return next(new ApiError("Thiếu thông tin cần thiết", 400));
+    }
 
   const result = await queryShowHideResume(profile_id, cv_id, type);
   if (!result) {
@@ -594,6 +593,27 @@ const showHideResume = async (req, res, next) => {
   return next(new ApiError("Lỗi khi cShow/Hide CV", 500));
 }
 };
+
+const changePassword = async (req, res, next) => {
+  try {
+    const jobseeker_id= req.user.id;
+    console.log("req.body", req.body);
+    const { newPassword } = req.body;
+
+    if (!jobseeker_id || !newPassword) {
+      return next(new ApiError("Thiếu thông tin công ty/ mật khẩu", 400));
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const result = await queryChangePassword(jobseeker_id, hashedPassword);
+    if (!result) {
+      return next(new ApiError("Cập nhật mật khẩu thất bại", 500));
+    }
+    return res.success({ }, "Cập nhật mật khẩu thành công");
+  } catch (err) {
+    return next(new ApiError("Lỗi khi cập nhật mật khẩu", 500));
+  } 
+}
 module.exports = {
   jobseekerGetJobDetail,
   getItemProfile,
@@ -625,5 +645,6 @@ module.exports = {
 
 
   getNotification,
-  updateReadNotification
+  updateReadNotification,
+  changePassword
 };

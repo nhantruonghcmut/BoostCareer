@@ -17,7 +17,7 @@ const encryptExistingPasswords = async () => {
     // Lấy tất cả user với password chưa mã hóa
     const [users] = await db.query('SELECT user_id, password_ FROM user_');
     
-    console.log(`Found ${users.length} users to update`);
+  // console(`Found ${users.length} users to update`);
 
     for (const user of users) {
       // Mã hóa password
@@ -30,10 +30,10 @@ const encryptExistingPasswords = async () => {
         [hashedPassword, user.user_id]
       );
 
-      console.log(`Updated password for user ID: ${user.user_id}`);
+    // console(`Updated password for user ID: ${user.user_id}`);
     }
 
-    console.log('Password encryption completed successfully!');
+  // console('Password encryption completed successfully!');
   } catch (error) {
     console.error('Error encrypting passwords:', error);
   } 

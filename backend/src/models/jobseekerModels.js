@@ -667,14 +667,18 @@ const queryAddResume = async (profile_id, resumeData) => {
   try {
     const { cv_name, cv_link, s3_key } = resumeData;
     const create_at = new Date();
-    
+    let isactive = 0; // Default to inactive (0), can be activated later
+    const [count] = await db.query(
+      `SELECT COUNT(*) as count FROM profile_cv WHERE profile_id = ?`,[profile_id]
+    );
+    if (count[0].count >= 0) { isactive=1;}    
     const [result] = await db.query(
-      `INSERT INTO profile_cv (profile_id, cv_name, cv_link, s3_key, create_at) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [profile_id, cv_name, cv_link, s3_key, create_at]
+      `INSERT INTO profile_cv (profile_id, cv_name, cv_link, s3_key, create_at, isactive) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [profile_id, cv_name, cv_link, s3_key, create_at, isactive]
     );
     
-    return result.insertId >0;
+    return result.insertId;
   }
   catch (error) {
     console.error("Error in queryAddResume:", error);
@@ -1280,7 +1284,23 @@ const queryGetNotification = async (jobseeker_id) => {
       throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
     }
   }
-  
+
+
+ const queryChangePassword = async (jobseeker_id, newPassword) => {
+  try {
+    const [result] = await db.query(
+      `UPDATE user_ SET password_ = ? WHERE user_id = ?;`,
+      [newPassword, jobseeker_id]
+    );
+    return result.affectedRows > 0; // Trả về true nếu cập nhật thành công
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
+  }
+};
+
+
+
 module.exports = {
   queryJobseekerGetJobDetail,
   queryGetItemProfile,
@@ -1305,5 +1325,7 @@ module.exports = {
   queryGetJobsSuggestion,
 
   queryGetNotification,
-  queryUpdateReadNotification
+  queryUpdateReadNotification,
+
+  queryChangePassword,
 };

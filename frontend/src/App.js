@@ -16,7 +16,6 @@ import JobSeekerPage from "./component/JobSeekersPage/index.js";
 import JobSeekerOverview from "./component/JobSeekersPage/Overview/index.js";
 import JobSeekerProfile from "./component/JobSeekersPage/Profile/index.js";
 import JobSeekerWork from "./component/JobSeekersPage/MyWork/index.js";
-import JobSeekerCompany from "./component/JobSeekersPage/MyCompany/index.js";
 import JobSeekerNotification from "./component/JobSeekersPage/MyNotification/index.js";
 import JobseekerAccountSetting from "./component/JobSeekersPage/AccountSetting/index.js";
 

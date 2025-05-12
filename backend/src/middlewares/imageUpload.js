@@ -3,7 +3,7 @@ const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const path = require("path");
 const s3 = require("../config/s3Config"); // Import cấu hình S3
 const dotenv = require("dotenv");
-const { v4: uuidv4 } = require("uuid"); // Thư viện tạo tên file duy nhất
+const { v7: uuidv7 } = require("uuid"); // Thư viện tạo tên file duy nhất
 const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
 dotenv.config();
 
@@ -12,12 +12,12 @@ const storage = multer.memoryStorage(); // Lưu file vào RAM trước khi uploa
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // Giới hạn 5MB
+  limits: { fileSize: 250 * 1024 * 1024 }, // Giới hạn 5MB
 });
 
-const uploadToS3 = async (file) => {
+const uploadImgToS3_jobseeker = async (file,userId) => {
   const fileExtension = path.extname(file.originalname);
-  const fileName = `uploads/${uuidv4()}${fileExtension}`;
+  const fileName = `jobseeker/profile_avatar/${userId}/${uuidv7()}${fileExtension}`;
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
@@ -31,23 +31,44 @@ const uploadToS3 = async (file) => {
 
   return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 };
-
-// Add a new function for CV uploads
-const uploadToS3CV = async (file, userId) => {
+const uploadImgToS3_employer = async (file,userId) => {
   const fileExtension = path.extname(file.originalname);
-  const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
-  const uniqueId = uuidv4();
-  
-  // Create path with userId folder and unique filename
-  const fileName = `uploads/cv/${userId}/${uniqueId}_${safeOriginalName}`;
+  const fileName = `employer/${userId}/${uuidv7()}${fileExtension}`;
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileName,
     Body: file.buffer,
     ContentType: file.mimetype,
-    ContentDisposition: 'inline; filename=' + file.originalname,
-    ACL: "public-read"
+    ACL: "public-read", // Cho phép truy cập công khai
+  };
+
+  await s3.send(new PutObjectCommand(params));
+
+  return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+};
+// Add a new function for CV uploads
+const uploadToS3CV = async (file, userId) => {
+  const fileExtension = path.extname(file.originalname);
+  const safeOriginalName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const uniqueId = uuidv7();
+  
+  // Create path with userId folder and unique filename
+  const fileName = `jobseeker/profile_cv/${userId}/${uniqueId}_${safeOriginalName}`;
+
+  // Log để debug
+  console.log("Uploading file to S3:", {
+    bucketName: process.env.AWS_BUCKET_NAME,
+    fileName: fileName,
+    contentType: file.mimetype
+  });
+
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: fileName,
+    Body: file.buffer,
+    ContentType: file.mimetype || 'application/octet-stream', // Default content type if missing
+    ACL: "public-read"  // Removed ContentDisposition to simplify
   };
 
   await s3.send(new PutObjectCommand(params));
@@ -65,11 +86,13 @@ const deleteFileFromS3 = async (fileKey) => {
     let key = fileKey;
     
     // If fileKey is a URL, extract the key
-    if (fileKey.startsWith('http')) {
+    if (fileKey && fileKey.startsWith('http')) {
       const urlParts = fileKey.split('/');
       // Skip protocol and bucket name
       key = urlParts.slice(3).join('/');
     }
+
+    console.log("Deleting file from S3:", { bucket: process.env.AWS_BUCKET_NAME, key });
     
     const params = {
       Bucket: process.env.AWS_BUCKET_NAME,
@@ -77,10 +100,11 @@ const deleteFileFromS3 = async (fileKey) => {
     };
     
     await s3.send(new DeleteObjectCommand(params));
+    console.log("File deleted successfully from S3");
     return true;
   } catch (error) {
     console.error("Error deleting file from S3:", error);
-    throw error;
+    return false; // Return false instead of throwing error for better error handling
   }
 };
-module.exports = { upload, uploadToS3, uploadToS3CV,deleteFileFromS3 };
+module.exports = { upload, uploadImgToS3_jobseeker, uploadImgToS3_employer, uploadToS3CV, deleteFileFromS3 };

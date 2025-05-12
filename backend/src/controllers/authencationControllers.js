@@ -84,8 +84,8 @@ const login = async (req, res, next) => {
     const accessToken = generateAccessToken(userLogin);
     const refreshToken = generateRefreshToken(userLogin);
     setTokenCookies(res, accessToken, refreshToken);
-    const decodedRefresh = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    console.log("decodedRefresh", decodedRefresh);
+    // const decodedRefresh = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    // console.log("decodedRefresh", decodedRefresh);
     return res.success(
       {
         user: {

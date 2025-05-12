@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+// import { logout } from "../../../redux/actions/authAction.js";
 import { logout } from "../../../redux_toolkit/AuthSlice.js";
-
+import { toast } from "react-toastify"; // Import toast nếu cần thông báo
+import { useChangePasswordMutation } from "../../../redux_toolkit/employerApi.js";
 export default function EmployerAccountSetting() {
   const dispatch = useDispatch();
-  const { isLogin, user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
+  const [changePassword] = useChangePasswordMutation();
 
-  const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -19,8 +19,37 @@ export default function EmployerAccountSetting() {
     rePassword: "",
   });
 
-  const handleChangePassword = () => {
-    console.log("user: ", user?.id, " passwordchange: ", data.password);
+  const handleChangePassword = async () => {
+    // Validate password match
+    if (data.password !== data.rePassword) {
+      toast.error("Mật khẩu không khớp!");
+      return;
+    }
+
+    // Validate password not empty
+    if (!data.password) {
+      toast.error("Mật khẩu không được để trống!");
+      return;
+    }
+
+    try {
+      const response = await changePassword({
+        newPassword: data.password,
+      }).unwrap();
+      
+      if (response.success) {
+        toast.success("Đổi mật khẩu thành công!");
+        setData({
+          password: "",
+          rePassword: "",
+        });
+      } else {
+        toast.error("Đổi mật khẩu thất bại!");
+      }
+    } catch (error) {
+      console.error("Error change password:", error);
+      toast.error("Đã xảy ra lỗi khi đổi mật khẩu!");
+    }
   };
 
 
@@ -29,7 +58,7 @@ export default function EmployerAccountSetting() {
       {/* Modal đổi mật khẩu */}
       <div
         className="modal fade"
-        id="changePasswordE"
+        id="changePassword1"
         tabIndex={-1}
         aria-labelledby="modalTitle"
         aria-hidden="true"
@@ -51,16 +80,16 @@ export default function EmployerAccountSetting() {
               />
             </div>
             <div className="modal-body">
-              <form>
-                <div className="mb-4">
-                  <label htmlFor="email" className="form-label text-muted">
+              <form>                <div className="mb-4">
+                  <label htmlFor="newPassword" className="form-label text-muted">
                     Mật khẩu mới
                   </label>
                   <input
                     type="password"
                     className="form-control"
-                    id="email"
+                    id="newPassword"
                     placeholder="Mật khẩu mới"
+                    value={data.password}
                     required
                     onChange={(e) => {
                       setData({
@@ -69,16 +98,21 @@ export default function EmployerAccountSetting() {
                       });
                     }}
                   />
-                </div>
-                <div className="mb-4">
+                  {data.password && data.password.length < 6 && (
+                    <div className="text-danger small mt-1">
+                      Mật khẩu cần có ít nhất 6 ký tự
+                    </div>
+                  )}
+                </div><div className="mb-4">
                   <label htmlFor="password" className="form-label text-muted">
                     Nhập lại mật khẩu
                   </label>
                   <input
                     type="password"
-                    className="form-control"
+                    className={`form-control ${data.rePassword && data.password !== data.rePassword ? 'is-invalid' : ''}`}
                     id="password"
                     placeholder="Nhập lại mật khẩu"
+                    value={data.rePassword}
                     required
                     onChange={(e) => {
                       setData({
@@ -87,6 +121,11 @@ export default function EmployerAccountSetting() {
                       });
                     }}
                   />
+                  {data.rePassword && data.password !== data.rePassword && (
+                    <div className="invalid-feedback">
+                      Mật khẩu không khớp
+                    </div>
+                  )}
                 </div>
                 <div className="d-grid">
                   <button
@@ -129,9 +168,9 @@ export default function EmployerAccountSetting() {
               Mật khẩu: <span className="fw-normal">******</span>
             </p>
           </div>
-          <div>
-            <p className="mb-0 text-muted">Ngày tạo: {user?.create_date}</p>
-          </div>
+          {/* <div>
+            <p className="mb-0 text-muted">Ngày tạo: {user?.create_at}</p>
+          </div> */}
         </div>
       </div>
       <div className="d-flex justify-content-end me-2 my-2 p-2">
@@ -145,7 +184,7 @@ export default function EmployerAccountSetting() {
         <span
           className="text-primary text-decoration-underline text-decoration-primary d-block mt-2 me-4 ms-3 custom-hover-2"
           data-bs-toggle="modal"
-          data-bs-target="#changePasswordE"
+          data-bs-target="#changePassword1"
         >
           Đổi mật khẩu
         </span>

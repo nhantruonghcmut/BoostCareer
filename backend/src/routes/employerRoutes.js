@@ -26,7 +26,8 @@ const {
   getListInvitaion,
   deleteInvitation,
   getNotification,
-  updateReadNotification
+  updateReadNotification,
+  changePassword
 } = require("../controllers/employerControllers.js");
 const { verifyToken, verifyRole } = require('../middlewares/authMiddleware');
 const { upload } = require("../middlewares/imageUpload.js");
@@ -68,6 +69,7 @@ employerRoutes.post("/overview", getOverview); // lấy thông tin tổng quan c
 employerRoutes.get("/notification", getNotification); // lấy danh sách thông báo
 employerRoutes.put("/notification", updateReadNotification); // dùng để đánh dấu đã đọc thông báo
 
+employerRoutes.post("/change-password", changePassword); // đổi mật khẩu
 module.exports = employerRoutes ;
 
 

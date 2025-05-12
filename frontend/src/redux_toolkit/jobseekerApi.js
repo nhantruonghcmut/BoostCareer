@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import domain from '../config/domain';
 import { logout } from "./AuthSlice";
-import { use } from 'react';
+
 const baseQuery = fetchBaseQuery({
     baseUrl: domain, // URL của backend
     credentials: 'include', // Gửi cookie cùng với request
@@ -233,11 +233,10 @@ export const jobseekerApi = createApi({
                 return response.data;
             },
             providesTags: ['CV'],
-        }),
-        addProfileCV: builder.mutation({
-            query: ({ file }) => {
+        }),        addProfileCV: builder.mutation({
+            query: ({ resume }) => {
                 const formData = new FormData();
-                formData.append('file', file);
+                formData.append('resume', resume); // Using 'resume' to match backend expectation
                 
                 return {
                     url: '/jobseeker/profile-cv',
@@ -282,6 +281,17 @@ export const jobseekerApi = createApi({
                 return response;
             },
             invalidatesTags: ['Notification'],
+        }),
+
+        changePassword: builder.mutation({
+            query: ({  newPassword }) => ({
+                url: '/jobseeker/change-password',
+                method: 'POST',
+                body: {newPassword },
+            }),
+            transformResponse: (response) => {
+                return response;
+            },
         }),
 
         getAI_score: builder.query({
@@ -348,6 +358,7 @@ export const {
 
     useGetNotificationQuery,
     useUpdateReadNotificationMutation,
+    useChangePasswordMutation,
 
     useGetAI_scoreQuery,
     useGetAI_AnalyzeQuery,

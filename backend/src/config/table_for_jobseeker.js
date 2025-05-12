@@ -150,9 +150,9 @@ module.exports = {
     cv: {
       tableName: "profile_cv",
       key: ["cv_id", "profile_id"],
-      fields: ["cv_id", "profile_id", "cv_name", "cv_link", "create_at"],
-      updateItem: [],
-      addItem: ["profile_id", "cv_name", "cv_link", "create_at"],
+      fields: ["cv_id", "profile_id", "cv_name", "cv_link","s3_key", "create_at","isactive"],
+      updateItem: ["isactive"],
+      addItem: ["profile_id", "cv_name", "cv_link","s3_key", "create_at","isactive"],
     },
   },
   logs: {

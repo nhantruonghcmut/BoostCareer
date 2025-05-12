@@ -1,6 +1,6 @@
 import axios from 'axios';
 import store from '../redux_toolkit/store';
-import { logout, forceLogout } from '../redux_toolkit/AuthSlice';
+import { forceLogout } from '../redux_toolkit/AuthSlice';
 
 // Thiết lập interceptor để xử lý trường hợp token hết hạn hoặc không hợp lệ
 const setupAxiosInterceptors = () => {

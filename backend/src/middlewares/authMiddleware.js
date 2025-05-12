@@ -38,7 +38,7 @@ const verifyToken = async (req, res, next) => {
       if (!user) {
         return res.status(401).json({ errorCode: "TOKEN_INVALID", message: "Access token không hợp lệ" });
       }
-      console.log("tạo access token mới cho user:"    );
+      console.log("tạo access token mới cho user tại midleware:"    );
       // Tạo mới access token
       const newAccessToken = generateAccessToken(user);
       res.cookie("accessToken", newAccessToken, {

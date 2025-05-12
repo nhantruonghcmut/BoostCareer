@@ -22,12 +22,12 @@ const {
   deleteJobSaving,
   getJobsSuggestion,
   getNotification,
-  updateReadNotification
+  updateReadNotification,
+  changePassword,
 } = require("../controllers/jobseekerControllers.js");
 
 const { upload } = require("../middlewares/imageUpload.js");
 const { verifyToken, verifyRole } = require('../middlewares/authMiddleware');
-
 const jobseekerRoutes = express.Router();
 
 // Bảo vệ routes với token và role
@@ -67,6 +67,9 @@ jobseekerRoutes.get("/jobs-suggestion", getJobsSuggestion); // xóa việc làm 
 
 jobseekerRoutes.get("/notification", getNotification); // lấy danh sách thông báo
 jobseekerRoutes.put("/notification", updateReadNotification); // dùng để đánh dấu đã đọc thông báo
+
+jobseekerRoutes.post("/change-password", changePassword); // đổi mật khẩu
+
 
 module.exports = jobseekerRoutes;
 

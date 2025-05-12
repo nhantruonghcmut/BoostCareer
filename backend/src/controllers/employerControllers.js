@@ -1,4 +1,8 @@
 const ApiError = require('../utils/ApiError');
+const bcrypt = require("bcrypt");
+// const {loginExecute} = require("../models/authencationModels.js");
+const { uploadImgToS3_employer, deleteFileFromS3 } = require("../middlewares/imageUpload.js");
+
 const {
   queryGetListJobseekerBySearch,
   queryGetJobseekerDetail,
@@ -25,7 +29,8 @@ const {
   queryGetListJobForInvite,
   queryGetOverview,
   queryGetNotification,
-  queryUpdateReadNotification
+  queryUpdateReadNotification,
+  queryChangePassword,
 } = require("../models/employerModels.js");
 
 
@@ -292,8 +297,8 @@ const updateLogoImage = async (req, res, next) => {
     }
         
     // Upload ảnh lên S3
-    const logoUrl = await uploadToS3(logoFile, 'company-logos');
-    
+    const logoUrl = await uploadImgToS3_employer(logoFile, company_id);
+
     if (!logoUrl) {
       return next(new ApiError("Lỗi khi tải ảnh lên", 500));
     }
@@ -326,8 +331,8 @@ const updateBackgroundImage = async (req, res, next) => {
     
    
     // Upload ảnh lên S3
-    const bgUrl = await uploadToS3(bgFile, 'company-backgrounds');
-    
+    const bgUrl = await uploadImgToS3_employer(bgFile, company_id);
+
     if (!bgUrl) {
       return next(new ApiError("Lỗi khi tải ảnh lên", 500));
     }
@@ -612,6 +617,25 @@ const updateReadNotification = async (req, res, next) => {
   } 
 }
 
+const changePassword = async (req, res, next) => {
+  try {
+    const employer_id= req.user.id;
+    const { newPassword } = req.body;
+
+    if (!employer_id || !newPassword) {
+      return next(new ApiError("Thiếu thông tin công ty/ mật khẩu", 400));
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const result = await queryChangePassword(employer_id, hashedPassword);
+    if (!result) {
+      return next(new ApiError("Cập nhật mật khẩu thất bại", 500));
+    }
+    return res.success({ }, "Cập nhật mật khẩu thành công");
+  } catch (err) {
+    return next(new ApiError("Lỗi khi cập nhật mật khẩu", 500));
+  } 
+}
 
 module.exports = {
   getListJobseekerBySearch,
@@ -649,5 +673,6 @@ module.exports = {
 
 
   getNotification,
-  updateReadNotification
+  updateReadNotification,
+  changePassword,
 };
