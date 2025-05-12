@@ -24,9 +24,9 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       } else {
         // Nếu refresh token không hợp lệ, chuyển đến trang login
         await api.dispatch(logout());
-      }
-    } else if (errorCode === 'TOKEN_MISSING') {
-      // Nếu access token và refresh token đều không tồn tại, chuyển đến trang login
+      }    } else if (errorCode === 'TOKEN_MISSING' || errorCode === 'AUTH_REQUIRED' || result.error.data?.forceLogout === true) {
+      // Nếu access token và refresh token đều không tồn tại hoặc không hợp lệ, chuyển đến trang login
+      console.log('Phiên đăng nhập đã hết hạn hoặc không hợp lệ, đang đăng xuất...');
       await api.dispatch(logout());
     }
   }

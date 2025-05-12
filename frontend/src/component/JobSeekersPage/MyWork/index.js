@@ -16,11 +16,10 @@ export default function JobSeekerWork() {
       </div>
 
       <div className="bg-light rounded-2 me-2 my-2 p-2">
-        <div className="">
-          <NavLink to="/jobseeker/mywork" className="text-decoration-none">
+        <div className="">          <NavLink to="/jobseeker/mywork" end className="text-decoration-none">
             <span className="me-3">Việc làm đã ứng tuyển</span>
           </NavLink>
-          <NavLink to="/jobseeker/savedwork" className="text-decoration-none">
+          <NavLink to="/jobseeker/mywork/savedwork" className="text-decoration-none">
             <span className="me-3">Việc làm đã lưu</span>
           </NavLink>
         </div>

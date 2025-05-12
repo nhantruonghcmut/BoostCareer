@@ -56,7 +56,13 @@ export const logout = createAsyncThunk(
       error: null
     },
     reducers: {
-      // Any additional synchronous reducers can go here
+      // Synchronous reducers
+      forceLogout: (state) => {
+        state.isLogin = false;
+        state.user = null;
+        state.loading = false;
+        state.error = null;
+      },
     },
     extraReducers: (builder) => {
       builder
@@ -109,4 +115,5 @@ export const logout = createAsyncThunk(
     }
   });
   
+  export const { forceLogout } = authSlice.actions;
   export default authSlice.reducer;

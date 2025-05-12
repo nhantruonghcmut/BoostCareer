@@ -8,37 +8,38 @@ const baseQuery = fetchBaseQuery({
   });
   
 
-const baseQueryWithReauth = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions);
+// const baseQueryWithReauth = async (args, api, extraOptions) => {
+//   let result = await baseQuery(args, api, extraOptions);
 
-  // Nếu nhận lỗi 401 (access token hết hạn hoặc không tồn tại)
-  if (result.error && result.error.status === 401) {
-    const errorCode = result.error.data?.errorCode;
+//   // Nếu nhận lỗi 401 (access token hết hạn hoặc không tồn tại)
+//   if (result.error && result.error.status === 401) {
+//     const errorCode = result.error.data?.errorCode;
 
-    if (errorCode === 'TOKEN_EXPIRED') {
-      // Gửi request đến /refresh để làm mới token
-      const refreshResult = await baseQuery('auth/refresh', api, extraOptions);
-      console.log("refreshResult", refreshResult);
+//     if (errorCode === 'TOKEN_EXPIRED') {
+//       // Gửi request đến /refresh để làm mới token
+//       const refreshResult = await baseQuery('auth/refresh', api, extraOptions);
+//       console.log("refreshResult", refreshResult);
 
-      if (refreshResult.data) {
-        // Nếu làm mới token thành công, gửi lại request ban đầu
-        result = await baseQuery(args, api, extraOptions);
-      } else {
-        // Nếu refresh token không hợp lệ, chuyển đến trang login
-        await api.dispatch(logout());
-      }
-    } else if (errorCode === 'TOKEN_MISSING') {
-      // Nếu access token và refresh token đều không tồn tại, chuyển đến trang login
-      await api.dispatch(logout());
-    }
-  }
+//       if (refreshResult.data) {
+//         // Nếu làm mới token thành công, gửi lại request ban đầu
+//         result = await baseQuery(args, api, extraOptions);
+//       } else {
+//         // Nếu refresh token không hợp lệ, chuyển đến trang login
+//         await api.dispatch(logout());
+//       }    } else if (errorCode === 'TOKEN_MISSING' || errorCode === 'AUTH_REQUIRED' || result.error.data?.forceLogout === true) {
+//       // Nếu access token và refresh token đều không tồn tại hoặc không hợp lệ, chuyển đến trang login
+//       console.log('Phiên đăng nhập đã hết hạn hoặc không hợp lệ, đang đăng xuất...');
+//       // Sử dụng action logout vì nó xóa state và cookie
+//       await api.dispatch(logout());
+//     }
+//   }
 
-  return result;
-};
+//   return result;
+// };
 
 export const jobseekerApi = createApi({
     reducerPath: 'jobseekerApi',
-    baseQuery: baseQueryWithReauth,
+    baseQuery: fetchBaseQuery,
     tagTypes: ['Basic', 'Experience', 'Education', 'Project', 'Skill', 'Language', 'Certification', 'Overview'],
     endpoints: (builder) => ({
         getOverviewJobseeker: builder.mutation({

@@ -71,34 +71,34 @@ export default function JobSeekerNotification() {
               <h2 className="accordion-header">
                 <button
                   className={`accordion-button fw-semibold ${
-                    openItem === item.notification_id ? "" : "collapsed"
-                  } ${item.is_read ? "" : "bg-secondary"}`}
+                    openItem === item?.notification_id ? "" : "collapsed"
+                  } ${item?.is_read ? "" : "bg-secondary"}`}
                   type="button"
                   onClick={async () => {
                     console.log(
                       "Button clicked for notification:",
-                      item.notification_id
+                      item?.notification_id
                     );
-                    console.log("Current is_read status:", item.is_read);
+                    console.log("Current is_read status:", item?.is_read);
 
                     // First update the read status if needed
-                    if (!item.is_read) {
-                      await handleReadNotification(item.notification_id);
+                    if (!item?.is_read) {
+                      await handleReadNotification(item?.notification_id);
                     }
 
                     // Then toggle the accordion
-                    toggle(item.notification_id);
+                    toggle(item?.notification_id);
                   }}
-                  aria-expanded={openItem === item.notification_id}
+                  aria-expanded={openItem === item?.notification_id}
                   disabled={isUpdating}
                 >
-                  {item.notification_type} từ{" "}
+                  {item?.notification_type} từ{" "}
                   {item?.entity_name === "Anonymous"
                     ? "Người dùng ẩn danh"
                     : item?.entity_name}
                 </button>
               </h2>
-              {openItem === item.notification_id && (
+              {openItem === item?.notification_id && (
                 <div className="accordion-body d-flex justify-content-between align-items-center">
                   <div className="d-flex align-items-center">
                     <img
@@ -119,7 +119,7 @@ export default function JobSeekerNotification() {
 
                   <div className="d-flex flex-column align-items-center">
                     <p className="text-secondary">
-                      {formatDistanceToNow(new Date(item.create_at), {
+                      {formatDistanceToNow(new Date(item?.created_at), {
                         addSuffix: true,
                         locale: vi,
                       })}

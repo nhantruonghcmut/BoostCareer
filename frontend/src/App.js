@@ -1,6 +1,8 @@
 import "./App.css";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import ProtectedRoute from "./utils/ProtectedRoute";
+import { useEffect } from "react";
+import setupAxiosInterceptors from "./utils/axiosInterceptor";
 
 import Header from "./component/_component/header.js";
 import Footer from "./component/_component/footer.js";
@@ -56,6 +58,11 @@ import TermsPage from "./component/TermsPage/index.js";
 import HelpPage from "./component/HelpPage/index.js";
 
 function App() {
+  useEffect(() => {
+    // Thiết lập interceptor khi ứng dụng khởi động
+    setupAxiosInterceptors();
+  }, []);
+
   return (
     <div className="App">
       <BrowserRouter>
@@ -78,10 +85,9 @@ function App() {
               <Route index element={<YourCVwithUs />} />
               <Route path="upload" element={<YourCV />} />
             </Route>
-            <Route path="company-follow" element={<CompanyYouFollow />} />
-            <Route path="mywork" element={<JobSeekerWork />}>
-              <Route path="your-apply" element={<YourApply />} />
-              <Route path="saved-work" element={<SavedWork />} />
+            <Route path="company-follow" element={<CompanyYouFollow />} />            <Route path="mywork" element={<JobSeekerWork />}>
+              <Route index element={<YourApply />} />
+              <Route path="savedwork" element={<SavedWork />} />
             </Route>
             <Route path="notification" element={<JobSeekerNotification />} />
             <Route path="account" element={<JobseekerAccountSetting />} />

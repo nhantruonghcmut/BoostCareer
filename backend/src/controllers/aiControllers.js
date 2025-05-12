@@ -94,7 +94,7 @@ function cleanText(text) {
 const scorematching = async (req, res, next) => {
   try {
     // const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    console.log(req.query)
+    // console.log(req.query)
     const { job_id } = req.query;
     const profile_id= req.user.id;
     if (!job_id || !profile_id) {
@@ -137,7 +137,7 @@ const analyzeProfile = async (req, res, next) => {
     }
     const candidateText = formatCandidateTextOptimized(profile_data);
     const jobText = formatJobPostingTextForOptimalEmbedding(job_data);
-    console.log("Phân tích phản hồi từ AI:");
+    // console.log("Phân tích phản hồi từ AI:");
     let analysis;
 
     try {

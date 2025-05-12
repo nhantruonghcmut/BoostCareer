@@ -4,11 +4,11 @@ const ApiError = require("../utils/ApiError");
 const {
   findUserByUsername,
   loginExecute,
-  registerExecute,
-  generateTokens,
+  registerExecute
 } = require("../models/authencationModels.js");
 
 const generateAccessToken = (user) => {
+   console.log("process.env.JWT_ACCESS_EXPIRES ", process.env.JWT_ACCESS_EXPIRES );
   return jwt.sign(
     { 
       id: user.user_id,
@@ -18,11 +18,12 @@ const generateAccessToken = (user) => {
 
     },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: '15m' } //process.env.JWT_ACCESS_EXPIRES || 
+    { expiresIn: parseInt(process.env.JWT_ACCESS_EXPIRES) } 
   );
 };
 
 const generateRefreshToken = (user) => {
+  console.log("process.env.JWT_REFRESH_EXPIRES ", process.env.JWT_REFRESH_EXPIRES );
   return jwt.sign(
     { 
       id: user.user_id,
@@ -31,12 +32,12 @@ const generateRefreshToken = (user) => {
       logo: user.logo || ''
     },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn:  '7d' } //process.env.JWT_REFRESH_EXPIRES ||
+    { expiresIn:  parseInt(process.env.JWT_REFRESH_EXPIRES)}
   );
 };
 
 const setTokenCookies = (res, accessToken, refreshToken) => {
-console.log("env ", process.env.JWT_REFRESH_EXPIRES);
+// console.log("env ", process.env.JWT_REFRESH_EXPIRES);
   res.cookie('accessToken', accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -82,13 +83,9 @@ const login = async (req, res, next) => {
 
     const accessToken = generateAccessToken(userLogin);
     const refreshToken = generateRefreshToken(userLogin);
-   const  decoded1 = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-   console.log("Decoded accessToken", decoded1);
-   const  decoded2 = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-   console.log("Decoded refreshToken", decoded2);
-console.log("Access token in login", accessToken);
     setTokenCookies(res, accessToken, refreshToken);
-    
+    const decodedRefresh = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    console.log("decodedRefresh", decodedRefresh);
     return res.success(
       {
         user: {
@@ -97,7 +94,6 @@ console.log("Access token in login", accessToken);
           role: userLogin.role_id,
           logo: userLogin.logo || '',
         },
-        accessToken: accessToken
       },
       'Đăng nhập thành công',
       200  
@@ -292,7 +288,7 @@ const register = async (req, res, next) => {
  * Refresh token
  */
 const refreshToken = async (req, res, next) => {
-  console.log("Refresh token request received", req.cookies.refreshToken);
+  console.log("SỬ DUNG REFRESH API");
   try {
     const refreshToken = req.cookies.refreshToken;
     
