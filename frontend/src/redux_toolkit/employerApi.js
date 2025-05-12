@@ -94,6 +94,31 @@ export const employerApi = createApi({
       invalidatesTags: ["CompanyInfor"],
     }),
 
+    updateLogoImage: builder.mutation({
+      query: (body) => ({
+        url: "/employer/logo-image",
+        method: "PUT",
+        body,
+      }),
+      transformResponse: (response) => {
+        // //console.log("redux receive updateLogoImage", response);
+        return response;
+      },
+      invalidatesTags: ["CompanyInfor"],
+    }),
+    updateCoverImage: builder.mutation({
+      query: (body) => ({
+        url: "/employer/background-image",
+        method: "PUT",
+        body,
+      }),
+      transformResponse: (response) => {
+        // //console.log("redux receive updateCoverImage", response);
+        return response;
+      },
+      invalidatesTags: ["CompanyInfor"],
+    }),
+
     getJobByUser: builder.query({
       query: () => ({
         url: "/employer/jobs",
@@ -350,6 +375,8 @@ export const {
   useGetCompanyInforQuery,
   useUpdateCompanyInforMutation,
   useAddCompanyInforMutation,
+  useUpdateLogoImageMutation,
+  useUpdateCoverImageMutation,
   useDeleteCompanyInforMutation,
 
   useGetJobByUserQuery,

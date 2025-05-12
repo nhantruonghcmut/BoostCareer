@@ -285,8 +285,15 @@ const deleteItemCompanyProfile = async (req, res, next) => {
 
 const updateLogoImage = async (req, res, next) => {
   try {
-    const company_id= req.user.id;
+    const company_id = req.user.id;
     const logoFile = req.file;
+    
+    console.log("Logo image update request received for company ID:", company_id);
+    console.log("File information:", logoFile ? { 
+      originalname: logoFile.originalname,
+      mimetype: logoFile.mimetype,
+      size: logoFile.size
+    } : "No file provided");
     
     if (!company_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
@@ -297,29 +304,46 @@ const updateLogoImage = async (req, res, next) => {
     }
         
     // Upload ảnh lên S3
-    const logoUrl = await uploadImgToS3_employer(logoFile, company_id);
+    console.log("Starting S3 upload for logo image...");
+    try {
+      const logoUrl = await uploadImgToS3_employer(logoFile, company_id);
+      console.log("S3 upload successful, URL:", logoUrl);
 
-    if (!logoUrl) {
-      return next(new ApiError("Lỗi khi tải ảnh lên", 500));
+      if (!logoUrl) {
+        return next(new ApiError("Lỗi khi tải ảnh lên", 500));
+      }
+      
+      // Cập nhật URL logo trong database
+      console.log("Updating logo URL in database...");
+      const result = await queryUpdateLogoImage(company_id, logoUrl);
+      console.log("Database update result:", result);
+      
+      if (!result) {
+        return next(new ApiError("Cập nhật logo thất bại", 500));
+      }
+      
+      return res.success({ logo_url: logoUrl }, "Cập nhật logo thành công");
+    } catch (uploadError) {
+      console.error("Error in image upload:", uploadError);
+      return next(new ApiError(`Lỗi khi tải ảnh lên S3: ${uploadError.message}`, 500));
     }
-    
-    // Cập nhật URL logo trong database
-    const result = await queryUpdateLogoImage(company_id, logoUrl);
-    
-    if (!result) {
-      return next(new ApiError("Cập nhật logo thất bại", 500));
-    }
-    
-    return res.success({ logo_url: logoUrl }, "Cập nhật logo thành công");
   } catch (err) {
-    return next(new ApiError("Lỗi khi cập nhật logo công ty", 500));
+    console.error("Error in updateLogoImage:", err);
+    return next(new ApiError(`Lỗi khi cập nhật logo công ty: ${err.message}`, 500));
   }
 };
 
 const updateBackgroundImage = async (req, res, next) => {
   try {
-    const company_id= req.user.id;
+    const company_id = req.user.id;
     const bgFile = req.file;
+    
+    console.log("Background image update request received for company ID:", company_id);
+    console.log("File information:", bgFile ? { 
+      originalname: bgFile.originalname,
+      mimetype: bgFile.mimetype,
+      size: bgFile.size
+    } : "No file provided");
     
     if (!company_id) {
       return next(new ApiError("Thiếu ID công ty", 400));
@@ -329,24 +353,33 @@ const updateBackgroundImage = async (req, res, next) => {
       return next(new ApiError("Không có file ảnh được tải lên", 400));
     }
     
-   
     // Upload ảnh lên S3
-    const bgUrl = await uploadImgToS3_employer(bgFile, company_id);
+    console.log("Starting S3 upload for background image...");
+    try {
+      const bgUrl = await uploadImgToS3_employer(bgFile, company_id);
+      console.log("S3 upload successful, URL:", bgUrl);
 
-    if (!bgUrl) {
-      return next(new ApiError("Lỗi khi tải ảnh lên", 500));
+      if (!bgUrl) {
+        return next(new ApiError("Lỗi khi tải ảnh lên", 500));
+      }
+      
+      // Cập nhật URL ảnh bìa trong database
+      console.log("Updating background URL in database...");
+      const result = await queryUpdateBackgroundImage(company_id, bgUrl);
+      console.log("Database update result:", result);
+      
+      if (!result) {
+        return next(new ApiError("Cập nhật ảnh bìa thất bại", 500));
+      }
+      
+      return res.success({ background_url: bgUrl }, "Cập nhật ảnh bìa thành công");
+    } catch (uploadError) {
+      console.error("Error in image upload:", uploadError);
+      return next(new ApiError(`Lỗi khi tải ảnh lên S3: ${uploadError.message}`, 500));
     }
-    
-    // Cập nhật URL ảnh bìa trong database
-    const result = await queryUpdateBackgroundImage(company_id, bgUrl);
-    
-    if (!result) {
-      return next(new ApiError("Cập nhật ảnh bìa thất bại", 500));
-    }
-    
-    return res.success({ background_url: bgUrl }, "Cập nhật ảnh bìa thành công");
   } catch (err) {
-    return next(new ApiError("Lỗi khi cập nhật ảnh bìa công ty", 500));
+    console.error("Error in updateBackgroundImage:", err);
+    return next(new ApiError(`Lỗi khi cập nhật ảnh bìa công ty: ${err.message}`, 500));
   }
 };
 

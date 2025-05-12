@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import {
   useGetIndustriesQuery,
   useGetScalesQuery,
@@ -17,8 +15,7 @@ import CompanyBackground from "../../../component/_component/ui/employer/Company
 import { toast } from "react-toastify";
 
 export default function CompanyProfile() {
-    const navigate = useNavigate();
-  const { isLogin, user } = useSelector((state) => state.auth);
+
   const { data: industry } = useGetIndustriesQuery();
   const { data: scale } = useGetScalesQuery();
   const { data: cities } = useGetCitiesQuery(84); // 84 for Vietnam

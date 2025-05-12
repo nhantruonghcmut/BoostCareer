@@ -945,32 +945,34 @@ const queryDeleteItemCompanyProfile = async (type, company_id, id) => {
   }
 };
 
-const queryUpdateLogoImage = async (company_id, imageData) => {
-try {
-  const [result] = await db.query(
-    `UPDATE company SET logo = ? WHERE company_id = ?;`,
-    [imageData, company_id]
-  );
-  return result.affectedRows > 0;
-}
-catch (error) {
-  console.error("Error updating logo image:", error);
-  throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
-}
+// Update logo image URL in the company profile
+const queryUpdateLogoImage = async (company_id, logoUrl) => {
+  try {
+    console.log("Updating logo image for company:", company_id);
+    const [result] = await db.query(
+      `UPDATE company SET logo = ? WHERE company_id = ?;`,
+      [logoUrl, company_id]
+    );
+    return result.affectedRows > 0; // Return true if update was successful
+  } catch (error) {
+    console.error("Error updating logo image:", error);
+    throw error;
+  }
 };
 
-const queryUpdateBackgroundImage = async (company_id, imageData) => {
+// Update background image URL in the company profile
+const queryUpdateBackgroundImage = async (company_id, bgUrl) => {
   try {
-  const [result] = await db.query(
-    `UPDATE company SET background = ? WHERE company_id = ?;`,
-    [imageData, company_id]
-  );
-  return result.affectedRows > 0;
-}
-catch (error) {
-  console.error("Error updating logo image:", error);
-  throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
-}
+    console.log("Updating background image for company:", company_id);
+    const [result] = await db.query(
+      `UPDATE company SET background = ? WHERE company_id = ?;`,
+      [bgUrl, company_id]
+    );
+    return result.affectedRows > 0; // Return true if update was successful
+  } catch (error) {
+    console.error("Error updating background image:", error);
+    throw error;
+  }
 };
 
 // Candidate Queries

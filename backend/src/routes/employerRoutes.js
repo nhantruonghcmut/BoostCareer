@@ -48,8 +48,8 @@ employerRoutes.get("/profile", getCompanyInformation);
 employerRoutes.post("/profile", addItemCompanyProfile);
 employerRoutes.put("/profile", updateItemCompanyProfile);
 employerRoutes.delete("/profile", deleteItemCompanyProfile);
-employerRoutes.put("/logo-image",upload.single("image"), updateLogoImage);
-employerRoutes.put("/background-image",upload.single("image"), updateBackgroundImage);
+employerRoutes.put("/logo-image",upload.single("logoCompany"), updateLogoImage);
+employerRoutes.put("/background-image",upload.single("background"), updateBackgroundImage);
 
 employerRoutes.get("/candidates", getListCandidate);  // lấy danh sách ứng viên được lưu lại
 employerRoutes.post("/candidate", saveCandidate); // thêm ứng viên vào danh sách ứng viên đã lưu

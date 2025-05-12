@@ -1,7 +1,12 @@
 import React, { useRef } from "react";
 import "./CompanyBackground.css";
-
+import {
+    useUpdateLogoImageMutation,
+  useUpdateCoverImageMutation,
+} from "../../../../redux_toolkit/employerApi.js";
 const CompanyBackground = ({ company }) => {
+  const [updateLogoImage] = useUpdateLogoImageMutation();
+  const [updateCoverImage] = useUpdateCoverImageMutation();
   //   const [logo, setLogo] = useState("");
   const fileInputRef = useRef(null);
   const backgroundInputRef = useRef(null);
@@ -18,17 +23,29 @@ const CompanyBackground = ({ company }) => {
     }
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      console.log("Cần gửi file này lên server để cập nhật logo: ", file);
+  const handleFileChange = async (event) => {
+    try {
+      const file = event.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("logoCompany", file);
+        await updateLogoImage(formData).unwrap();
+      }
+    } catch (error) {
+      console.error("Error updating logo:", error);
     }
   };
 
-  const handleFileChangeBackground = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      console.log("Cần gửi file này lên server để cập nhật background: ", file);
+  const handleFileChangeBackground = async (event) => {
+    try {
+      const file = event.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("background", file);
+        await updateCoverImage(formData).unwrap();
+      }
+    } catch (error) {
+      console.error("Error updating background:", error);
     }
   };
 

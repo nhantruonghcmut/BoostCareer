@@ -57,11 +57,11 @@ const uploadToS3CV = async (file, userId) => {
   const fileName = `jobseeker/profile_cv/${userId}/${uniqueId}_${safeOriginalName}`;
 
   // Log để debug
-  console.log("Uploading file to S3:", {
-    bucketName: process.env.AWS_BUCKET_NAME,
-    fileName: fileName,
-    contentType: file.mimetype
-  });
+  // console.log("Uploading file to S3:", {
+  //   bucketName: process.env.AWS_BUCKET_NAME,
+  //   fileName: fileName,
+  //   contentType: file.mimetype
+  // });
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
