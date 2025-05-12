@@ -26,11 +26,11 @@ export default function Footer() {
               </li>
               <li>
                 <i className="bi bi-telephone-fill"></i>
-                <span>+1 (555) 123-4567</span>
+                <span>+84 777784090</span>
               </li>
               <li>
                 <i className="bi bi-envelope-fill"></i>
-                <span>contact@boost-career.com</span>
+                <span>nhan.truongcse@hcmut.edu.vn</span>
               </li>
             </ul>
           </div>

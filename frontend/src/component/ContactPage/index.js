@@ -12,25 +12,21 @@ export default function ContactPage() {
             <h2 className="fw-bold">
               You Will Grow, You Will <br /> Succeed. We Promise That
             </h2>
-            <p className="text-muted">
-              Pellentesque arcu facilisis nunc mi proin. Dignissim mattis in
-              lectus tincidunt tincidunt ultrices. Diam convallis morbi
-              pellentesque adipiscing
-            </p>
+
 
             <div className="row gy-3">
               <div className="col-6 d-flex">
                 <i className="bi bi-telephone fs-4 me-3 text-success"></i>
                 <div>
                   <strong>Call for inquiry</strong>
-                  <div className="text-muted">+1 (555) 123-4567</div>
+                  <div className="text-muted">+84 777784090</div>
                 </div>
               </div>
               <div className="col-6 d-flex">
                 <i className="bi bi-envelope fs-4 me-3 text-success"></i>
                 <div>
                   <strong>Send us email</strong>
-                  <div className="text-muted">contact@boost-career.comt</div>
+                  <div className="text-muted">nhan.truongcse@hcmut.edu.vnt</div>
                 </div>
               </div>
               <div className="col-6 d-flex">

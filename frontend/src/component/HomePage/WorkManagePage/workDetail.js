@@ -34,7 +34,20 @@ export default function WorkDetail() {
   const [deleteJobSaving] = useDeleteJobSavingMutation();
   const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)} triệu vnđ`;
 
+const formatNumberVN = (number) => {
+  if (!number) return "0";
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
 
+const formatSalary = (value) => {
+  if (!value || value === 0) return "";
+  // Nếu là triệu
+  if (value >= 1000000) {
+    return `${formatNumberVN(Math.floor(value / 1000000))} triệu`;
+  }
+  // Mặc định format 
+  return formatNumberVN(value);
+};
 /////// KHU VỰC LẤY DATA
 // Public data - always fetch
 const { data: postDetail, isLoading: isLoadingJobdetail } = useGetJobDetailQuery(id, {
@@ -104,36 +117,6 @@ console.log("User-specific queries skipped:", skipUserQueries);
     setShowAnalysisModal(false);
   };
 
-
-
-  //##
-  
-// Log to verify API calls are skipped
-// console.log("Job apply query skipped:", skipJobApplyQuery);
-// console.log("Job saving query skipped:", skipJobSavingQuery);
-// const { data: ai_analyze,isLoading:isLoadinganalyze } = useGetAI_AnalyzeQuery({job_id:id}, { skip: !id }) ||{};
-// const ai_score =0;
-// const ai_analyze = {
-//   "strengths": [
-//       "Số năm kinh nghiệm: 3 năm",
-//       "Học vấn: Thạc sỹ Quản lý an toàn thông tin và Đại học Computer Science",
-//       "Kỹ năng: Java Programming",
-//       "Ngôn ngữ: ENGLISH (TOEIC 700-900)"
-//   ],
-//   "weaknesses": [
-//       "Thiếu kinh nghiệm với ERP development (D365FO)",
-//       "Không có kỹ năng X++ và SQL Server",
-//       "Không có kinh nghiệm với Power BI report development",
-//       "Thiếu hiểu biết về OOP (Object-Oriented Programming) và clean code practices",
-//       "Không có kinh nghiệm với .NET (C#/ASP.NET, ASP.NET Core) development",
-//   ],
-//   "suggestions": [
-//       "Học và nắm vững OOP (Object-Oriented Programming) và clean code practices",
-//       "Học và nắm vững X++ và SQL Server",
-//       "Học và nắm vững Power BI report development",
-//       "Học và nắm vững .NET (C#/ASP.NET, ASP.NET Core) development",
-//   ]
-// };
 const ai_analyze = aiAnalyzeResult.data || {};
 const [analysisData, setAnalysisData] = useState(ai_analyze);
 const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
@@ -285,23 +268,22 @@ const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
                 <h4 className="card-title">{postDetail?.title}</h4>
                 <p className="text-muted">
                   <strong>
-                    {postDetail?.salary_min === 0 &&
-                    postDetail?.salary_max === 0
-                      ? "Thỏa thuận"
-                      : `${formatNumberToTr(
-                          postDetail?.salary_min
-                        )} - ${formatNumberToTr(
-                          postDetail?.salary_max
-                        )} /tháng`}
-                  </strong>{" "}
-                  • <i className="bi bi-stopwatch-fill me-1"></i>
+                 { postDetail?.salary_min && postDetail?.salary_max? `${formatSalary(postDetail?.salary_min)} - ${formatSalary(postDetail?.salary_max)} vnđ`
+                  : postDetail?.salary_min
+                  ? `Từ ${formatSalary(postDetail?.salary_min)} vnđ`
+                  : postDetail?.salary_max
+                  ? `Lên đến ${formatSalary(postDetail?.salary_max)} vnđ`
+                  : "Thỏa thuận"}
+                  </strong> &nbsp;&nbsp;
+                   <i className="bi bi-calendar-date-fill me-1"></i>
                   {calculateDaysRemaining(postDetail?.date_expi)
                     ? `Hết hạn trong ${calculateDaysRemaining(
                         postDetail?.date_expi
                       )} ngày`
-                    : "Hết hạn"}{" "}
-                  •<i className="bi bi-people-fill me-1"></i>
-                  {postDetail?.views} lượt xem •{" "}
+                    : "Hết hạn"}&nbsp;&nbsp;
+                  <i className="bi bi-people-fill me-1"></i>
+                  {postDetail?.views} lượt xem &nbsp;&nbsp;
+                  <i className="bi bi-geo-alt me-1"></i>
                   {postDetail?.work_location_name}
                 </p>
                 {user?.role === 3 ? (

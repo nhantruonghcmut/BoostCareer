@@ -17,6 +17,7 @@ import {
   useAddCompanyReviewMutation,
   useDeleteCompanyReviewMutation,
 } from "../../../redux_toolkit/jobseekerApi.js";
+import CompanyRating from "../../_component/ui/CompanyRatingSection.js";
 import { useGetCitiesQuery } from "../../../redux_toolkit/CategoryApi.js";
 import CompanyHeader from "../../_component/ui/CompanyHeader.js";
 import TitleComponent from "../../_component/ui/TitleComponent.js";
@@ -33,7 +34,11 @@ export default function CompanyDetail() {
   const { data: jobApply, refetch: refetchJobApply } = useGetJobApplyQuery({},
     { skip: !isLogin }
   ); // Add refetch function
-  const formatNumberToTr = (number) => `${(number / 1e6).toFixed(0)} triệu vnđ`;
+  const formatNumberToTr = (number) => {
+    // Format số theo định dạng Việt Nam
+    const formattedNumber = Math.floor(number / 1e6).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return `${formattedNumber} triệu vnđ`;
+  };
   const { companyId } = useParams();
   const { data: city } = useGetCitiesQuery(84); // 84 là mã quốc gia Việt Nam
   const { data: companyInformation } = useGetCompanyInformationQuery(companyId);
@@ -258,10 +263,10 @@ export default function CompanyDetail() {
             </div>
 
             <div className="card mt-2">
-              <Rating
-                ratingData={ratingData}
-                profile_id={companyId}
-                isRateCompany={true}
+<CompanyRating
+                reviewDetail={companyInformation?.review_details}
+                averageScore={companyInformation?.average_score}
+                profile_id={companyInformation?.company_id}
               />
             </div>
           </div>
@@ -286,16 +291,37 @@ export default function CompanyDetail() {
                         )
                       )
                     : "Chưa có thông tin"}
-                </p>
+                </p>                
                 <h6 className="fw-bold">Chia sẻ công ty tới bạn bè</h6>
                 <div className="d-flex gap-2">
-                  <button className="btn btn-outline-primary btn-sm">
+                  <button 
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => {
+                      const url = encodeURIComponent(window.location.href);
+                      const title = encodeURIComponent(companyInformation?.company_name || "Công ty");
+                      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&t=${title}`, '_blank');
+                    }}
+                  >
                     <i className="bi bi-facebook"></i> Facebook
                   </button>
-                  <button className="btn btn-outline-info btn-sm">
+                  <button 
+                    className="btn btn-outline-info btn-sm"
+                    onClick={() => {
+                      const url = encodeURIComponent(window.location.href);
+                      const title = encodeURIComponent(companyInformation?.company_name || "Công ty");
+                      window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`, '_blank');
+                    }}
+                  >
                     <i className="bi bi-twitter"></i> Twitter
                   </button>
-                  <button className="btn btn-outline-secondary btn-sm">
+                  <button 
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => {
+                      const url = encodeURIComponent(window.location.href);
+                      const title = encodeURIComponent(companyInformation?.company_name || "Công ty");
+                      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+                    }}
+                  >
                     <i className="bi bi-linkedin"></i> LinkedIn
                   </button>
                 </div>

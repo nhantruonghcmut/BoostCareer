@@ -7,9 +7,6 @@ export const loginUser = createAsyncThunk('auth/login',
         try{
           console.log("bat dau chay loginUser chay api");
             const response = await axios.post(`${domain}/auth/login`, {params: {username, password}}, {withCredentials: true});
-            if (response.data.data?.token) {
-              localStorage.setItem('token', response.data.data.token);
-          }
             return response.data;
         }
         catch (error) {
@@ -24,14 +21,11 @@ export const logout = createAsyncThunk(
     try {
       const response = await axios.delete(`${domain}/auth/logout`, { 
         withCredentials: true 
-      });
-      
-      // Always remove token regardless of response to ensure user is logged out locally
-     
+      });    
+   
       
       return response.data;
     } catch (error) {
-      // Still remove token even if API call fails
       return rejectWithValue(error.response?.data?.message || 'Đăng xuất thất bại');
     }
   }

@@ -32,11 +32,6 @@ export default function CompanyCard({ company }) {
             dụng
           </p>
           <div className="mb-2">
-            {/* {company?.locations?.map((loc) => (
-                <span key={loc} className="badge bg-secondary me-1">
-                  {loc}
-                </span>
-              ))} */}
             <span className="badge bg-secondary me-1">
               {company?.city_name}
             </span>

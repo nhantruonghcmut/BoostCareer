@@ -4,6 +4,22 @@ import { NavLink } from "react-router-dom";
 import LoginModal from "./LoginModal.js";
 import { useDispatch, useSelector } from "react-redux";
 
+// Hàm format số theo định dạng Việt Nam
+const formatNumberVN = (number) => {
+  if (!number) return "0";
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+const formatSalary = (value) => {
+  if (!value || value === 0) return "";
+  // Nếu là triệu
+  if (value >= 1000000) {
+    return `${formatNumberVN(Math.floor(value / 1000000))} triệu`;
+  }
+  // Mặc định format 
+  return formatNumberVN(value);
+};
+
 const JobCard = ({
   job,
   handleSaveJob,
@@ -92,9 +108,15 @@ const JobCard = ({
               </span>
               <span className="badge bg-light text-dark">
                 {job?.working_type}
-              </span>
+              </span>              
               <span className="badge bg-light text-dark">
-                {job?.salary_min} - {job?.salary_max}
+                {job?.salary_min && job?.salary_max
+                  ? `${formatSalary(job?.salary_min)} - ${formatSalary(job?.salary_max)} vnđ`
+                  : job?.salary_min
+                  ? `Từ ${formatSalary(job?.salary_min)} vnđ`
+                  : job?.salary_max
+                  ? `Lên đến ${formatSalary(job?.salary_max)} vnđ`
+                  : "Thỏa thuận"}
               </span>
               <span className="badge bg-light text-dark">
                 <i className="bi bi-geo-alt-fill me-1"></i>
