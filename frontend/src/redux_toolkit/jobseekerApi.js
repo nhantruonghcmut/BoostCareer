@@ -188,27 +188,28 @@ export const jobseekerApi = createApi({
                 method: 'POST',
                 body: data,
             }),
-            invalidatesTags: ['CompanyReview'],
+            invalidatesTags:  ["Company_Information","Company_Review"],
         }),
-        deleteCompanyReview: builder.mutation({
-            query: (review_id) => ({
+        updateCompanyReview: builder.mutation({
+            query: (data) => ({
                 url: '/jobseeker/company-rating',
-                method: 'DELETE',
-                body: { review_id },
+                method: 'PUT',
+                body: data,
             }),
-            invalidatesTags: ['CompanyReview'],
+            invalidatesTags: ["Company_Information","Company_Review"],
         }),
         getCompanyReview: builder.query({
-            query: () => ({
+            query: (company_id) => ({
                 url: '/jobseeker/company-rating',
+                params: { company_id },
             }),
             transformResponse: (response) => {
                 return response.data;
             },
-            providesTags: ['CompanyReview'],
+            providesTags: ['Company_Review'],
         }),
         getJobApply: builder.query({
-            query: (profie_id) => ({
+            query: () => ({
                 url: '/jobseeker/job-applications',
             }),
             transformResponse: (response) => {
@@ -345,7 +346,7 @@ export const {
     useDeleteFollowingCompanyMutation,
 
     useAddCompanyReviewMutation,
-    useDeleteCompanyReviewMutation,
+    useUpdateCompanyReviewMutation,
     useGetCompanyReviewQuery,
 
     useGetJobApplyQuery,

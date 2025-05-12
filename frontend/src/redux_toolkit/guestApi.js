@@ -12,6 +12,7 @@ export const guestApi = createApi({
         params: {id} ,
       }),
       transformResponse: (response) => response.data,
+      providesTags: ["Company_Information"],
     }),
     // Get all companies with pagination
     getCompanyBySearch: builder.query({

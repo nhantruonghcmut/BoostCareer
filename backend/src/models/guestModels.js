@@ -46,7 +46,7 @@ const queryGetPublicInformationOfCompany = async (id) => {
         JSON_ARRAYAGG(
           JSON_OBJECT(
             'review_name', pfj.full_name,
-            'review_content', lr.content,
+            'content', lr.content,
             'score', lr.score,
             'date', lr.create_at
   )),JSON_ARRAY())

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -7,15 +7,9 @@ import {
   useGetCompanyInformationQuery,
   useGetJobOfCompanyByIdQuery,
 } from "../../../redux_toolkit/guestApi.js";
-import Rating from "../../_component/ui/RatingSection.js";
 import {
-  useGetCompanyReviewQuery,
-  useAddFollowingCompanyMutation,
-  useDeleteFollowingCompanyMutation,
   useGetJobApplyQuery,
   useAddJobApplyMutation,
-  useAddCompanyReviewMutation,
-  useDeleteCompanyReviewMutation,
 } from "../../../redux_toolkit/jobseekerApi.js";
 import CompanyRating from "../../_component/ui/CompanyRatingSection.js";
 import { useGetCitiesQuery } from "../../../redux_toolkit/CategoryApi.js";
@@ -266,7 +260,7 @@ export default function CompanyDetail() {
 <CompanyRating
                 reviewDetail={companyInformation?.review_details}
                 averageScore={companyInformation?.average_score}
-                profile_id={companyInformation?.company_id}
+                company_id={companyInformation?.company_id}
               />
             </div>
           </div>

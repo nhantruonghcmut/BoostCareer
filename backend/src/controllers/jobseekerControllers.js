@@ -18,6 +18,8 @@ const {
   queryGetListJobApplication,
   queryApplyToJob,
   queryAddCompanyReview,
+  queryGetCompanyReview,
+  queryUpdateCompanyReview,
   queryGetListCompanyFollowing,
   queryDeleteCompanyFollowing,
   queryAddCompanyFollowing,
@@ -28,8 +30,10 @@ const {
   queryGetJobsSuggestion,
   queryGetNotification,
   queryUpdateReadNotification,
-  queryChangePassword
+  queryChangePassword,
+  updateProfileCompletionPercentage
 } = require("../models/jobseekerModels.js");
+const { get } = require("http");
 
 const jobseekerGetJobDetail = async (req, res, next) => {
   try {
@@ -374,6 +378,46 @@ const addCompanyReview = async (req, res, next) => {
   }
 };
 
+const getCompanyReview = async (req, res, next) => {
+  try {
+    const profile_id = req.user.id;
+    const { company_id } = req.query;
+  if (!company_id || !profile_id) {
+    return next(new ApiError("Thiếu thông tin ID công ty hoặc ID người dùng", 400));
+  }
+  const data = await queryGetCompanyReview( profile_id,company_id);
+  if (!data) {
+    return next(new ApiError("Không tìm thấy thông tin đánh giá công ty", 404));
+  }
+  return res.success(
+    { reviews: data || [] },
+    "Lấy danh sách đánh giá công ty thành công"
+  );
+}
+catch (err) {
+    return next(new ApiError("Lỗi khi tìm kiếm đánh giá công ty", 500));
+  }
+};
+
+
+const updateCompanyReview = async (req, res, next) => {
+  try {
+    const profile_id = req.user.id;
+    const { company_id, score,content } = req.body;
+  if (!company_id || !profile_id || !score) {
+    return next(new ApiError("Thiếu thông tin ID công ty hoặc ID người dùng", 400));
+  }
+  const success = await queryUpdateCompanyReview( profile_id,company_id, score,content);
+  if (success) {
+    return res.success({}, "Cập nhật đánh giá công ty thành công");    
+  }
+  return next(new ApiError("Cập nhật đánh giá công ty không thành công", 400));
+}
+  catch (err) {
+    return next(new ApiError("Lỗi khi cập nhật đánh giá công ty", 500));
+  }
+};
+
 const getListCompanyFollowing = async (req, res, next) => {
   try {  
     const profile_id = req.user.id;
@@ -614,6 +658,29 @@ const changePassword = async (req, res, next) => {
     return next(new ApiError("Lỗi khi cập nhật mật khẩu", 500));
   } 
 }
+
+/**
+ * Recalculate and update profile completion percentage
+ */
+const recalculateProfileCompletion = async (req, res, next) => {
+  try {
+    const profile_id = req.user.id;
+    
+    if (!profile_id) {
+      return next(new ApiError("Thiếu thông tin ID hồ sơ", 400));
+    }
+    
+    const percentage = await updateProfileCompletionPercentage(profile_id);
+    
+    return res.success(
+      { percentage }, 
+      "Cập nhật tỉ lệ hoàn thành hồ sơ thành công"
+    );
+  } catch (err) {
+    return next(new ApiError(`Lỗi khi cập nhật tỉ lệ hoàn thành hồ sơ: ${err.message}`, 500));
+  }
+};
+
 module.exports = {
   jobseekerGetJobDetail,
   getItemProfile,
@@ -630,6 +697,8 @@ module.exports = {
   applyToJob,
 
   addCompanyReview,
+  getCompanyReview,
+  updateCompanyReview,
   
 
   getListCompanyFollowing,
@@ -646,5 +715,7 @@ module.exports = {
 
   getNotification,
   updateReadNotification,
-  changePassword
+  changePassword,
+
+  recalculateProfileCompletion
 };

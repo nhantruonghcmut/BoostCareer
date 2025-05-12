@@ -476,7 +476,11 @@ try {
       VALUES ${placeholders};`,
       values
     );
-    return  result.affectedRows;}
+    
+    // Update profile completion percentage
+    await updateProfileCompletionPercentage(profile_id);
+    
+    return result.affectedRows;}
   else {
     const fieldsArray = profileTables['profile'][type]["addItem"];    
     const values = [];
@@ -502,6 +506,10 @@ try {
       VALUES (${placeholders});`,
         values
       );
+      
+      // Update profile completion percentage
+      await updateProfileCompletionPercentage(data.profile_id);
+      
       return result.affectedRows;
     }
   } catch (error) {
@@ -513,6 +521,8 @@ try {
 const queryUpdateItemProfile = async (type, data) => {
   // data là dạng object như {title: "abc", profile_id: 1}
   try {
+    const profile_id = data.profile_id;
+    
     if (type === "Basic") {
       // Special case for Basic profile fields
       const key = profileTables['profile'][type]["key"][0]; // bang nay chi co 1 key
@@ -535,6 +545,10 @@ const queryUpdateItemProfile = async (type, data) => {
         WHERE ${key} = ?;`,
         values
       );
+      
+      // Update profile completion percentage directly for Basic type
+      await updateProfileCompletionPercentage(profile_id);
+      
       return result.affectedRows;
     } else {
       // console.log("data Update other ",data);
@@ -555,6 +569,10 @@ const queryUpdateItemProfile = async (type, data) => {
         WHERE ${whereClause};`,
         values
       );
+      
+      // Update profile completion percentage
+      await updateProfileCompletionPercentage(profile_id);
+      
       return result.affectedRows;
     }
   } catch (error) {
@@ -565,20 +583,26 @@ const queryUpdateItemProfile = async (type, data) => {
 
 const queryDeleteItemProfile = async (type, data) => {
   try {
-
     if (!profileTables['profile'][type]) {
       throw new Error(`Invalid profile type: ${type}`);
     }
+    
+    const profile_id = data.profile_id;
     const values = [];
     const fieldsToDelete = profileTables['profile'][type]["key"]; 
     const whereClause = fieldsToDelete.map((item) => `${item} = ?`).join(" AND ");
     fieldsToDelete.map((item) => values.push(data[item]));
+    
     const [result] = await db.query(
       `
     DELETE FROM ${profileTables['profile'][type].tableName}
     WHERE ${whereClause};`,
       values
     );
+    
+    // Update profile completion percentage after deletion
+    await updateProfileCompletionPercentage(profile_id);
+    
     // console.log(result);
     // console.log(result.affectedRows);
     return result.affectedRows>0;
@@ -671,7 +695,7 @@ const queryAddResume = async (profile_id, resumeData) => {
     const [count] = await db.query(
       `SELECT COUNT(*) as count FROM profile_cv WHERE profile_id = ?`,[profile_id]
     );
-    if (count[0].count >= 0) { isactive=1;}    
+    if (count[0].count === 0) { isactive=1;}    
     const [result] = await db.query(
       `INSERT INTO profile_cv (profile_id, cv_name, cv_link, s3_key, create_at, isactive) 
        VALUES (?, ?, ?, ?, ?, ?)`,
@@ -1299,7 +1323,173 @@ const queryGetNotification = async (jobseeker_id) => {
   }
 };
 
+// Function to calculate and update profile completion percentage
+const updateProfileCompletionPercentage = async (profile_id) => {
+  try {
+    // Initialize total percentage
+    let totalPercentage = 0;
 
+    // 1. Calculate basic profile completion (30%)
+    const [basicProfileResult] = await db.query(
+      `SELECT 
+        title, level_id, job_function_id, career_target, 
+        salary_expect, city_id, address, year_exp, 
+        birthday, marital_status, gender 
+       FROM profile_jobseeker 
+       WHERE profile_id = ?`,
+      [profile_id]
+    );
+
+    if (basicProfileResult.length > 0) {
+      const basicProfile = basicProfileResult[0];
+      // Title - 5%
+      if (basicProfile.title) totalPercentage += 5;
+      
+      // Level + job_function - 5%
+      if (basicProfile.level_id && basicProfile.job_function_id) totalPercentage += 5;
+      
+      // Career target + salary_expect - 5%
+      if (basicProfile.career_target && basicProfile.salary_expect) totalPercentage += 5;
+      
+      // City + address - 5%
+      if (basicProfile.city_id && basicProfile.address) totalPercentage += 5;
+      
+      // Year exp + birthday - 5%
+      if (basicProfile.year_exp !== null && basicProfile.birthday) totalPercentage += 5;
+      
+      // Marital status + gender - 5%
+      if (basicProfile.marital_status !== null && basicProfile.gender !== null) totalPercentage += 5;
+    }
+
+    // 2. Education section (15%)
+    const [educationResults] = await db.query(
+      `SELECT * FROM profile_education WHERE profile_id = ?`,
+      [profile_id]
+    );
+    
+    if (educationResults.length > 0) {
+      // Check if any education record has empty fields
+      const hasEmptyFields = educationResults.some(
+        edu => !edu.education_id || !edu.major || !edu.school || !edu.from_ || !edu.to_
+      );
+      
+      if (!hasEmptyFields) totalPercentage += 15;
+      else totalPercentage += 5;
+    }
+
+    // 3. Skills section (15%)
+    const [skillResults] = await db.query(
+      `SELECT COUNT(*) as skill_count FROM profile_skill WHERE profile_id = ?`,
+      [profile_id]
+    );
+    
+    if (skillResults.length > 0) {
+      const skillCount = skillResults[0].skill_count;
+      if (skillCount > 5) totalPercentage += 15;
+      else if (skillCount >= 3) totalPercentage += 10;
+      else if (skillCount >= 1) totalPercentage += 5;
+    }
+
+    // 4. Projects section (10%)
+    const [projectResults] = await db.query(
+      `SELECT COUNT(*) as project_count FROM profile_project WHERE profile_id = ?`,
+      [profile_id]
+    );
+    
+    if (projectResults.length > 0) {
+      const projectCount = projectResults[0].project_count;
+      if (projectCount >= 2) totalPercentage += 10;
+      else if (projectCount === 1) totalPercentage += 5;
+    }
+
+    // 5. Experience section (15%)
+    const [experienceResults] = await db.query(
+      `SELECT COUNT(*) as experience_count FROM profile_experience WHERE profile_id = ?`,
+      [profile_id]
+    );
+    
+    if (experienceResults.length > 0) {
+      const experienceCount = experienceResults[0].experience_count;
+      if  (experienceCount >= 2) totalPercentage += 10;
+      else if (experienceCount === 1) totalPercentage += 5;
+    }
+
+    // 6. Language section (5%)
+    const [languageResults] = await db.query(
+      `SELECT COUNT(*) as language_count FROM profile_language WHERE profile_id = ?`,
+      [profile_id]
+    );
+    
+    if (languageResults.length > 0 && languageResults[0].language_count > 0) {
+      totalPercentage += 5;
+    }
+
+    // 7. CV section (10%)
+    const [cvResults] = await db.query(
+      `SELECT COUNT(*) as cv_count FROM profile_cv WHERE profile_id = ?`,
+      [profile_id]
+    );
+    if (cvResults.length > 0 && cvResults[0].cv_count > 0) {
+      totalPercentage += 10;
+    }
+
+    // 8. Certification section (5%)
+    const [certificationResults] = await db.query(
+      `SELECT COUNT(*) as certification_count FROM profile_certification WHERE profile_id = ?`,
+      [profile_id]
+    );
+    if (certificationResults.length > 0 && certificationResults[0].certification_count > 0) {
+      totalPercentage += 5;
+    }
+
+    // Update the percent_complete field in profile_jobseeker table
+    await db.query(
+      `UPDATE profile_jobseeker SET percent_complete = ? WHERE profile_id = ?`,
+      [totalPercentage, profile_id]
+    );
+
+    return totalPercentage;
+  } catch (error) {
+    console.error("Error in updateProfileCompletionPercentage:", error);
+    throw error;
+  }
+};
+
+const queryGetCompanyReview = async (jobseeker_id, company_id) => {
+  try {
+    const [result] = await db.query(
+      `SELECT 
+        jobseeker_id,
+        company_id,
+        score,
+        content,
+        create_at
+      FROM logs_review
+      WHERE jobseeker_id = ? AND company_id = ?;`,
+      [jobseeker_id, company_id]
+    );
+    return result;
+  } catch (error) {
+    console.error("Error in getCompanyReview:", error);
+    throw error;
+  }
+};
+
+const queryUpdateCompanyReview = async (jobseeker_id, company_id, score, content) => {
+  try {
+    const create_at = new Date();
+    const [result] = await db.query(
+      `UPDATE logs_review 
+      SET score = ?, content = ?, create_at = ? 
+      WHERE jobseeker_id = ? AND company_id = ?;`,
+      [score, content, create_at, jobseeker_id, company_id]
+    );
+    return result.affectedRows > 0;
+  } catch (error) {
+    console.error("Error in updateCompanyReview:", error);
+    throw error;
+  }
+};
 
 module.exports = {
   queryJobseekerGetJobDetail,
@@ -1314,7 +1504,12 @@ module.exports = {
   queryShowHideResume,
   queryGetListJobApplication,
   queryApplyToJob,
+
   queryAddCompanyReview,
+  queryGetCompanyReview,
+  queryUpdateCompanyReview,
+
+
   queryGetListCompanyFollowing,
   queryDeleteCompanyFollowing,
   queryAddCompanyFollowing,
@@ -1328,4 +1523,6 @@ module.exports = {
   queryUpdateReadNotification,
 
   queryChangePassword,
+
+  updateProfileCompletionPercentage,
 };
