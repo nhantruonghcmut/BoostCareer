@@ -66,13 +66,11 @@ export const config_jobtable = (need_reload, setNeed_reload) => {
   return {
 
     columns,
-    actions: [
-      {
+    actions: [      {
         label: "Xem",
         color: "info",
-        onClick: (item) => alert(`Xem tin tuyển dụng: ${item.title}`)
-      },
-      {
+        onClick: (item) => window.open(`/job-details/${item.job_id}`, "_blank")
+      },      {
         label: "Xóa",
         color: "danger",
         onClick: async (item) => {
@@ -80,9 +78,7 @@ export const config_jobtable = (need_reload, setNeed_reload) => {
             const result =await deleteJobs({ job_ids: [item.job_id] })
             if (result.data) { 
                 setNeed_reload(true); // Cập nhật state để reload   
-                 }
-            alert(`Xóa tin tuyển dụng: ${item.title} thành công`);
-            // refetch(); // Gọi refetch trực tiếp
+            }
           }
           catch (error) {
             console.log("Xóa thất bại", error);

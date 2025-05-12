@@ -1,7 +1,8 @@
 import React, { Suspense, useEffect } from 'react'
-import { HashRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import { useGetCatalogIndustryQuery,
+import { 
+  useGetCatalogIndustryQuery,
   useGetCatalogJobfunctionQuery,
   useGetCatalogJoblevelQuery,
   useGetCatalogNationQuery,
@@ -11,32 +12,35 @@ import { useGetCatalogIndustryQuery,
   useGetCatalogEducationQuery,
   useGetCatalogLanguageQuery,
   useGetCatalogBenifitQuery,
-  useGetCatalogTagQuery, } from  "./redux/api/api_catalog";
+  useGetCatalogTagQuery 
+} from "./redux/api/api_catalog";
 
 import { CSpinner, useColorModes } from '@coreui/react'
 import './scss/style.scss'
-// We use those styles to show code examples, you should remove them in your application.
-// import './scss/examples.scss'
+
+// Authentication guard
+import AuthGuard from './components/AuthGuard'
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'))
 
-
-
+// Pages
+const Login = React.lazy(() => import('./views/pages/login/Login'))
+const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
+const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 
 const App = () => {
-    ///////// get function and catalog
-    useGetCatalogIndustryQuery();
-    useGetCatalogJobfunctionQuery();
-    useGetCatalogcityQuery();
-    useGetCatalogJoblevelQuery();
-    useGetCatalogScaleQuery();
-    useGetCatalogDistrictQuery();
-    useGetCatalogEducationQuery();
-    useGetCatalogLanguageQuery();
-    // useGetCatalogBenifitQuery();
-    useGetCatalogTagQuery();
-    useGetCatalogNationQuery();
+  // Fetch all catalog data needed for the application
+  useGetCatalogIndustryQuery();
+  useGetCatalogJobfunctionQuery();
+  useGetCatalogcityQuery();
+  useGetCatalogJoblevelQuery();
+  useGetCatalogScaleQuery();
+  useGetCatalogDistrictQuery();
+  useGetCatalogEducationQuery();
+  useGetCatalogLanguageQuery();
+  useGetCatalogTagQuery();
+  useGetCatalogNationQuery();
 
   const { isColorModeSet, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
   const storedTheme = useSelector((state) => state.ui.theme)
@@ -53,22 +57,21 @@ const App = () => {
     }
 
     setColorMode(storedTheme)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [storedTheme, isColorModeSet, setColorMode])
 
   return (
-    <HashRouter>
-      <Suspense
-        fallback={
-          <div className="pt-3 text-center">
-            <CSpinner color="primary" variant="grow" />
-          </div>
-        }
-      >
+    <Router>
+      <Suspense fallback={<div className="d-flex justify-content-center align-items-center vh-100"><CSpinner color="primary" /></div>}>
         <Routes>
-          <Route path="*" name="Home" element={<DefaultLayout />} />
+          {/* Login page disabled temporarily */}
+          {/* <Route path="/login" name="Login" element={<Login />} /> */}
+          <Route path="/404" name="Page 404" element={<Page404 />} />
+          <Route path="/500" name="Page 500" element={<Page500 />} />
+          {/* Bypass AuthGuard temporarily */}
+          <Route path="*" element={<DefaultLayout />} />
         </Routes>
       </Suspense>
-    </HashRouter>
+    </Router>
   )
 }
 

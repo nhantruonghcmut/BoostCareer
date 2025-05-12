@@ -3,19 +3,23 @@ import { NavLink } from "react-router-dom";
 
 export default function PageNotFound() {
   return (
-    <div>
-      <div className="w-100 h-100 d-flex flex-column justify-content-center align-items-center mt-5 pt-2">
-        <img
-          alt="bonk"
-          src="/img/pageNotFound/bonk-meme.jpg"
-          className="w-50 h-50 pt-5"
-        ></img>
-        <h1>Page Not Found</h1>
-        <button className="btn btn-primary mb-2">
-          <NavLink className="text-decoration-none text-white" to="/">
-            Trang chủ
+    <div className="container py-5">
+      <div className="row justify-content-center align-items-center">
+        <div className="col-md-8 text-center">
+          <img
+            alt="page not found"
+            src="/img/pageNotFound/404-error.svg"
+            className="img-fluid mb-4"
+            style={{ maxHeight: "300px" }}
+          />
+          <h2 className="mb-3">Không tìm thấy trang</h2>
+          <p className="text-muted mb-4">
+            Xin lỗi, trang bạn đang tìm kiếm không tồn tại hoặc đã được di chuyển.
+          </p>
+          <NavLink className="btn btn-primary px-4 py-2" to="/">
+            Quay về trang chủ
           </NavLink>
-        </button>
+        </div>
       </div>
     </div>
   );

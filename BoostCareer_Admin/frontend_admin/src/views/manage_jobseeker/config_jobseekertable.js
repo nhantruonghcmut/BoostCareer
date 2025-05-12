@@ -23,12 +23,11 @@ export const config_jobseekertable = ( need_reload, setNeed_reload ) => {
 
   
   const [visible, setVisible] = React.useState(false);
-  const openMessageModal = () => {setVisible(true);};
-  const handleSendMessage = async (message) =>  {
+  const openMessageModal = () => {setVisible(true);};  const handleSendMessage = async (message) =>  {
     try {
       const result = await send_message({'message':message});
       if (result.data) {
-        alert("Gửi tin nhắn thành công");
+        setVisible(false);
       }
     }
     catch (error) {
@@ -74,13 +73,11 @@ export const config_jobseekertable = ( need_reload, setNeed_reload ) => {
       ];
 return {
 columns,
-actions : [
-    {
+actions : [    {
       label: "Xem hồ sơ",
       color: "warning",
-      onClick: (item) => alert(`Xem tin tuyển dụng: ${item.title}`)
-    },
-    {
+      onClick: (item) => window.open(`/jobseeker-profile/${item.jobseeker_id}`, "_blank")
+    },{
       label: "Xóa",
       color: "danger",
       onClick: async (item) => {
@@ -88,7 +85,6 @@ actions : [
             const result =await delete_jobseekers({ jobseeker_ids: [item.jobseeker_id] })
             // Cập nhật state để reload   
             if (result.data) { setNeed_reload(true); }
-            alert(`Xóa tài khoản tuyển dụng: ${item.company_name} thành công`);
           }
           catch (error) {
             console.log("Xóa thất bại", error);
@@ -112,23 +108,21 @@ actions : [
         catch (error) 
             {  console.log("Cập nhật trạng thái thất bại", error); }
       },
-    },
-    {
-      label: "Đặt lại mật khẩu",
-      color: "info",
-      onClick: async (item) => {
-        try {
-          const result =await reset_Password(item.jobseeker_id);
-          if (result.data) {
-              alert(`Reset mật khẩu cho: ${item.company_name} thành công`);
-              setNeed_reload(true); // Cập nhật state để reload
-          } 
-        }
-        catch (error) {
-          console.log("Xóa thất bại",error);
-        }
+    },      {
+        label: "Đặt lại mật khẩu",
+        color: "info",
+        onClick: async (item) => {
+          try {
+            const result =await reset_Password(item.jobseeker_id);
+            if (result.data) {
+                setNeed_reload(true); // Cập nhật state để reload
+            } 
+          }
+          catch (error) {
+            console.log("Xóa thất bại",error);
+          }
+        },
       },
-    },
   ]
 }
 };

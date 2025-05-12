@@ -5,22 +5,22 @@ const {
 } = require("../models/Model_authencation.js");
 
 const login = async (req, res) => {
-  const { username, password } = req.body.params;
+  const { username, password } = req.body;
 
   if (!username || !password) {
     return res
       .status(400)
-      .json({ message: "Tài khoản hoặc mật khẩu không đúng." });
+      .json({ success: false, message: "Tài khoản và mật khẩu không được để trống." });
   }
 
   try {
-    // Tìm người dùng trong cơ sở dữ liệu
+    // Find user in database
     const user = await findUserByUsername(username);
 
     if (!user) {
       return res
         .status(401)
-        .json({ message: "Tài khoản hoặc mật khẩu không đúng." });
+        .json({ success: false, message: "Tài khoản hoặc mật khẩu không đúng." });
     }
 
     const userLogin = await loginExecute(username, password);
@@ -28,22 +28,42 @@ const login = async (req, res) => {
     if (!userLogin) {
       return res
         .status(401)
-        .json({ message: "Tài khoản hoặc mật khẩu không đúng." });
+        .json({ success: false, message: "Tài khoản hoặc mật khẩu không đúng." });
     }
 
+    // Check if user is admin
+    if (userLogin.role_id !== 1) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Tài khoản không có quyền truy cập vào hệ thống quản trị." });
+    }
+
+    // Generate token (JWT can be used here)
+    const token = Date.now().toString(); // This should be replaced with a proper JWT token
+
+    // Store user info in session
     req.session.userLogin = {
       id: userLogin.user_id,
       username: userLogin.username,
       role: userLogin.role_id,
       create_date: userLogin.create_date,
+      token
     };
 
-    res
-      .status(200)
-      .json({ message: "Đăng nhập thành công.", user: req.session.userLogin });
+    res.status(200).json({ 
+      success: true, 
+      message: "Đăng nhập thành công.", 
+      user: {
+        id: userLogin.user_id,
+        username: userLogin.username,
+        role: userLogin.role_id,
+        create_date: userLogin.create_date
+      },
+      token
+    });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Có lỗi khi đăng nhập." });
+    res.status(500).json({ success: false, message: "Có lỗi khi đăng nhập." });
   }
 };
 
@@ -68,8 +88,23 @@ const logout = (req, res) => {
   });
 };
 
+const getCurrentUser = (req, res) => {
+  if (req.session.userLogin) {
+    return res.status(200).json({
+      success: true,
+      user: req.session.userLogin
+    });
+  } else {
+    return res.status(401).json({
+      success: false,
+      message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+    });
+  }
+};
+
 module.exports = {
   isLogin,
   login,
   logout,
+  getCurrentUser
 };

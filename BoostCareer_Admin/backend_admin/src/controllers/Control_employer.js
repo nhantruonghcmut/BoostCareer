@@ -21,10 +21,9 @@ const get_All_employer = async (req, res) => {
       const total_count = data.length > 0 ? data[0].total_count : 0;
       const totalPages = Math.ceil(total_count / paging_size);
       return res.status(200).json({employers:data,totalPages });
-    }
-  } catch (error) {
-    console.log("Get Employer By Search error:", error);
-    res.status(500);
+    }  } catch (error) {
+    console.log("Get All Employer error:", error);
+    return res.status(500).json({ message: "Server error when getting all employers" });
   }
 };
 
@@ -38,14 +37,13 @@ const get_Employer_bysearch = async (req, res) => {
       const total_count = data.length > 0 ? data[0].total_count : 0;
       const totalPages = Math.ceil(total_count / paging_size);
       return res.status(200).json({employers:data,totalPages });
-    }
-    else
+    }    else
     {
-      return res.status(200).json({jobs:[],totalPages:0 });
+      return res.status(200).json({employers:[],totalPages:0 });
     }
   } catch (error) {
     console.log("Get Employer By Search error:", error);
-    res.status(500);
+    return res.status(500).json({ message: "Server error when searching employers" });
   }
 };
 
@@ -56,10 +54,9 @@ const delete_Employers = async (req, res) => {
 
     if (result) {
       return res.status(200).json( "SUCCESS" );
-    }
-  } catch (error) {
-    console.log("DELETE JOBS ERROR: ", error);
-    res.status(500);
+    }  } catch (error) {
+    console.log("DELETE EMPLOYERS ERROR: ", error);
+    return res.status(500).json({ message: "Server error when deleting employers" });
   }
 };
 
@@ -72,37 +69,38 @@ const update_Status_ = async (req, res) => {
 
     if (result) {
       return res.status(200).json( "SUCCESS" );
-    }
-  } catch (error) {
+    }  } catch (error) {
     console.log("UPDATE STATUS ERROR: ", error);
-    res.status(500);
+    return res.status(500).json({ message: "Server error when updating employer status" });
   }
 };
 
 const send_Message = async (req, res) => {
   try {
-    const {employer_ids}  = req.body.employer_ids;
-    const employer = await querysend_Message();
+    const { message, employer_ids } = req.body;
+    const result = await querysend_Message(message, employer_ids);
 
-    if (employer) {
-      return res.status(200).json({ employer });
+    if (result) {
+      return res.status(200).json({ success: true, message: "Message sent successfully" });
+    } else {
+      return res.status(400).json({ success: false, message: "Failed to send message" });
     }
   } catch (error) {
-    console.log("Get Leading employer error:", error);
-    res.status(500);
+    console.log("Send message error:", error);
+    return res.status(500).json({ success: false, message: "Server error when sending message" });
   }
 };
 
 const reset_Password = async (req, res) => {
   try {
-    const employer_ids = await queryreset_Password();
+    const { employer_ids } = req.body;
+    const result = await queryreset_Password(employer_ids);
 
-    if (employer) {
-      return res.status(200).json({ employer });
-    }
-  } catch (error) {
-    console.log("Get Leading employer error:", error);
-    res.status(500);
+    if (result) {
+      return res.status(200).json({ success: true, message: "Password reset successfully" });
+    }  } catch (error) {
+    console.log("Password reset error:", error);
+    return res.status(500).json({ success: false, message: "Error resetting password" });
   }
 };
 

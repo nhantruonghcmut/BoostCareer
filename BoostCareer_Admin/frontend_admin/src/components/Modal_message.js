@@ -1,147 +1,107 @@
-import React, { useState } from 'react'
-import {  CButton,  CModal,  CModalHeader,  CModalTitle,  CModalBody,  CModalFooter,  CForm,  CFormLabel, 
-   CFormInput,  CFormTextarea,  CFormSelect,  CRow,  CCol} from '@coreui/react'
+import React, { useState, useEffect } from 'react';
+import {
+  CButton,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
+  CForm,
+  CFormLabel,
+  CFormTextarea,
+  CRow,
+  CCol,
+  CSpinner,
+  CFormText
+} from '@coreui/react';
+
 const Modal_message = ({
-  visible, onClose, onSend, senderOptions, receiverOptions, defaultSender,  ...prop}) => {
-    const [messageData, setMessageData] = useState({
-      sender: '',
-      receiver: '',
-      title: '',
-      content: ''
-    });
-  
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setMessageData({
-        ...messageData,
-        [name]: value
-      });
-    };
-  
-    const handleSend = () => {
-      onSend(messageData);
-      resetForm();
-      onClose();
-    };
-  
-    const resetForm = () => {
-      setMessageData({
-        sender: defaultSender || '',
-        receiver: '',
-        title: '',
-        content: ''
-      });
-    };
-  
-    const handleClose = () => {
-      resetForm();
-      onClose();
-    };
-   
-    return (
-      <CModal visible={visible} onClose={handleClose} backdrop="static">
+  visible, 
+  onClose, 
+  onSendMessage,
+  recipientName = "",
+  isSending = false
+}) => {
+  const [message, setMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Reset form when modal opens or closes
+  useEffect(() => {
+    if (visible) {
+      setMessage('');
+      setErrorMessage('');
+    }
+  }, [visible]);
+
+  const handleChange = (e) => {
+    setMessage(e.target.value);
+    if (e.target.value.trim()) {
+      setErrorMessage('');
+    }
+  };
+
+  const handleSend = () => {
+    if (!message.trim()) {
+      setErrorMessage('Vui lòng nhập nội dung tin nhắn');
+      return;
+    }
+    onSendMessage(message);
+  };
+
+  return (
+    <CModal visible={visible} onClose={onClose} backdrop="static" size="lg">
       <CModalHeader closeButton>
-        <CModalTitle>Gửi tin nhắn mới</CModalTitle>
+        <CModalTitle>
+          Gửi tin nhắn {recipientName ? `tới ${recipientName}` : ''}
+        </CModalTitle>
       </CModalHeader>
       <CModalBody>
         <CForm>
           <CRow className="mb-3">
             <CCol md="12">
-              <CFormLabel htmlFor="sender">Người gửi</CFormLabel>
-              {senderOptions ? (
-                <CFormSelect
-                  id="sender"
-                  name="sender"
-                  value={messageData.sender}
-                  onChange={handleChange}
-                >
-                  <option value="">Chọn người gửi</option>
-                  {senderOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </CFormSelect>
-              ) : (
-                <CFormInput
-                  type="text"
-                  id="sender"
-                  name="sender"
-                  value={messageData.sender}
-                  onChange={handleChange}
-                  placeholder="Nhập tên người gửi"
-                />
-              )}
-            </CCol>
-          </CRow>
-          <CRow className="mb-3">
-            <CCol md="12">
-              <CFormLabel htmlFor="receiver">Người nhận</CFormLabel>
-              {receiverOptions ? (
-                <CFormSelect
-                  id="receiver"
-                  name="receiver"
-                  value={messageData.receiver}
-                  onChange={handleChange}
-                >
-                  <option value="">Chọn người nhận</option>
-                  {receiverOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </CFormSelect>
-              ) : (
-                <CFormInput
-                  type="text"
-                  id="receiver"
-                  name="receiver"
-                  value={messageData.receiver}
-                  onChange={handleChange}
-                  placeholder="Nhập tên người nhận"
-                />
-              )}
-            </CCol>
-          </CRow>
-          <CRow className="mb-3">
-            <CCol md="12">
-              <CFormLabel htmlFor="title">Tiêu đề</CFormLabel>
-              <CFormInput
-                type="text"
-                id="title"
-                name="title"
-                value={messageData.title}
-                onChange={handleChange}
-                placeholder="Nhập tiêu đề tin nhắn"
-              />
-            </CCol>
-          </CRow>
-          <CRow className="mb-3">
-            <CCol md="12">
-              <CFormLabel htmlFor="content">Nội dung tin nhắn</CFormLabel>
+              <CFormLabel htmlFor="message">Nội dung tin nhắn</CFormLabel>
               <CFormTextarea
-                id="content"
-                name="content"
-                rows="5"
-                value={messageData.content}
+                id="message"
+                name="message"
+                value={message}
                 onChange={handleChange}
-                placeholder="Nhập nội dung tin nhắn"
+                rows={5}
+                placeholder="Nhập nội dung tin nhắn..."
+                disabled={isSending}
+                invalid={!!errorMessage}
+                required
               />
+              {errorMessage && (
+                <CFormText color="danger">{errorMessage}</CFormText>
+              )}
             </CCol>
           </CRow>
         </CForm>
       </CModalBody>
       <CModalFooter>
-        <CButton color="secondary" onClick={handleClose}>
+        <CButton 
+          color="secondary" 
+          onClick={onClose}
+          disabled={isSending}
+        >
           Hủy
         </CButton>
-        <CButton color="primary" onClick={handleSend}>
-          Gửi
+        <CButton 
+          color="primary" 
+          onClick={handleSend}
+          disabled={isSending || !message.trim()}
+        >
+          {isSending ? (
+            <>
+              <CSpinner size="sm" /> Đang gửi...
+            </>
+          ) : (
+            'Gửi tin nhắn'
+          )}
         </CButton>
       </CModalFooter>
     </CModal>
   );
 };
 
-
-export default Modal_message
+export default Modal_message;

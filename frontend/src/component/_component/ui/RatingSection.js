@@ -89,8 +89,6 @@ const Rating = ({ ratingData, profile_id, isRateCompany }) => {
                       color: "#ffc107",
                       fontSize: "1.2rem",
                     }}
-                    //// tại đây hiển thị overall nên ko có click, nên tạo thêm dãi star khác
-                    // onClick={() => handleStarClick(num)}
                   ></i>
                 ))}
               </div>

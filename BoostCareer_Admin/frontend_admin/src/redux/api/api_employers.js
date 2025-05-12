@@ -18,40 +18,61 @@ export const apiEmployers = baseApi.injectEndpoints({
           body: { searchData, paging }
         };
       },
+      transformErrorResponse: (response) => {
+        return response?.data?.message || "Error fetching employers";
+      },
     }),
     delete_Employers: builder.mutation({
-      query: (Employers_ids) => ({
+      query: (params) => ({
         url: `/api/employer/delete_employers`,
         method: 'DELETE',
-        body: Employers_ids,
+        body: params,
       }),
+      transformErrorResponse: (response) => {
+        return response?.data?.message || "Error deleting employers";
+      },
     }),
     update_Employers: builder.mutation({
-      query: (Employers) => ({
+      query: (params) => ({
         url: `/api/employer/updateEmployers`,
         method: 'PUT',
-        body: Employers,
+        body: params,
       }),
+      transformErrorResponse: (response) => {
+        return response?.data?.message || "Error updating employers";
+      },
     }),   
     update_status_Employers: builder.mutation({
       query: ({ status_, employer_ids }) =>  {
-        console.log("update_status", status_, employer_ids);
         return {
-        url: `/api/employer/update_status_`,
-        method: 'POST',
-        body: {status_,employer_ids}}},
+          url: `/api/employer/update_status_`,
+          method: 'POST',
+          body: {status_, employer_ids}
+        };
+      },
+      transformErrorResponse: (response) => {
+        return response?.data?.message || "Error updating employer status";
+      },
     }),
     send_message_employer: builder.mutation({
-      query: (message) => ({
+      query: (params) => ({
         url: `/api/employer/send_message`,
         method: 'POST',
-        body: message,  })         
+        body: params,
+      }),
+      transformErrorResponse: (response) => {
+        return response?.data?.message || "Error sending message";
+      },
     }),
     reset_Password_employer: builder.mutation({
-      query: (employer_ids) => ({
+      query: (params) => ({
         url: `/api/employer/reset_password`,
         method: 'POST',
-        body: employer_ids,  })         
+        body: params,
+      }),
+      transformErrorResponse: (response) => {
+        return response?.data?.message || "Error resetting password";
+      },
     }),
   }),
 });

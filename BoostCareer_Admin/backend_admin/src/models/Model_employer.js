@@ -1,4 +1,5 @@
 const db = require("../config/databaseConfig.js");
+const bcrypt = require("bcrypt");
 
 const queryget_All_employer = async () => {
   const [employer] = await db.query(`
@@ -125,20 +126,54 @@ SET status_ = ? WHERE employer_id IN (?);`,[status_,employer_ids]);
   return employer;
 };
 
-const querysend_Message = async (message) => {
-  // dau vao
-  const field = ['message_id', 'message_title','sender_id','receiver_id',
-                 'is_from_admin','is_read', 'date_time', 'content']
-  // const values               
-  const [employer] = await db.query(`INSERT INTO message VALUES;`,[message]);
+const querysend_Message = async (message, employer_ids) => {
+  try {
+    // Generate random message ID
+    const message_id = Date.now().toString();
+    const message_title = "Message from Admin";
+    const sender_id = 1; // Assuming 1 is the admin ID
+    const is_from_admin = 1;
+    const is_read = 0;
+    const date_time = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const content = message;
 
-  return employer;
+    // For each employer, create a message
+    const values = [];
+    for (const receiver_id of employer_ids) {
+      values.push([message_id, message_title, sender_id, receiver_id, is_from_admin, is_read, date_time, content]);
+    }
+
+    const [result] = await db.query(
+      `INSERT INTO message 
+       (message_id, message_title, sender_id, receiver_id, is_from_admin, is_read, date_time, content) 
+       VALUES ?`, 
+      [values]
+    );
+
+    return result;
+  } catch (error) {
+    console.error("Error in querysend_Message:", error);
+    return null;
+  }
 };
 
-const queryreset_Password = async () => {
-  const [employer] = await db.query(` `);
+const queryreset_Password = async (employer_ids) => {
+  try {
+    // Generate a default password
+    const defaultPassword = "123456";
+    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
-  return employer;
+    // Update password for all selected employers
+    const [result] = await db.query(
+      `UPDATE user_ SET password = ? WHERE user_id IN (?)`,
+      [hashedPassword, employer_ids]
+    );
+
+    return result;
+  } catch (error) {
+    console.error("Error in queryreset_Password:", error);
+    return null;
+  }
 };
 
 module.exports = {
