@@ -74,9 +74,7 @@ const aiAnalyzeResult = useGetAI_AnalyzeQuery({job_id: id}, {
   refetchOnMountOrArgChange: true, // Gọi lại khi component mount hoặc tham số thay đổi
   refetchOnReconnect: true, // Gọi lại khi kết nối mạng được khôi phục
 });
-const relatedJobsResult = useGetRelatedJobsQuery(id, { 
-  skip: skipUserQueries 
-});
+const relatedJobsResult = useGetRelatedJobsQuery(id );
 
 // Extract data with fallbacks
 const jobApply = jobApplyResult.data || [];
