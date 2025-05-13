@@ -1,6 +1,7 @@
 export default function FounderSection() {
   const url =
     "https://png.pngtree.com/png-clipart/20190924/original/pngtree-user-vector-avatar-png-image_4830521.jpg";
+  const myImage ="https://boostcareer.s3.us-east-1.amazonaws.com/system/founder.png";
   const testimonials = [
     {
       name: "Thanh Hang Dang",
@@ -13,7 +14,7 @@ export default function FounderSection() {
     {
       name: "Van Nhan Truong",
       role: "Founder",
-      avatar: url,
+      avatar: myImage,
       rating: 5,
       title: "Sự Đơn Giản Là Chìa Khóa",
       text: "Chúng tôi tin rằng, sự đơn giản mang lại hiệu quả vượt trội. Mọi thứ được tối giản để bạn có thể dễ dàng tiếp cận và tận hưởng trải nghiệm tốt nhất.",
@@ -61,8 +62,8 @@ export default function FounderSection() {
                       src={item.avatar}
                       alt={item.name}
                       className="rounded-circle me-2"
-                      width="40"
-                      height="40"
+                      width="50"
+                      height="50"
                     />
                     <div>
                       <strong>{item.name}</strong>

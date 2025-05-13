@@ -21,10 +21,6 @@ export default function CompanyDetail() {
   const navigate = useNavigate();
   const { isLogin, user } = useSelector((state) => state.auth);
   const [applyJob] = useAddJobApplyMutation();
-  // const [addFollowingCompany] = useAddFollowingCompanyMutation();
-  // const [deleteFollowingCompany] = useDeleteFollowingCompanyMutation();
-  // const [addReviewCompany] = useAddCompanyReviewMutation();
-  // const [deleteReviewCompany] = useDeleteCompanyReviewMutation();
   const { data: jobApply, refetch: refetchJobApply } = useGetJobApplyQuery({},
     { skip: !isLogin }
   ); // Add refetch function

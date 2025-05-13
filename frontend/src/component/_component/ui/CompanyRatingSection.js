@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-toastify";
 import LoginModal from "./LoginModal.js";
@@ -9,12 +10,14 @@ const {     useAddCompanyReviewMutation,
  } = require("../../../redux_toolkit/jobseekerApi.js");
 
 const CompanyRating = ({ reviewDetail, company_id, averageScore }) => {
-  const { data } = useGetCompanyReviewQuery(company_id);
+  const {user,isLogin} = useSelector((state) => state.auth);
+  const skipped = !isLogin;
+  const { data } = useGetCompanyReviewQuery(company_id, { skip: skipped });
   const  yourreview  = data?.reviews || {};
   console.log("reviewDetail", reviewDetail);
   const [addCompanyReview] = useAddCompanyReviewMutation();
   const [updateCompanyReview] = useUpdateCompanyReviewMutation();
-  const { user } = useSelector((state) => state.auth);
+
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
