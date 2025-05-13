@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
  loginUser
 } from "../../../redux_toolkit/AuthSlice.js";
+import { toast } from "react-toastify";
 import { validateField } from "../../../utils/validateField";
 
 const LoginModal = ({ title }) => {
@@ -59,9 +60,10 @@ const LoginModal = ({ title }) => {
     try {
           const result = await dispatch(loginUser(dataLogin)).unwrap();
           if (result.success) {
-          const modalElement = document.getElementById('LoginModal');
-          const modalInstance = bootstrap.Modal.getInstance(modalElement);
-          modalInstance.hide();
+          // const modalElement = document.getElementById('LoginModal');
+          // const modalInstance = bootstrap.Modal.getInstance(modalElement);
+          // modalInstance.hide();
+          toast.success("Đăng nhập thành công");
           }
         } catch (error) {
           // Error handling already done in the thunk
