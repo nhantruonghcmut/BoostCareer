@@ -40,7 +40,7 @@ export const employerApi = createApi({
   endpoints: (builder) => ({
     getOverview: builder.mutation({
       query: ({ days }) => ({
-        url: "/employer/overview",
+        url: "/api/employer/overview",
         method: "POST",
         body: { days },
       }),
@@ -52,14 +52,14 @@ export const employerApi = createApi({
 
     getCompanyInfor: builder.query({
       query: () => ({
-        url: "/employer/profile",
+        url: "/api/employer/profile",
       }),
       transformResponse: (response) => response.data,
       providesTags: ["CompanyInfor"],
     }),
     updateCompanyInfor: builder.mutation({
       query: (body) => ({
-        url: "/employer/profile",
+        url: "/api/employer/profile",
         method: "PUT",
         body,
       }),
@@ -71,7 +71,7 @@ export const employerApi = createApi({
     }),
     addCompanyInfor: builder.mutation({
       query: (body) => ({
-        url: "/employer/profile",
+        url: "/api/employer/profile",
         method: "Post",
         body,
       }),
@@ -83,7 +83,7 @@ export const employerApi = createApi({
     }),
     deleteCompanyInfor: builder.mutation({
       query: (data) => ({
-        url: "/employer/profile",
+        url: "/api/employer/profile",
         method: "DELETE",
         params: data,
       }),
@@ -96,7 +96,7 @@ export const employerApi = createApi({
 
     updateLogoImage: builder.mutation({
       query: (body) => ({
-        url: "/employer/logo-image",
+        url: "/api/employer/logo-image",
         method: "PUT",
         body,
       }),
@@ -108,7 +108,7 @@ export const employerApi = createApi({
     }),
     updateCoverImage: builder.mutation({
       query: (body) => ({
-        url: "/employer/background-image",
+        url: "/api/employer/background-image",
         method: "PUT",
         body,
       }),
@@ -121,7 +121,7 @@ export const employerApi = createApi({
 
     getJobByUser: builder.query({
       query: () => ({
-        url: "/employer/jobs",
+        url: "/api/employer/jobs",
       }),
       transformResponse: (response) => {
         return response.data;
@@ -130,7 +130,7 @@ export const employerApi = createApi({
     }),
     addJob: builder.mutation({
       query: (body) => ({
-        url: "/employer/job",
+        url: "/api/employer/job",
         method: "post",
         body,
       }),
@@ -142,7 +142,7 @@ export const employerApi = createApi({
     }),
     updateJob: builder.mutation({
       query: (body) => ({
-        url: "/employer/job",
+        url: "/api/employer/job",
         method: "PUT",
         body,
       }),
@@ -154,7 +154,7 @@ export const employerApi = createApi({
     }),
     deleteJob: builder.mutation({
       query: ({ job_id }) => ({
-        url: `/employer/job`,
+        url: `/api/employer/job`,
         method: "DELETE",
         body: { job_id },
       }),
@@ -167,7 +167,7 @@ export const employerApi = createApi({
 
     getlistJobseeker: builder.query({
       query: (searchData = { page_size: 10 }) => ({
-        url: "/employer/jobseekers",
+        url: "/api/employer/jobseekers",
         params: searchData,
       }),
       transformResponse: (response) => {
@@ -178,7 +178,7 @@ export const employerApi = createApi({
     }),
     getJobseekerDetail: builder.query({
       query: ({ jobseeker_id }) => ({
-        url: "/employer/jobseeker-detail",
+        url: "/api/employer/jobseeker-detail",
         params: { jobseeker_id },
       }),
       transformResponse: (response) => {
@@ -190,7 +190,7 @@ export const employerApi = createApi({
 
     getListCandidate: builder.query({
       query: () => ({
-        url: "/employer/candidates",
+        url: "/api/employer/candidates",
         params: { },
       }),
       transformResponse: (response) => {
@@ -201,7 +201,7 @@ export const employerApi = createApi({
     }),
     addCandidate: builder.mutation({
       query: ({ jobseeker_id }) => ({
-        url: "/employer/candidate",
+        url: "/api/employer/candidate",
         method: "post",
         body: { jobseeker_id },
       }),
@@ -219,7 +219,7 @@ export const employerApi = createApi({
     }),
     deleteCandidate: builder.mutation({
       query: ({ jobseeker_id }) => ({
-        url: "/employer/candidate",
+        url: "/api/employer/candidate",
         method: "DELETE",
         body: { jobseeker_id },
       }),
@@ -236,7 +236,7 @@ export const employerApi = createApi({
     }),
     rateCandidate: builder.mutation({
       query: ({ type, application_id, rating, content }) => ({
-        url: "/employer/candidate",
+        url: "/api/employer/candidate",
         method: "PUT",
         body: { type, application_id, rating, content },
       }),
@@ -255,7 +255,7 @@ export const employerApi = createApi({
 
     getJobApplication: builder.query({
       query: () => ({
-        url: "/employer/job-applications",
+        url: "/api/employer/job-applications",
       }),
       transformResponse: (response) => {
         // //console.log("redux receive getJobseekerApplied", response);
@@ -265,7 +265,7 @@ export const employerApi = createApi({
     }),
     rejectJobApplication: builder.mutation({
       query: ({ job_id, jobseeker_id }) => ({
-        url: "/employer/job-application",
+        url: "/api/employer/job-application",
         method: "DELETE",
         body: { job_id, jobseeker_id },
       }),
@@ -278,7 +278,7 @@ export const employerApi = createApi({
 
     getListJobForInvitation: builder.query({
       query: ({ jobseeker_id }) => ({
-        url: "/employer/list-job-for-invitation",
+        url: "/api/employer/list-job-for-invitation",
         params: { jobseeker_id },
       }),
       transformResponse: (response) => {
@@ -289,7 +289,7 @@ export const employerApi = createApi({
     }),
     inviteCandidateApplyJob: builder.mutation({
       query: ({ jobseeker_id, job_ids }) => ({
-        url: "/employer/job-invitation",
+        url: "/api/employer/job-invitation",
         method: "post",
         body: { jobseeker_id, job_ids },
       }),
@@ -308,7 +308,7 @@ export const employerApi = createApi({
 
     deleteInvitation: builder.mutation({
       query: ({ jobseeker_id, job_id }) => ({
-        url: "/employer/job-invitation",
+        url: "/api/employer/job-invitation",
         method: "DELETE",
         body: { jobseeker_id, job_id },
       }),
@@ -326,7 +326,7 @@ export const employerApi = createApi({
 
     getListInvitation: builder.query({
       query: () => ({
-        url: "/employer/invitation",
+        url: "/api/employer/invitation",
         params: { },
       }),
       transformResponse: (response) => {
@@ -338,7 +338,7 @@ export const employerApi = createApi({
 
     getNotification: builder.query({
       query: () => ({
-        url: "/employer/notification",
+        url: "/api/employer/notification",
         params: {  },
       }),
       transformResponse: (response) => {
@@ -348,7 +348,7 @@ export const employerApi = createApi({
     }),
     updateReadNotification: builder.mutation({
       query: ({ notification_id }) => ({
-        url: "/employer/notification",
+        url: "/api/employer/notification",
         method: "PUT",
         body: {  notification_id },
       }),
@@ -359,7 +359,7 @@ export const employerApi = createApi({
     }),
     changePassword: builder.mutation({
         query: ({  newPassword }) => ({
-            url: '/employer/change-password',
+            url: '/api/employer/change-password',
             method: 'POST',
             body: {newPassword },
         }),

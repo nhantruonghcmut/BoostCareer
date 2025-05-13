@@ -6,7 +6,7 @@ export const loginUser = createAsyncThunk('auth/login',
     async ({username, password},{ rejectWithValue }) => {
         try{
           console.log("bat dau chay loginUser chay api");
-            const response = await axios.post(`${domain}/auth/login`, {params: {username, password}}, {withCredentials: true});
+            const response = await axios.post(`${domain}/api/auth/login`, {params: {username, password}}, {withCredentials: true});
             return response.data;
         }
         catch (error) {
@@ -19,7 +19,7 @@ export const logout = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`${domain}/auth/logout`, { 
+      const response = await axios.delete(`${domain}/api/auth/logout`, { 
         withCredentials: true 
       });    
    
@@ -36,7 +36,7 @@ export const logout = createAsyncThunk(
     async (dataRegister, { rejectWithValue }) => {
       try {
         const response = await axios.post(
-          `${domain}/auth/register`,
+          `${domain}/api/auth/register`,
           { params:  dataRegister  },
           { withCredentials: true }
         );        

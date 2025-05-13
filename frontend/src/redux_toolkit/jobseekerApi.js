@@ -44,7 +44,7 @@ export const jobseekerApi = createApi({
     endpoints: (builder) => ({
         getOverviewJobseeker: builder.mutation({
             query: ({days}) => ({
-                url: '/jobseeker/overview',
+                url: '/api/jobseeker/overview',
                 method: 'POST',
                 body: { days },
             }),
@@ -56,7 +56,7 @@ export const jobseekerApi = createApi({
 
         getJobsSuggestion: builder.query({
             query: () => ({
-                url: '/jobseeker/jobs-suggestion',
+                url: '/api/jobseeker/jobs-suggestion',
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -65,7 +65,7 @@ export const jobseekerApi = createApi({
         }),
         getItemProfile: builder.query({
             query: ({type}) => ({
-                url:`/jobseeker/profile`,
+                url:`/api/jobseeker/profile`,
                 params: { type },
             }),
             transformResponse: (response) => {
@@ -84,7 +84,7 @@ export const jobseekerApi = createApi({
                 formData.append("image", image);
                 
                 return {
-                    url: '/jobseeker/avatar-imagine',
+                    url: '/api/jobseeker/avatar-imagine',
                     method: 'POST',
                     body: formData,
                     // Không cần set Content-Type vì fetchBaseQuery tự xử lý với FormData
@@ -100,7 +100,7 @@ export const jobseekerApi = createApi({
         
         updateItemProfile: builder.mutation({
             query: ({ type, data }) => ({
-                url: `/jobseeker/profile`,
+                url: `/api/jobseeker/profile`,
                 method: 'PUT',
                 body: { type, data }, // Sửa lỗi cú pháp
             }),
@@ -109,7 +109,7 @@ export const jobseekerApi = createApi({
         
         addItemProfile: builder.mutation({
             query: ({ type, data }) => ({
-                url: `/jobseeker/profile`,
+                url: `/api/jobseeker/profile`,
                 method: 'POST',
                 body: { type, data }, // Sửa lỗi cú pháp
             }),
@@ -118,7 +118,7 @@ export const jobseekerApi = createApi({
         
         deleteItemProfile: builder.mutation({
             query: ({ type, data }) => ({
-                url: `/jobseeker/profile`,
+                url: `/api/jobseeker/profile`,
                 method: 'DELETE',
                 body: { type, data },
             }),
@@ -126,7 +126,7 @@ export const jobseekerApi = createApi({
         }),
         getJobsaving: builder.query({
             query: (profile_id) => ({
-                url: '/jobseeker/job-saving',
+                url: '/api/jobseeker/job-saving',
             }),
             transformResponse: (response) => {
                 console.log("getJobsaving APIIIIIIIIIII", response);
@@ -136,7 +136,7 @@ export const jobseekerApi = createApi({
         }),
         addJobSaving: builder.mutation({
             query: (data) => ({
-                url: '/jobseeker/job-saving',
+                url: '/api/jobseeker/job-saving',
                 method: 'POST',
                 body: data,
             }),
@@ -144,7 +144,7 @@ export const jobseekerApi = createApi({
         }),
         deleteJobSaving: builder.mutation({
             query: (data) => ({
-                url: '/jobseeker/job-saving',
+                url: '/api/jobseeker/job-saving',
                 method: 'DELETE',
                 body: data,
             }),
@@ -152,7 +152,7 @@ export const jobseekerApi = createApi({
         }),
         getFollowingCompany: builder.query({
             query: () => ({
-                url: '/jobseeker/company-following',
+                url: '/api/jobseeker/company-following',
             }),
             transformResponse: (response) => {
                 console.log("getFollowingCompany APIIIIIIIIIII", response);
@@ -162,7 +162,7 @@ export const jobseekerApi = createApi({
         }),
         addFollowingCompany: builder.mutation({
             query: ({company_id}) => ({
-                url: '/jobseeker/company-following',
+                url: '/api/jobseeker/company-following',
                 method: 'POST',
                 body: {company_id },
             }),
@@ -173,7 +173,7 @@ export const jobseekerApi = createApi({
         }),
         deleteFollowingCompany: builder.mutation({
             query: (data) => ({
-                url: '/jobseeker/company-following',
+                url: '/api/jobseeker/company-following',
                 method: 'DELETE',
                 body: data,
             }),
@@ -184,7 +184,7 @@ export const jobseekerApi = createApi({
         }),
         addCompanyReview: builder.mutation({
             query: (data) => ({
-                url: '/jobseeker/company-rating',
+                url: '/api/jobseeker/company-rating',
                 method: 'POST',
                 body: data,
             }),
@@ -192,7 +192,7 @@ export const jobseekerApi = createApi({
         }),
         updateCompanyReview: builder.mutation({
             query: (data) => ({
-                url: '/jobseeker/company-rating',
+                url: '/api/jobseeker/company-rating',
                 method: 'PUT',
                 body: data,
             }),
@@ -200,7 +200,7 @@ export const jobseekerApi = createApi({
         }),
         getCompanyReview: builder.query({
             query: (company_id) => ({
-                url: '/jobseeker/company-rating',
+                url: '/api/jobseeker/company-rating',
                 params: { company_id },
             }),
             transformResponse: (response) => {
@@ -210,7 +210,7 @@ export const jobseekerApi = createApi({
         }),
         getJobApply: builder.query({
             query: () => ({
-                url: '/jobseeker/job-applications',
+                url: '/api/jobseeker/job-applications',
             }),
             transformResponse: (response) => {
                 return response.data?.jobs || [];
@@ -219,7 +219,7 @@ export const jobseekerApi = createApi({
         }),
         addJobApply: builder.mutation({
             query: ({job_id}) => ({
-                url: '/jobseeker/job-application',
+                url: '/api/jobseeker/job-application',
                 method: 'POST',
                 body: {job_id},
             }),
@@ -227,7 +227,7 @@ export const jobseekerApi = createApi({
         }),
         getProfileCV: builder.query({
             query: () => ({
-                url: '/jobseeker/profile-cv',
+                url: '/api/jobseeker/profile-cv',
                 params: { },
             }),
             transformResponse: (response) => {
@@ -240,7 +240,7 @@ export const jobseekerApi = createApi({
                 formData.append('resume', resume); // Using 'resume' to match backend expectation
                 
                 return {
-                    url: '/jobseeker/profile-cv',
+                    url: '/api/jobseeker/profile-cv',
                     method: 'POST',
                     body: formData,
                 };
@@ -249,7 +249,7 @@ export const jobseekerApi = createApi({
         }),
         deleteProfileCV: builder.mutation({
             query: ({cv_id}) => ({
-                url: '/jobseeker/profile-cv',
+                url: '/api/jobseeker/profile-cv',
                 method: 'DELETE',
                 body: {  cv_id },
             }),
@@ -257,7 +257,7 @@ export const jobseekerApi = createApi({
         }),
         ShowHideProfileCV: builder.mutation({
             query: ({ profile_id, cv_id, type }) => ({
-                url: "/jobseeker/show-hide-profile-cv",
+                url: "/api/jobseeker/show-hide-profile-cv",
                 method: "POST",
                 body: { profile_id, cv_id, type },
               }),
@@ -265,7 +265,7 @@ export const jobseekerApi = createApi({
             }),            
         getNotification: builder.query({
             query: () => ({
-                url: '/jobseeker/notification',
+                url: '/api/jobseeker/notification',
             }),
             transformResponse: (response) => {
                 return response.data;
@@ -274,7 +274,7 @@ export const jobseekerApi = createApi({
         }),
         updateReadNotification: builder.mutation({
             query: ({ notification_id }) => ({
-                url: '/jobseeker/notification',
+                url: '/api/jobseeker/notification',
                 method: 'PUT',
                 body: { notification_id  },
             }),
@@ -286,7 +286,7 @@ export const jobseekerApi = createApi({
 
         changePassword: builder.mutation({
             query: ({  newPassword }) => ({
-                url: '/jobseeker/change-password',
+                url: '/api/jobseeker/change-password',
                 method: 'POST',
                 body: {newPassword },
             }),

@@ -19,7 +19,7 @@ export const guestApi = createApi({
       query: (searchData={active_page:1,page_size:10}) => {
         console.log("Requesting getAllCompanies with page:", searchData);
         return {
-          url: "/guest/companies",
+          url: "/api/guest/companies",
           params: searchData,
         };    },
       transformResponse: (response) => { return response.data;},
@@ -35,7 +35,7 @@ export const guestApi = createApi({
     // Get leading companies
     getLeadingCompanies: builder.query({
       query: (searchData={paging_size:10}) => ({
-        url: "/guest/leading-company",
+        url: "/api/guest/leading-company",
         params: searchData,
       }),
       transformResponse: (response) => {  return response.data;},
@@ -43,7 +43,7 @@ export const guestApi = createApi({
     // Get latest work/jobs
     getLatestWork: builder.query({
       query: (searchData = {paging_size:10}) => ({
-        url: "/guest/jobs",
+        url: "/api/guest/jobs",
         params: searchData,
       }),    
       transformResponse: (response) => { 
@@ -53,7 +53,7 @@ export const guestApi = createApi({
     // Get all posts by search query
     getJobSearch: builder.query({
       query: (searchData = {paging_size:10}) => ({
-        url: "/guest/jobs",
+        url: "/api/guest/jobs",
         params: searchData,
       }),
       transformResponse: (response) => { return response.data;},
@@ -61,7 +61,7 @@ export const guestApi = createApi({
     // Get post detail by ID
     getJobDetail: builder.query({
       query: (job_id) => ({
-        url: "/guest/job-detail",
+        url: "/api/guest/job-detail",
         params: { job_id },
       }),
       transformResponse: (response) => { return response.data;},
@@ -69,20 +69,20 @@ export const guestApi = createApi({
     // Get all posts by user ID
     getJobOfCompanyById: builder.query({
       query: (id) => ({
-        url: "/guest/jobs-of-company",
+        url: "/api/guest/jobs-of-company",
         params: { id },
       }),
       transformResponse: (response) => { return response.data;},
     }),
     getGeneralInfo: builder.query({
       query: () => ({
-        url: "/guest/general-info",
+        url: "/api/guest/general-info",
       }),
       transformResponse: (response) => { return response.data;},
     }),
     getRelatedJobs: builder.query({
       query: (job_id) => ({
-        url: "/guest/related-jobs",
+        url: "/api/guest/related-jobs",
         params:  {job_id} ,
       }),
       transformResponse: (response) => { return response.data;},
