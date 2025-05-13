@@ -297,7 +297,7 @@ export const jobseekerApi = createApi({
 
         getAI_score: builder.query({
             query: ({ job_id }) => ({
-                url: '/AIservice/score-matching',
+                url: '/api/AIservice/score-matching',
                 params: {job_id},
             }),
             transformResponse: (response) => {
@@ -305,7 +305,7 @@ export const jobseekerApi = createApi({
             },
         }),        getAI_Analyze: builder.query({
             query: ({ job_id }) => ({
-                url: '/AIservice/analyze',    
+                url: '/api/AIservice/analyze',
                 params: {job_id},
                 // Tăng thời gian timeout lên 30 giây (mặc định là 10 giây)
                 responseHandler: (response) => response.json(),

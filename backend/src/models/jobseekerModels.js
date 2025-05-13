@@ -203,17 +203,17 @@ const queryGetUserInformation = async (id) => {
       user_jobseeker js
     JOIN 
       user_ u ON js.jobseeker_id = u.user_id
-    JOIN 
+    LEFT JOIN 
       catalog_role r ON u.role_id = r.role_id
     JOIN 
       profile_jobseeker p ON js.jobseeker_id = p.profile_id
-    JOIN 
+    LEFT JOIN 
       catalog_job_function j ON j.job_function_id = p.job_function_id
-    JOIN 
+    LEFT JOIN 
       catalog_city c ON p.city_id = c.city_id
-    JOIN 
+    LEFT JOIN 
       catalog_level cle ON p.level_id= cle.level_id
-	  join 
+	  LEFT JOIN
     catalog_nation cna ON cna.nation_id = p.nationality_id
     WHERE 
       u.user_id = ?;
@@ -418,8 +418,8 @@ const queryGetFollowedCompanyByID = async (id) => {
       (select * from company
         join user_employer e on company.company_id = e.employer_id
         WHERE e.status_ = 1) as c ON main_table.employer_id = c.company_id
-    JOIN catalog_industry ci ON c.industry_id = ci.industry_id
-    JOIN catalog_scale cs on cs.scale_id = c.scale_id    
+    LEFT JOIN catalog_industry ci ON c.industry_id = ci.industry_id
+    LEFT JOIN catalog_scale cs on cs.scale_id = c.scale_id    
     ORDER BY count_job_posted DESC, count_follower DESC, average_score DESC;
     `,
     [id]
@@ -431,8 +431,8 @@ const queryGetFollowedCompanyByID = async (id) => {
 const queryGetBasicCompany = async (id) => {
   const [result] = await db.query(
     `SELECT * FROM (Select * FROM company where company_id = ?) as t1
-    JOIN catalog_scale cs on cs.scale_id= t1.scale_id  JOIN company_location cl ON cl.company_id = t1.company_id 
-    JOIN catalog_industry ci where ci.industry_id=t1.industry_id`,
+    LEFT JOIN catalog_scale cs on cs.scale_id= t1.scale_id  LEFT JOIN company_location cl ON cl.company_id = t1.company_id
+    LEFT JOIN catalog_industry ci where ci.industry_id=t1.industry_id`,
     [id]
   );
   return result;
@@ -777,11 +777,11 @@ const queryGetListJobApplication = async (profile_id) => {
       (SELECT ja.*
        FROM logs_jobseeker_apply_job ja
        WHERE ja.jobseeker_id = ?) lja
-       JOIN job j ON lja.job_id = j.job_id
-       JOIN catalog_industry ci ON j.industry_id = ci.industry_id
-       JOIN catalog_job_function cj ON j.job_function_id = cj.job_function_id
-      JOIN company c ON j.employer_id = c.company_id
-      JOIN catalog_city cc ON j.work_location = cc.city_id
+      LEFT  JOIN job j ON lja.job_id = j.job_id
+      LEFT  JOIN catalog_industry ci ON j.industry_id = ci.industry_id
+      LEFT  JOIN catalog_job_function cj ON j.job_function_id = cj.job_function_id
+      LEFT JOIN company c ON j.employer_id = c.company_id
+      LEFT JOIN catalog_city cc ON j.work_location = cc.city_id
       WHERE j.status_ = 1 and j.date_expi >= NOW();
        `,
       [profile_id]
@@ -936,10 +936,10 @@ const queryGetListJobSaving = async (profile_id) => {
      FROM logs_jobseeker_save_job js
      WHERE js.jobseeker_id = ?) ljsj
      JOIN job j ON ljsj.job_id = j.job_id
-     JOIN catalog_industry ci ON j.industry_id = ci.industry_id
-     JOIN catalog_job_function cj ON j.job_function_id = cj.job_function_id
+    LEFT  JOIN catalog_industry ci ON j.industry_id = ci.industry_id
+    LEFT  JOIN catalog_job_function cj ON j.job_function_id = cj.job_function_id
     JOIN company c ON j.employer_id = c.company_id
-    JOIN catalog_city cc ON j.work_location = cc.city_id;`,
+    LEFT JOIN catalog_city cc ON j.work_location = cc.city_id;`,
     [profile_id]
     );
     if (savedJobs.length > 0) {

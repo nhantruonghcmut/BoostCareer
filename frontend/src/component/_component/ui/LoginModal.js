@@ -59,7 +59,9 @@ const LoginModal = ({ title }) => {
     try {
           const result = await dispatch(loginUser(dataLogin)).unwrap();
           if (result.success) {
-            navigate("/"); // Redirect to home page on success
+          const modalElement = document.getElementById('LoginModal');
+          const modalInstance = bootstrap.Modal.getInstance(modalElement);
+          modalInstance.hide();
           }
         } catch (error) {
           // Error handling already done in the thunk

@@ -54,7 +54,7 @@ JOIN
   const conditions = [];
   const values = [];
   if (education_id) {
-    query += `JOIN 
+    query += `JOIN
     (select * from profile_education where profile_education.education_id >=?) as pedu ON p.profile_id = pedu.profile_id`;
     values.push(education_id);
   }
@@ -430,15 +430,15 @@ const queryGetListJobByUser = async (employer_id) => {
       (select * from job where employer_id =?) as j
   JOIN
       company c ON j.employer_id = c.company_id
-  JOIN
+  LEFT JOIN
       catalog_industry ci ON j.industry_id = ci.industry_id
-  JOIN
+  LEFT JOIN
       catalog_job_function func ON j.job_function_id = func.job_function_id
-  JOIN
+  LEFT JOIN
       catalog_city loc ON j.work_location = loc.city_id    
-  JOIN
+  LEFT JOIN
       catalog_level lvl ON j.level_id = lvl.level_id
-  JOIN
+  LEFT JOIN
       catalog_education edu ON j.require_education = edu.education_id;
       `,
       [employer_id]
@@ -467,7 +467,7 @@ const queryGetListJobForInvite = async (employer_id, jobseeker_id) => {
         
 FROM
   (SELECT * FROM job WHERE employer_id = ? AND status_ = 1 AND date_expi > NOW()) AS j    
-  JOIN catalog_city loc ON j.work_location = loc.city_id
+ LEFT  JOIN catalog_city loc ON j.work_location = loc.city_id
   LEFT JOIN logs_employer_invitation lei ON j.job_id = lei.job_id AND lei.jobseeker_id = ?;
       `,
       [employer_id, jobseeker_id]
@@ -549,15 +549,15 @@ const queryGetJobDetailByUser = async (job_id, employer_id) => {
       (select * from job where job_id=? and employer_id =? ) as j
   JOIN
       company c ON j.employer_id = c.company_id
-  JOIN
+  LEFT JOIN
       catalog_industry ci ON j.industry_id = ci.industry_id
-  JOIN
+  LEFT JOIN
       catalog_job_function func ON j.job_function_id = func.job_function_id
-  JOIN
+  LEFT JOIN
       catalog_city loc ON j.work_location = loc.city_id    
-  JOIN
+  LEFT JOIN
       catalog_level lvl ON j.level_id = lvl.level_id
-  JOIN
+  LEFT JOIN
       catalog_education edu ON j.require_education = edu.education_id;
       `,
       [ job_id, employer_id]
@@ -845,8 +845,8 @@ const queryGetCompanyInformation = async (company_id) => {
         (select * from user_employer where employer_id = ?) as ue
         JOIN 
         (select * from user_ where user_.user_id = ?) as u ON u.user_id = ue.employer_id
-        JOIN catalog_industry ci ON ci.industry_id = c.industry_id
-        JOIN catalog_scale cs ON cs.scale_id = c.scale_id;  `,
+        LEFT JOIN catalog_industry ci ON ci.industry_id = c.industry_id
+        LEFT JOIN catalog_scale cs ON cs.scale_id = c.scale_id;  `,
       [company_id, company_id,company_id]
     );
     return companyInfo[0];
