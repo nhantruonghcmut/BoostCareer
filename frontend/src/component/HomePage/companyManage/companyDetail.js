@@ -184,20 +184,18 @@ export default function CompanyDetail() {
                             {option.work_location_name} |{" "}
                             {calculateDaysRemaining(option.date_expi) > 0
                               ? `Còn ${calculateDaysRemaining(
-                                  option.date_expi
-                                )} ngày để ứng tuyển`
+                                option.date_expi
+                              )} ngày để ứng tuyển`
                               : "Hết hạn"}
                           </p>
                         </div>
                         <div className="text-end">
                           <span className="badge bg-success">
                             {option.salary_min === 0 && option.salary_max === 0
-                              ? "Thỏa thuận"
-                              : `${formatNumberToTr(
-                                  option.salary_min
-                                )} - ${formatNumberToTr(
-                                  option.salary_max
-                                )}/tháng`}
+                              ? "Thỏa thuận":
+                              option.salary_max === 0 ? `Từ ${formatNumberToTr(option.salary_min)}/ tháng` :
+                              option.salary_min === 0 ? `Lên đến ${formatNumberToTr(option.salary_max)}/tháng` : 
+                              `Từ ${formatNumberToTr( option.salary_min)} - ${formatNumberToTr( option.salary_max)}/ tháng`}
                           </span>
                           {user?.role === 3 ? (
                             option.is_apply ? (
@@ -233,9 +231,8 @@ export default function CompanyDetail() {
                         {[...Array(totalPages)].map((_, index) => (
                           <li
                             key={index}
-                            className={`page-item ${
-                              currentPage === index + 1 ? "active" : ""
-                            }`}
+                            className={`page-item ${currentPage === index + 1 ? "active" : ""
+                              }`}
                           >
                             <button
                               className="page-link"
@@ -253,7 +250,7 @@ export default function CompanyDetail() {
             </div>
 
             <div className="card mt-2">
-<CompanyRating
+              <CompanyRating
                 reviewDetail={companyInformation?.review_details}
                 averageScore={companyInformation?.average_score}
                 company_id={companyInformation?.company_id}
@@ -274,17 +271,17 @@ export default function CompanyDetail() {
                 <p>
                   {companyInformation?.company_location
                     ? companyInformation.company_location.map(
-                        (location, index) => (
-                          <p key={index}>
-                            {location.address} - {location.city_name}
-                          </p>
-                        )
+                      (location, index) => (
+                        <p key={index}>
+                          {location.address} - {location.city_name}
+                        </p>
                       )
+                    )
                     : "Chưa có thông tin"}
-                </p>                
+                </p>
                 <h6 className="fw-bold">Chia sẻ công ty tới bạn bè</h6>
                 <div className="d-flex gap-2">
-                  <button 
+                  <button
                     className="btn btn-outline-primary btn-sm"
                     onClick={() => {
                       const url = encodeURIComponent(window.location.href);
@@ -294,7 +291,7 @@ export default function CompanyDetail() {
                   >
                     <i className="bi bi-facebook"></i> Facebook
                   </button>
-                  <button 
+                  <button
                     className="btn btn-outline-info btn-sm"
                     onClick={() => {
                       const url = encodeURIComponent(window.location.href);
@@ -304,7 +301,7 @@ export default function CompanyDetail() {
                   >
                     <i className="bi bi-twitter"></i> Twitter
                   </button>
-                  <button 
+                  <button
                     className="btn btn-outline-secondary btn-sm"
                     onClick={() => {
                       const url = encodeURIComponent(window.location.href);

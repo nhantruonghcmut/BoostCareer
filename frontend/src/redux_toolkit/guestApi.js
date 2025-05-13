@@ -8,7 +8,7 @@ export const guestApi = createApi({
     // Get company information by ID
     getCompanyInformation: builder.query({
       query: (id) => ({
-        url: "guest/company-detail",
+        url: "/api/guest/company-detail",
         params: {id} ,
       }),
       transformResponse: (response) => response.data,
@@ -27,7 +27,7 @@ export const guestApi = createApi({
     // Get company by ID
     getCompanyById: builder.query({
       query: (id) => ({
-        url: `guest/company-detail`,
+        url: `/api/guest/company-detail`,
         params: { id },
       }),
       transformResponse: (response) => { return response.data;},

@@ -5,6 +5,8 @@ import { loginUser } from '../../redux_toolkit/AuthSlice';
 import { validateField } from "../../utils/validateField";
 
 export default function Login() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [dataLogin, setDataLogin] = useState({
     username: "",
     password: "",
@@ -15,8 +17,7 @@ export default function Login() {
     password: "",
   });
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+
   const { isLogin, loading } = useSelector((state) => state.auth);
 
   const [formValid, setFormValid] = useState(false);

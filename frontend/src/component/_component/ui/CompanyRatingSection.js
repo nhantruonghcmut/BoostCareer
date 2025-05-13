@@ -3,7 +3,6 @@ import { useSelector } from "react-redux";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "react-toastify";
 import LoginModal from "./LoginModal.js";
-import {  useSelector } from "react-redux";
 const {     useAddCompanyReviewMutation,
     useUpdateCompanyReviewMutation,
     useGetCompanyReviewQuery,

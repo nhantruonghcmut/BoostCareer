@@ -68,21 +68,37 @@ const JobListing = () => {
   const { data: cata_tag } = useGetTagsQuery();
   const [searchParams, setSearchParams] = useSearchParams();
   const titleFromUrl = searchParams.get("title");
+  // Lấy skill_id từ URL
+  const skillIdFromUrl = searchParams.get("skill_id");
 
   const initialMaxSalary = 5000000; // 20 triệu là giá trị mặc định
-
-  const [tempFilter, setTempFilter] = useState({
-    title: titleFromUrl || "",
-    industry_id: "",
-    job_function_id: "",
-    work_location: "",
-    salary_expect: "",
-    level_id: "",
-    working_type: "",
-    skills: [],
-    require_experience: "",
-    active_page: 1,
-    paging_size: 10,
+  const [tempFilter, setTempFilter] = useState(() => {
+    // Xử lý skill_id từ URL nếu có
+    const initialSkills = [];
+    if (skillIdFromUrl) {
+      try {
+        const skillId = parseInt(skillIdFromUrl);
+        if (!isNaN(skillId)) {
+          initialSkills.push(skillId);
+        }
+      } catch (e) {
+        console.error("Lỗi khi chuyển đổi skill_id từ URL:", e);
+      }
+    }
+    
+    return {
+      title: titleFromUrl || "",
+      industry_id: "",
+      job_function_id: "",
+      work_location: "",
+      salary_expect: "",
+      level_id: "",
+      working_type: "",
+      skills: initialSkills,
+      require_experience: "",
+      active_page: 1,
+      paging_size: 10,
+    };
   });
 
   const [filter, setFilter] = useState({
@@ -102,7 +118,7 @@ const JobListing = () => {
     setFilter({ ...tempFilter, active_page: 1 });
   };
 
-  // Cập nhật hàm handleSkillToggle để kiểm tra giới hạn
+  // Cập nhật hàm handleSkillToggle chỉ để thêm/xóa kỹ năng, không cần liên kết với URL
   const handleSkillToggle = (skillId) => {
     setTempFilter((prev) => {
       const skills = [...prev.skills];
@@ -248,16 +264,41 @@ const JobListing = () => {
     }
   }, [titleFromUrl]);
 
+  // Xử lý khi skill_id thay đổi trong URL  // Xử lý khi skill_id từ URL thay đổi - đã tự động đưa vào state ban đầu rồi
+  useEffect(() => {
+    // skill_id đã được xử lý trong state ban đầu, không cần làm gì thêm
+    if (skillIdFromUrl) {
+      console.log("Đã bắt được skill_id từ URL:", parseInt(skillIdFromUrl));
+    }
+  }, [skillIdFromUrl]);
+
 
   
+  // Log filter khi có thay đổi để kiểm tra
+  useEffect(() => {
+    if (filter.skills.length > 0) {
+      console.log("Đang tìm công việc với các kỹ năng:", filter.skills);
+    }
+  }, [filter]);
 
   return (
-    <>
-      <TitleComponent
+    <>      <TitleComponent
         title={"Danh Sách Việc Làm"}
         description={"Bắt đầu hành trình sự nghiệp của bạn ngay hôm nay!"}
       />
       <div className="container-fluid p-3 mt-3">
+        {/* Breadcrumb đơn giản */}
+        <nav aria-label="breadcrumb mb-3">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <NavLink to="/">Trang chủ</NavLink>
+            </li>
+            <li className="breadcrumb-item active" aria-current="page">
+              Danh sách việc làm
+            </li>
+          </ol>
+        </nav>
+
         <div className="row">
           <div className="col-lg-3 mb-4 ">
             <div className="p-3 border rounded shadow-sm bg-light">
@@ -449,9 +490,7 @@ const JobListing = () => {
                   <div className="alert alert-info py-1 small">
                     Bạn đã chọn tối đa 3 kỹ năng. Xóa bớt để thêm kỹ năng mới.
                   </div>
-                )}
-
-                {tempFilter.skills.length > 0 && (
+                )}                {tempFilter.skills.length > 0 && (
                   <div className="d-flex flex-wrap gap-1 mt-2">
                     {tempFilter.skills.map((skillId) => {
                       const skill = cata_tag?.find((s) => s.tag_id === skillId);
@@ -460,7 +499,7 @@ const JobListing = () => {
                           key={skillId}
                           className="badge bg-success d-flex align-items-center"
                         >
-                          {skill?.tags_content}
+                          {skill?.tags_content || `Kỹ năng ID: ${skillId}`}
                           <i
                             className="bi bi-x-circle ms-1"
                             onClick={() => handleSkillToggle(skillId)}
@@ -533,14 +572,35 @@ const JobListing = () => {
                 ))}
               </select>
             </div>
-            {processedJobs.map((job, index) => (
-              <JobCard
-                job={job}
-                key={index}
-                handleSaveJob={handleSaveJob}
-                handleRemoveSaveJob={handleRemoveSaveJob}
-              />
-            ))}
+              {isLoading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="mt-2">Đang tải danh sách việc làm...</p>
+              </div>
+            ) : processedJobs.length === 0 ? (              <div className="alert alert-info">
+                <div className="d-flex align-items-center">
+                  <i className="bi bi-info-circle me-2 fs-4"></i>
+                  <div>
+                    <h5 className="mb-1">Không tìm thấy kết quả nào</h5>
+                    <p className="mb-0">
+                      Không có công việc nào phù hợp với bộ lọc hiện tại.
+                      <br/>Vui lòng thử với các tiêu chí tìm kiếm khác.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              processedJobs.map((job, index) => (
+                <JobCard
+                  job={job}
+                  key={index}
+                  handleSaveJob={handleSaveJob}
+                  handleRemoveSaveJob={handleRemoveSaveJob}
+                />
+              ))
+            )}
 
             <nav className="d-flex justify-content-center mt-4">
               <ul className="pagination pagination-sm">

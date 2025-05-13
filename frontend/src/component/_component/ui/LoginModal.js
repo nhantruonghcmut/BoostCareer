@@ -8,6 +8,7 @@ import { validateField } from "../../../utils/validateField";
 
 const LoginModal = ({ title }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { isLogin, loading } = useSelector((state) => state.auth);
 
@@ -34,7 +35,7 @@ const LoginModal = ({ title }) => {
     setErrors((prev) => ({ ...prev, [name]: error })); // Update error state
   };
 
-  const submitLogin = (e) => {
+  const submitLogin = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
@@ -55,7 +56,15 @@ const LoginModal = ({ title }) => {
       return; // Prevent submission if there are validation errors
     }
 
-    dispatch(loginUser({params:dataLogin})); // Proceed with login if no errors
+    try {
+          const result = await dispatch(loginUser(dataLogin)).unwrap();
+          if (result.success) {
+            navigate("/"); // Redirect to home page on success
+          }
+        } catch (error) {
+          // Error handling already done in the thunk
+          console.error("Login failed:", error);
+        }
   };
 
   useEffect(() => {
