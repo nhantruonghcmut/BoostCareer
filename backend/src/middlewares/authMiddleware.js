@@ -46,7 +46,7 @@ const verifyToken = async (req, res, next) => {
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 2 * 60 * 1000, // 2 phút
+        maxAge: 60 * 60 * 1000, // 60 phút
       });
 
       req.user = user; // Gắn thông tin user vào request

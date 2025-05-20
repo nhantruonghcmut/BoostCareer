@@ -40,7 +40,7 @@ const EmployersSlice = createSlice({
       apiEmployers.endpoints.fetchEmployers.matchRejected,
       (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to fetch employers";
+        // state.error = action.payload || "Failed to fetch employers";
       }
     );
     

@@ -120,7 +120,7 @@ export default function EmployerNotification() {
 
                   <div className="d-flex flex-column align-items-center">
                     <p className="text-secondary">
-                      {formatDistanceToNow(new Date(item.create_at), {
+                      {formatDistanceToNow(new Date(item?.created_at), {
                         addSuffix: true,
                         locale: vi,
                       })}

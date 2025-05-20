@@ -16,22 +16,27 @@ import { useGetCitiesQuery } from "../../../redux_toolkit/CategoryApi.js";
 import CompanyHeader from "../../_component/ui/CompanyHeader.js";
 import TitleComponent from "../../_component/ui/TitleComponent.js";
 import { toast } from "react-toastify";
-
+const {     
+    useGetCompanyReviewQuery,
+ } = require("../../../redux_toolkit/jobseekerApi.js");
 export default function CompanyDetail() {
   const navigate = useNavigate();
+  const { companyId } = useParams();
   const { isLogin, user } = useSelector((state) => state.auth);
+  const skipped = !isLogin;
   const [applyJob] = useAddJobApplyMutation();
   const { data: jobApply, refetch: refetchJobApply } = useGetJobApplyQuery({},
     { skip: !isLogin }
   ); // Add refetch function
+   const { data: yourReview } = useGetCompanyReviewQuery(companyId, { skip: skipped });
   const formatNumberToTr = (number) => {
     // Format số theo định dạng Việt Nam
     const formattedNumber = Math.floor(number / 1e6).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     return `${formattedNumber} triệu vnđ`;
   };
-  const { companyId } = useParams();
+
   const { data: city } = useGetCitiesQuery(84); // 84 là mã quốc gia Việt Nam
-  const { data: companyInformation } = useGetCompanyInformationQuery(companyId);
+  const { data: companyInformation,refetch } = useGetCompanyInformationQuery(companyId);
   const { data } = useGetJobOfCompanyByIdQuery(companyId);
   const postsByUser = data?.jobs || [];
 
@@ -45,6 +50,12 @@ export default function CompanyDetail() {
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const appliedJobIds = jobApply?.map((item) => item.job_id) || [];
+  // state để truyền cho component con
+const [reviewDetail, setReviewDetail] = useState(companyInformation?.review_details);
+const [averageScore, setAverageScore] = useState(companyInformation?.average_score);
+const [companyIdState, setCompanyIdState] = useState(companyInformation?.company_id);
+
+
 
   const handleApplyJob = async (id) => {
     try {
@@ -104,7 +115,18 @@ export default function CompanyDetail() {
   useEffect(() => {
     setCurrentPage(1);
   }, [keyword, keyLocation]);
+useEffect(() => {
+  if (companyInformation) {
+    setReviewDetail(companyInformation.review_details);
+    setAverageScore(companyInformation.average_score);
+    setCompanyIdState(companyInformation.company_id);
+  }
+}, [companyInformation]); 
 
+useEffect(() => {
+  refetch();
+}
+, [companyId,yourReview]);
   return (
     <>
       <TitleComponent title={"Chi Tiết Công Ty"} description={""} />
@@ -251,9 +273,9 @@ export default function CompanyDetail() {
 
             <div className="card mt-2">
               <CompanyRating
-                reviewDetail={companyInformation?.review_details}
-                averageScore={companyInformation?.average_score}
-                company_id={companyInformation?.company_id}
+                reviewDetail={reviewDetail}
+                averageScore={averageScore}
+                company_id={companyIdState}
               />
             </div>
           </div>

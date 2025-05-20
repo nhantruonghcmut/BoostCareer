@@ -84,7 +84,7 @@ const Employer = () => {
           setNeed_reload(false);
         } catch (error) {
           console.error("Error fetching data:", error);
-          addToast('Error', 'Failed to fetch employer data', 'danger');
+          // addToast('Error', 'Failed to fetch employer data', 'danger');
           setNeed_reload(false);
         }
       };

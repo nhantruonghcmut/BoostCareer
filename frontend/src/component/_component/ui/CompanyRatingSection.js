@@ -13,7 +13,7 @@ const CompanyRating = ({ reviewDetail, company_id, averageScore }) => {
   const skipped = !isLogin;
   const { data } = useGetCompanyReviewQuery(company_id, { skip: skipped });
   const  yourreview  = data?.reviews || {};
-  console.log("reviewDetail", reviewDetail);
+  // console.log("reviewDetail", reviewDetail);
   const [addCompanyReview] = useAddCompanyReviewMutation();
   const [updateCompanyReview] = useUpdateCompanyReviewMutation();
 

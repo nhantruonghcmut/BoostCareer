@@ -217,7 +217,7 @@ const queryGetJobseekerDetail = async (employer_id, jobseeker_id) => {
               (select * from profile_skill pski where js.jobseeker_id = pski.profile_id) pski2
               join catalog_tags ctag on pski2.skill_id=ctag.tag_id),JSON_ARRAY())) 
 		AS skill_info,
-      (COALESCE( (select profile_cv.cv_link from profile_cv where profile_cv.profile_id = js.jobseeker_id), '')) AS cv_link,
+      (COALESCE( (select profile_cv.cv_link from profile_cv where profile_cv.profile_id = js.jobseeker_id and isactive = 1), '')) AS cv_link,
       (COALESCE( (select JSON_ARRAYAGG(
               JSON_OBJECT(
                   'language_id', plt.language_id,
@@ -1077,12 +1077,16 @@ const queryInviteJobseekerApply = async (employer_id, jobseeker_id, job_ids) => 
         `INSERT INTO logs_employer_invitation (employer_id, jobseeker_id, job_id, create_at) VALUES (?, ?, ?, ?);`,
         [employer_id, jobseeker_id, job_id, create_at]
       );
+      const [result2] = await db.query(
+        `INSERT INTO notification (recipient_id, notification_type, entity_id,content,is_read, created_at) VALUES (?, ?, ?, ?);`,
+        [jobseeker_id,"invitation",employer_id,job_id,"Bạn vừa được nhà tuyển dụng mời ứng tuyển",0, create_at]
+      );
       // console.log("result", result);
-      if (result.affectedRows === 0) {
+      if (result.affectedRows === 0 || result2.affectedRows === 0) {
         throw new Error("Failed to insert invite into database");
       }
     }
-    return true; // Trả về true nếu có hàng bị xóa
+    return true; // Trả về true ok
   } catch (error) {
     console.error("Error saving candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
@@ -1419,7 +1423,7 @@ const [result] = await db.query(
   END AS type_name,
   content,
   is_read,
-  create_at,
+  created_at,
   CASE  
         WHEN notification_type = 'review' THEN "Anonymous"
         ELSE p.full_name

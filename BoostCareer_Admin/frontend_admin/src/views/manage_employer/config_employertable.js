@@ -27,32 +27,6 @@ export const config_employertable = (need_reload, setNeed_reload) => {
   const [visible, setVisible] = useState(false);
   const [currentEmployer, setCurrentEmployer] = useState(null);
   
-  const openMessageModal = (employer) => {
-    setCurrentEmployer(employer);
-    setVisible(true);
-  };
-  const handleSendMessage = async (message) => {
-    if (!currentEmployer) return;
-    
-    try {
-      const result = await send_message({
-        message: message,
-        employer_ids: [currentEmployer.employer_id]
-      });
-      
-      if (result.data) {
-        setVisible(false);
-      }
-    } catch (error) {
-      console.error("Send message error:", error);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setVisible(false);
-    setCurrentEmployer(null);
-  };
-
   const columns = [
     {
       header: "ID",
@@ -117,7 +91,7 @@ export const config_employertable = (need_reload, setNeed_reload) => {
       },      {
         label: "Xóa",
         color: "danger",
-        disabled: isDeleting,
+        // disabled: isDeleting,
         onClick: async (item) => {
           try {            
             const result = await delete_employers({ employer_ids: [item.employer_id] });
@@ -129,8 +103,7 @@ export const config_employertable = (need_reload, setNeed_reload) => {
           }
         },
         renderContent: (item) => isDeleting ? <><CSpinner size="sm" /> Đang xóa...</> : "Xóa"
-      },      {
-        label: (item) => (item.employer_status === 1 ? "Khóa" : "Mở khóa"),
+      },      {        label: (item) => (item.employer_status === 1 ? "Khóa" : "Mở khóa"),
         color: (item) => item.employer_status === 1 ? "dark" : "success",
         disabled: isUpdatingStatus,
         onClick: async (item) => {
@@ -149,7 +122,7 @@ export const config_employertable = (need_reload, setNeed_reload) => {
           }
         },
         renderContent: (item) => {
-          if (isUpdatingStatus) return <><CSpinner size="sm" /> Đang cập nhật...</>;
+          // if (isUpdatingStatus) return <><CSpinner size="sm" /> Đang cập nhật...</>;
           return item.employer_status === 1 ? "Khóa" : "Mở khóa";
         }
       },      {

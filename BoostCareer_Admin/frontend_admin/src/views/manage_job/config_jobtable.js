@@ -66,13 +66,14 @@ export const config_jobtable = (need_reload, setNeed_reload) => {
   return {
 
     columns,
-    actions: [      {
-        label: "Xem",
+    actions: [      {        label: "Xem",
         color: "info",
+        disabled: false,
         onClick: (item) => window.open(`/job-details/${item.job_id}`, "_blank")
       },      {
         label: "Xóa",
         color: "danger",
+        disabled: false,
         onClick: async (item) => {
           try {            
             const result =await deleteJobs({ job_ids: [item.job_id] })
@@ -84,10 +85,10 @@ export const config_jobtable = (need_reload, setNeed_reload) => {
             console.log("Xóa thất bại", error);
           }
         },
-      },
-      {
+      },      {
         label: (item) => item.status_ === 1 ? "Ẩn tin" : "Hiện tin", // Thay đổi label dựa vào status_
         color: (item) => item.status_ === 1 ? "secondary" : "success", // Thay đổi color tương ứng
+        disabled: false,
         onClick: async (item) => {
           try {
             const newStatus = item.status_ === 1 ? 0 : 1;

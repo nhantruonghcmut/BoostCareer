@@ -121,13 +121,12 @@ const GenericTable = ({
                   {actions.length > 0 && (
                     <CTableDataCell>
                       <div className="d-flex gap-2 justify-content-center">
-                        {actions.map((action, actionIndex) => (
-                          <CButton
+                        {actions.map((action, actionIndex) => (                          <CButton
                             key={actionIndex}
                             color={typeof action.color === 'function' ? action.color(item) : action.color || "primary"}
                             onClick={() => action.onClick(item, rowIndex)}
                             // size="sm"
-                            disabled={action.disabled ? action.disabled(item) : false}
+                            disabled={typeof action.disabled === 'function' ? action.disabled(item) : action.disabled || false}
                             className="fixed-action-btn"
                           >
                             {typeof action.label === 'function' ? action.label(item) : action.label}

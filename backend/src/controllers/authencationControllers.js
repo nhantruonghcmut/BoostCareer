@@ -43,7 +43,7 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/'   ,
-    maxAge: (parseInt(process.env.JWT_ACCESS_EXPIRES) || 900) * 1000
+    maxAge: (parseInt(process.env.JWT_ACCESS_EXPIRES) || 3600) * 1000
   });
 
   res.cookie('refreshToken', refreshToken, {

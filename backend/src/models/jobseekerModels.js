@@ -800,13 +800,25 @@ const queryGetListJobApplication = async (profile_id) => {
 
 const queryApplyToJob = async (profile_id, job_id) => {
   try {
+    const [job] = await db.query(
+      `SELECT employer_id,title FROM job WHERE job_id = ? AND status_ = 1 AND date_expi >= NOW()`,
+      [job_id]
+    );
+    if (job.length === 0) {
+      return false; // Job not found or not active
+    }
     const create_at = new Date();
     const [result] = await db.query(
       `Insert INTO logs_jobseeker_apply_job (job_id, jobseeker_id, create_at)
       VALUES (?, ?, ?)`,
       [job_id, profile_id, create_at]
     );
-    if (result.affectedRows > 0) {
+      const [result2] = await db.query(
+      `INSERT INTO notification (recipient_id, notification_type, entity_id,content,is_read, created_at) VALUES 
+        (?, ?, ?, ?, ?, ?);`,
+      [job[0].employer_id,"application", profile_id,"Có ứng viên ứng tuyển công việc "+job[0].title,0, create_at]
+    );
+    if (result.affectedRows > 0 && result2.affectedRows > 0) {
       return true; // Application successful
     } else {
       return false; // Application failed
@@ -821,13 +833,19 @@ catch (error) {
 // Company review and following
 const queryAddCompanyReview = async ( profile_id, company_id,score,content) => {
   try{
+    const create_at = new Date();
     const [result] = await db.query(
       `INSERT INTO logs_review (jobseeker_id, company_id, score, content, create_at) 
        VALUES (?, ?, ?, ?, now())`,
       [profile_id, company_id, score, content]
     );
+        const [result2] = await db.query(
+      `INSERT INTO notification (recipient_id, notification_type, entity_id,content,is_read, created_at) VALUES 
+        (?, ?, ?, ?, ?, ?);`,
+      [company_id,"review", profile_id,"Bạn có lượt đánh giá mới ",0, create_at]
+    );
     // console.log(result);
-    return result.affectedRows > 0;
+    return result.affectedRows > 0 && result2.affectedRows > 0;
   }
   catch (error) {
     console.error("Error in queryAddCompanyReview:", error);
@@ -898,7 +916,12 @@ const queryAddCompanyFollowing = async (profile_id, company_id) => {
       `INSERT INTO logs_jobseeker_follow_employer (jobseeker_id, employer_id, create_at) 
        VALUES (?, ?, ?)`,
       [profile_id, company_id, create_at]);
-    return result.affectedRows > 0;    
+    const [result2] = await db.query(
+      `INSERT INTO notification (recipient_id, notification_type, entity_id,content,is_read, created_at) VALUES 
+        (?, ?, ?, ?, ?, ?);`,
+      [company_id,"follow", profile_id,"Bạn có lượt theo dõi mới ",0, create_at]);
+
+    return result.affectedRows > 0 && result2.affectedRows > 0;
   }
   catch
   (error) {

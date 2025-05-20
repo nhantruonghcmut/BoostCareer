@@ -73,13 +73,13 @@ export const config_jobseekertable = ( need_reload, setNeed_reload ) => {
       ];
 return {
 columns,
-actions : [    {
-      label: "Xem hồ sơ",
+actions : [    {      label: "Xem hồ sơ",
       color: "warning",
+      disabled: false,
       onClick: (item) => window.open(`/jobseeker-profile/${item.jobseeker_id}`, "_blank")
-    },{
-      label: "Xóa",
+    },{      label: "Xóa",
       color: "danger",
+      disabled: false,
       onClick: async (item) => {
           try {            
             const result =await delete_jobseekers({ jobseeker_ids: [item.jobseeker_id] })
@@ -91,14 +91,14 @@ actions : [    {
           }
       },
     },
-    {
-      label: "Gửi tin nhăn",
+    {      label: "Gửi tin nhăn",
       color: "primary",
+      disabled: false,
       onClick: (item) => openMessageModal(),
     },
-    {
-      label: (item) => (item.status_===1? "Khóa" : "Mở khóa"),
+    {      label: (item) => (item.status_===1? "Khóa" : "Mở khóa"),
       color: (item) => item.status_ === 1 ? "dark" : "success",
+      disabled: false,
       onClick: async (item) => {
         try {
           const newStatus = item.status_ === 1 ? 0 : 1;
