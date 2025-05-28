@@ -1078,8 +1078,8 @@ const queryInviteJobseekerApply = async (employer_id, jobseeker_id, job_ids) => 
         [employer_id, jobseeker_id, job_id, create_at]
       );
       const [result2] = await db.query(
-        `INSERT INTO notification (recipient_id, notification_type, entity_id,content,is_read, created_at) VALUES (?, ?, ?, ?);`,
-        [jobseeker_id,"invitation",employer_id,job_id,"Bạn vừa được nhà tuyển dụng mời ứng tuyển",0, create_at]
+        `INSERT INTO notification (recipient_id, notification_type, entity_id,content,is_read, created_at) VALUES (?, ?, ?, ?,?,?);`,
+        [jobseeker_id,"invitation",employer_id,"Bạn vừa được nhà tuyển dụng mời ứng tuyển",0, create_at]
       );
       // console.log("result", result);
       if (result.affectedRows === 0 || result2.affectedRows === 0) {

@@ -1,24 +1,29 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend server for BoostCareer application",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon –inspect index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --inspect index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_ENV=development nodemon --inspect index.js",
+    "prod": "NODE_ENV=production node index.js"
   },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.774.0",
+    "@aws-sdk/lib-storage": "^3.774.0",
     "@aws-sdk/s3-request-presigner": "^3.774.0",
+    "aws-ssl-profiles": "^1.1.2",
     "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "date-fns": "^3.0.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.0",
     "express-session": "^1.18.1",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
     "multer": "^1.4.5-lts.1",
     "multer-s3": "^3.0.1",
     "mysql2": "^3.11.4",
@@ -26,5 +31,13 @@
     "openai": "^4.97.0",
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

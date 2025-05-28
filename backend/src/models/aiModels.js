@@ -70,8 +70,7 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
               from 
                 (select * from profile_skill pski where js.jobseeker_id = pski.profile_id) pski2
                 join catalog_tags ctag on pski2.skill_id=ctag.tag_id),JSON_ARRAY())) 
-          AS skill_info,
-        (COALESCE( (select profile_cv.cv_link from profile_cv where profile_cv.profile_id = js.jobseeker_id), '')) AS cv_link,
+          AS skill_info,        
         (COALESCE( (select JSON_ARRAYAGG(
                 JSON_OBJECT(
                     'language_id', plt.language_id,
