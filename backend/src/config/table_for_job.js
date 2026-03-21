@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   job: {
     tableName: 'job',
     key: ['job_id'],

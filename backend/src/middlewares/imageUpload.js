@@ -1,10 +1,9 @@
-const multer = require("multer");
-const { PutObjectCommand } = require("@aws-sdk/client-s3");
-const path = require("path");
-const s3 = require("../config/s3Config"); // Import cấu hình S3
-const dotenv = require("dotenv");
-const { v7: uuidv7 } = require("uuid"); // Thư viện tạo tên file duy nhất
-const { DeleteObjectCommand } = require("@aws-sdk/client-s3");
+import multer from "multer";
+import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import path from "path";
+import s3 from "../config/s3Config.js"; // Import cấu hình S3
+import dotenv from "dotenv";
+import { v7 as uuidv7 } from "uuid"; // Thư viện tạo tên file duy nhất
 dotenv.config();
 
 // Cấu hình multer để xử lý file trước khi upload lên S3
@@ -107,4 +106,4 @@ const deleteFileFromS3 = async (fileKey) => {
     return false; // Return false instead of throwing error for better error handling
   }
 };
-module.exports = { upload, uploadImgToS3_jobseeker, uploadImgToS3_employer, uploadToS3CV, deleteFileFromS3 };
+export { upload, uploadImgToS3_jobseeker, uploadImgToS3_employer, uploadToS3CV, deleteFileFromS3 };

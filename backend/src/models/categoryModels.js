@@ -1,5 +1,4 @@
-const { is } = require("express/lib/request.js");
-const db = require("../config/databaseConfig.js");
+import db from "../config/databaseConfig.js";
 
 const queryCategory_Industry = async () => {
   const [rows] = await db.query("SELECT * FROM catalog_industry;");
@@ -62,7 +61,7 @@ const queryCategory_Education = async () => {
   return rows;
 };
 
-module.exports = {
+export {
   queryCategory_Industry,
   queryCategory_Jobfunction,
   queryCatalog_Benefit,

@@ -1,10 +1,11 @@
-const express = require("express");
-const authencationRoutes = require("./authencationRoutes.js");
-const categoryRoutes = require("./categoryRoutes.js");
-const jobseekerRoutes = require("./jobseekerRoutes.js");
-const employerRoutes = require("./employerRoutes.js");
-const guestRoutes = require("./guestRoutes.js");
-const AIRoutes = require("./openAIRoutes.js");
+import express from "express";
+import authencationRoutes from "./authencationRoutes.js";
+import categoryRoutes from "./categoryRoutes.js";
+import jobseekerRoutes from "./jobseekerRoutes.js";
+import employerRoutes from "./employerRoutes.js";
+import guestRoutes from "./guestRoutes.js";
+import AIRoutes from "./openAIRoutes.js";
+// import crawRoutes from "./crawRoutes.js";
 
 
 const routes = express();
@@ -14,6 +15,6 @@ routes.use("/api/jobseeker", jobseekerRoutes);
 routes.use("/api/employer", employerRoutes);
 routes.use("/api/guest", guestRoutes);
 routes.use("/api/AIservice", AIRoutes);
+// routes.use("/api/craw", crawRoutes);
 
-
-module.exports = routes;
+export default routes;

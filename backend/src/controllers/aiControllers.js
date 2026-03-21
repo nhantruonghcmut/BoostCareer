@@ -1,9 +1,9 @@
-const ApiError = require("../utils/ApiError.js");
-const { OpenAI } = require("openai");
-const {
+import ApiError from "../utils/ApiError.js";
+import { OpenAI } from "openai";
+import {
   queryGetJobseekerDetail,
   queryGetJobDetailByUser,
-} = require("../models/aiModels.js");
+} from "../models/aiModels.js";
 
 
 async function getEmbedding(text) {
@@ -166,14 +166,6 @@ const analyzeProfile = async (req, res, next) => {
     return next(new ApiError("Error analyzing match", 500));
   }
 };
-
-function cleanText(text) {
-  return (text || "")
-    .replace(/%00endl/g, "\n") // Chú ý: bước này tạo ra \n
-    .replace(/<[^>]*>/g, "") // Loại bỏ thẻ HTML
-    .replace(/\s+/g, " ") // Bước này sẽ biến \n thành một khoảng trắng ' '
-    .trim(); // Loại bỏ khoảng trắng thừa ở đầu/cuối
-}
 
 function formatCandidateTextOptimized(profile) {
   const descriptionParts = [];
@@ -509,7 +501,7 @@ function formatJobPostingTextForOptimalEmbedding(jobPosting) {
   return parts.filter((part) => part && part.length > 0).join("\n");
 }
 
-module.exports = {
+export {
   scorematching,
   analyzeProfile
 };

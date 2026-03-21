@@ -1,5 +1,5 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   getPublicInformationOfCompany,
   getPublicJobDetail,
   getListJobBySearch,
@@ -9,7 +9,7 @@ const {
   getGeneralInfo,
   getRelatedJobs
 
-} = require("../controllers/guestControllers.js");
+} from "../controllers/guestControllers.js";
 
 const guestRoutes = express.Router();
 guestRoutes.get("/job-detail", getPublicJobDetail);
@@ -20,7 +20,7 @@ guestRoutes.get("/companies", getListCompanyBySearch);
 guestRoutes.get("/company-detail", getPublicInformationOfCompany);
 guestRoutes.get("/general-info", getGeneralInfo);
 guestRoutes.get("/related-jobs", getRelatedJobs);
-module.exports = guestRoutes;
+export default guestRoutes;
 
 
 

@@ -19,4 +19,4 @@ const responseHandler = (req, res, next) => {
   next();
 };
 
-module.exports = responseHandler;
+export default responseHandler;

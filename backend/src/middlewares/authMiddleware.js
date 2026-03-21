@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const ApiError = require('../utils/ApiError');
-const {
+import jwt from 'jsonwebtoken';
+import ApiError from '../utils/ApiError.js';
+import {
   findUserByUsername,
-} = require("../models/authencationModels.js");
+} from "../models/authencationModels.js";
 // Verify access token middleware
 
 const generateAccessToken = (user) => {
@@ -89,14 +89,10 @@ const verifyToken = async (req, res, next) => {
         path: "/"
       });
       return res.status(401).json({ errorCode: "TOKEN_INVALID", message: "Access token không hợp lệ", forceLogout: true });
-    }
-
-    req.user = decoded; // Gắn thông tin user vào request
+    }    req.user = decoded; // Gắn thông tin user vào request
     next();
   });
 };
-
-module.exports = { verifyToken };
 
 // Role-based access control middleware
 const verifyRole = (...roles) => {
@@ -113,7 +109,7 @@ const verifyRole = (...roles) => {
   };
 };
 
-module.exports = {
+export {
   verifyToken,
   verifyRole
 };

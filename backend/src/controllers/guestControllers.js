@@ -1,6 +1,6 @@
-const { uploadToS3 } = require("../middlewares/imageUpload.js");
-const ApiError = require("../utils/ApiError.js");
-const {
+// import  uploadToS3  from "../middlewares/imageUpload.js";
+import ApiError from "../utils/ApiError.js";
+import {
   queryGetPublicInformationOfCompany,
   queryGetPublicJobDetail,
   queryGetListJobBySearch,
@@ -9,7 +9,7 @@ const {
   queryGetListCompanyBySearch,
   queryGetGeneralInfo,
   queryGetRelatedJobs
-} = require("../models/guestModels.js");
+} from "../models/guestModels.js";
 
 const getPublicJobDetail = async (req, res, next) => {
   try {
@@ -160,7 +160,7 @@ catch (err) {
 }
 };
 
-module.exports = {
+export {
   getPublicInformationOfCompany,
   getPublicJobDetail,
   getListJobBySearch,

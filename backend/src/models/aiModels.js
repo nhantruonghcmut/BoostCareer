@@ -1,4 +1,4 @@
-const db = require("../config/databaseConfig.js");
+import db from "../config/databaseConfig.js";
 
 const queryGetJobseekerDetail = async (jobseeker_id) => {
     try {
@@ -186,7 +186,7 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
     }
   };
   
-module.exports = {
+export {
     queryGetJobseekerDetail ,
     queryGetJobDetailByUser
   };

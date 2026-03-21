@@ -1,9 +1,9 @@
-const ApiError = require('../utils/ApiError');
-const bcrypt = require("bcrypt");
+import ApiError from '../utils/ApiError.js';
+import bcrypt from "bcrypt";
 // const {loginExecute} = require("../models/authencationModels.js");
-const { uploadImgToS3_employer, deleteFileFromS3 } = require("../middlewares/imageUpload.js");
+import { uploadImgToS3_employer, deleteFileFromS3 } from "../middlewares/imageUpload.js";
 
-const {
+import {
   queryGetListJobseekerBySearch,
   queryGetJobseekerDetail,
   queryGetListJobByUser,
@@ -31,7 +31,7 @@ const {
   queryGetNotification,
   queryUpdateReadNotification,
   queryChangePassword,
-} = require("../models/employerModels.js");
+} from "../models/employerModels.js";
 
 
 //////////////////////////////////////////////////////////////
@@ -670,7 +670,7 @@ const changePassword = async (req, res, next) => {
   } 
 }
 
-module.exports = {
+export {
   getListJobseekerBySearch,
   getListJobByUser,
   getJobDetailByUser,

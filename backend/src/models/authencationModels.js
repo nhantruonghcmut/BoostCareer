@@ -1,6 +1,6 @@
-const db = require("../config/databaseConfig.js");
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+import db from "../config/databaseConfig.js";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 
 const generateTokens = (userLogin) => {
@@ -145,4 +145,4 @@ const registerExecute = async (
   }
 };
 
-module.exports = { findUserByUsername, loginExecute, registerExecute,generateTokens };
+export { findUserByUsername, loginExecute, registerExecute,generateTokens };

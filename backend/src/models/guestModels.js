@@ -1,4 +1,4 @@
-const db = require("../config/databaseConfig.js");
+import db from "../config/databaseConfig.js";
 
 const queryGetPublicInformationOfCompany = async (id) => {
   // Lấy thông tin công khai của công ty đang được active (trả về null nếu không tìm thấy/ bị khóa bởi admin)
@@ -74,7 +74,7 @@ const queryGetPublicInformationOfCompany = async (id) => {
           (select * from company join user_employer e on company.company_id = e.employer_id
           WHERE e.status_ = 1 and company_id = ?) as c
         JOIN catalog_industry ci ON ci.industry_id = c.industry_id
-        JOIN catalog_scale cs ON cs.scale_id = c.scale_id;        
+        LEFT JOIN catalog_scale cs ON cs.scale_id = c.scale_id;        
     `,
       [id]
     );
@@ -193,7 +193,7 @@ const queryGetPublicJobDetail = async (job_id) => {
       catalog_city loc ON j.work_location = loc.city_id    
   JOIN
       catalog_level lvl ON j.level_id = lvl.level_id
-  JOIN 
+  LEFT JOIN
       catalog_scale cs ON cs.scale_id = c.scale_id
   JOIN
       catalog_education edu ON j.require_education = edu.education_id;
@@ -457,7 +457,7 @@ const queryGetListLeadingCompany = async (paging_size) => {
                       join user_employer e on company.company_id = e.employer_id
                       WHERE e.status_ = 1) as c
                   JOIN catalog_industry ci ON c.industry_id = ci.industry_id
-                  JOIN catalog_scale cs on cs.scale_id = c.scale_id
+                  LEFT JOIN catalog_scale cs on cs.scale_id = c.scale_id
                   ORDER BY count_job_posted DESC, count_follower DESC, average_score DESC
                   LIMIT ? OFFSET 0;`,
       [paging_size]
@@ -511,7 +511,7 @@ SELECT
         join user_employer e on company.company_id = e.employer_id
         WHERE e.status_ = 1) as c
     JOIN catalog_industry ci ON c.industry_id = ci.industry_id
-    JOIN catalog_scale cs on cs.scale_id = c.scale_id
+    LEFT JOIN catalog_scale cs on cs.scale_id = c.scale_id
 `;
 
     const conditions = [];
@@ -581,7 +581,7 @@ const queryGetGeneralInfo = async () => {
                       join user_employer e on company.company_id = e.employer_id
                       WHERE e.status_ = 1) as c
                   JOIN catalog_industry ci ON c.industry_id = ci.industry_id
-                  JOIN catalog_scale cs on cs.scale_id = c.scale_id
+                  LEFT JOIN catalog_scale cs on cs.scale_id = c.scale_id
                   ORDER BY count_job_posted DESC, count_follower DESC, average_score DESC
                   LIMIT 5 OFFSET 0;
       `
@@ -712,10 +712,10 @@ const queryGetRelatedJobs = async (job_id) => {
     console.error("Error fetching related jobs:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
-}
+};
 
 
-module.exports = {
+export {
   queryGetPublicInformationOfCompany,
   queryGetPublicJobDetail,
   queryGetListJobBySearch,

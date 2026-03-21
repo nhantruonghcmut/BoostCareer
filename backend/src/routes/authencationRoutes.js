@@ -1,13 +1,13 @@
-const express = require("express");
-const router = express.Router();
-const {
+import express from "express";
+
+import {
   login,
   register,
   logout,
   refreshToken,
-  } = require("../controllers/authencationControllers.js");
-const { verifyToken } = require("../middlewares/authMiddleware");
-
+  } from "../controllers/authencationControllers.js";
+import { verifyToken } from "../middlewares/authMiddleware.js";
+const router = express.Router();
 // Public routes
 router.post("/login", login);
 router.post("/register", register);
@@ -15,4 +15,4 @@ router.delete("/logout", logout);
 router.post("/refresh", refreshToken);
 
 
-module.exports = router;
+export default router;

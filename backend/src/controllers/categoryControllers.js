@@ -1,5 +1,5 @@
-const ApiError = require('../utils/ApiError.js');
-const {
+import ApiError from '../utils/ApiError.js';
+import {
   queryCategory_Industry,
   queryCategory_Jobfunction,
   queryCatalog_Benefit,
@@ -11,7 +11,7 @@ const {
   queryCategory_Scale,
   queryCategory_Tags,
   queryCategory_Education,
-} = require("../models/categoryModels.js");
+} from "../models/categoryModels.js";
 
 /**
  * Lấy danh sách ngành nghề
@@ -175,7 +175,7 @@ const gettime = (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   getCategory_Industry,
   getCategory_Jobfunction,
   getCatalog_Benefit,

@@ -1,11 +1,11 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const ApiError = require("../utils/ApiError");
-const {
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import ApiError from "../utils/ApiError.js";
+import {
   findUserByUsername,
   loginExecute,
   registerExecute
-} = require("../models/authencationModels.js");
+} from "../models/authencationModels.js";
 
 const generateAccessToken = (user) => {
    console.log("process.env.JWT_ACCESS_EXPIRES ", process.env.JWT_ACCESS_EXPIRES );
@@ -321,7 +321,7 @@ const refreshToken = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   isLogin,
   login,
   logout,

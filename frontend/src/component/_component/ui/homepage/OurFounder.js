@@ -1,7 +1,7 @@
 export default function FounderSection() {
   const url =
     "https://png.pngtree.com/png-clipart/20190924/original/pngtree-user-vector-avatar-png-image_4830521.jpg";
-  const myImage ="https://boostcareer.s3.us-east-1.amazonaws.com/system/founder.png";
+  const myImage ="https://boostcareer2.s3.us-east-1.amazonaws.com/system/founder.png";
   const testimonials = [
     {
       name: "Thanh Hang Dang",

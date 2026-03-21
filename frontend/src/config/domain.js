@@ -1,4 +1,4 @@
-const domain = "https://boostcareer.click";
+const domain = "https://boostcareer.site";
 // const domain = "http://localhost:4000";
 
 export default domain;

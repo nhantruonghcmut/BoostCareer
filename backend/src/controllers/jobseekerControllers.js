@@ -1,10 +1,10 @@
-const { uploadImgToS3_jobseeker, uploadToS3CV, deleteFileFromS3 } = require("../middlewares/imageUpload.js");
-const path = require('path');
-const bcrypt = require("bcrypt");
+import { uploadImgToS3_jobseeker, uploadToS3CV, deleteFileFromS3 } from "../middlewares/imageUpload.js";
+import path from 'path';
+import bcrypt from "bcrypt";
 // const {loginExecute} = require("../models/authencationModels.js");
-const db = require("../config/databaseConfig.js");
-const ApiError = require('../utils/ApiError');
-const {
+import db from "../config/databaseConfig.js";
+import ApiError from '../utils/ApiError.js';
+import {
   queryJobseekerGetJobDetail,
   queryGetItemProfile,
   queryDeleteItemProfile,
@@ -32,8 +32,8 @@ const {
   queryUpdateReadNotification,
   queryChangePassword,
   updateProfileCompletionPercentage
-} = require("../models/jobseekerModels.js");
-const { get } = require("http");
+} from "../models/jobseekerModels.js";
+// const { get } = require("http");
 
 const jobseekerGetJobDetail = async (req, res, next) => {
   try {
@@ -92,6 +92,7 @@ const updateJobseekerProfileImage = async (req, res, next) => {
  */
 const getItemProfile = async (req, res, next) => {
   try {
+    console.log("getItemProfile");
     const profile_id = req.user.id;
     const { type } = req.query;
     
@@ -681,7 +682,7 @@ const recalculateProfileCompletion = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   jobseekerGetJobDetail,
   getItemProfile,
   deleteItemProfile,

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   // Employer Basic information
   Basic: {
     tableName: 'user_employer',

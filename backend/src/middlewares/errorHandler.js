@@ -1,5 +1,5 @@
-const ApiError = require('../utils/ApiError');
-const logger = require('../utils/logger');
+import ApiError from '../utils/ApiError.js';
+import logger from '../utils/logger.js';
 
 const errorConverter = (err, req, res, next) => {
   let error = err;
@@ -16,7 +16,15 @@ const errorHandler = (err, req, res, next) => {
   
   // Tạo object chứa thông tin chi tiết về lỗi
   const errorDetails = {
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }),
     url: req.originalUrl,
     method: req.method,
     path: req.path,
@@ -36,11 +44,11 @@ const errorHandler = (err, req, res, next) => {
 
   // Log dựa trên mức độ nghiêm trọng
   if (statusCode >= 500) {
-    logger.error(`[SERVER ERROR] ${message}`, errorDetails);
+    logger.error(`[SERVER ERROR] [${req.method}] ${req.path} - ${message}`, errorDetails);
   } else if (statusCode >= 400) {
-    logger.warn(`[CLIENT ERROR] ${message}`, errorDetails);
+    logger.warn(`[CLIENT ERROR] [${req.method}] ${req.path} - ${message}`, errorDetails);
   } else {
-    logger.info(`[OTHER ERROR] ${message}`, errorDetails);
+    logger.info(`[OTHER ERROR] [${req.method}] ${req.path} - ${message}`, errorDetails);
   }
 
   // Trả về response cho client
@@ -70,4 +78,4 @@ function sanitizeRequestBody(body) {
   return sanitized;
 }
 
-module.exports = { errorConverter, errorHandler };
+export { errorConverter, errorHandler };

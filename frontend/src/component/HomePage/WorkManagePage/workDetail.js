@@ -360,7 +360,7 @@ const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
                 <ul>
                   {postDetail?.describle
                     ?.split("%00endl")
-                    .map((item, index) => item && <li key={index}>{item}</li>)}
+                    .map((item, index) => item? (<p key={index} className="mb-2">{item}</p>):null )}
                 </ul>
 
                 <h5 className="mt-3">Thông tin việc làm</h5>
@@ -541,7 +541,7 @@ const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
                       {postDetail.more_requirements
                         .split("%00endl")
                         .map(
-                          (item, index) => item && <li key={index}>{item}</li>
+                          (item, index) => item && <p key={index} className="mb-2">{item}</p>
                         )}
                     </ul>
                   </>

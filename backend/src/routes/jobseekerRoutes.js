@@ -1,5 +1,5 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   jobseekerGetJobDetail,
   getOverview,
   getItemProfile,
@@ -27,10 +27,10 @@ const {
   getNotification,
   updateReadNotification,
   changePassword,
-} = require("../controllers/jobseekerControllers.js");
+} from "../controllers/jobseekerControllers.js";
 
-const { upload } = require("../middlewares/imageUpload.js");
-const { verifyToken, verifyRole } = require('../middlewares/authMiddleware');
+import { upload } from "../middlewares/imageUpload.js";
+import { verifyToken, verifyRole } from '../middlewares/authMiddleware.js';
 const jobseekerRoutes = express.Router();
 
 // Bảo vệ routes với token và role
@@ -83,7 +83,7 @@ jobseekerRoutes.post("/change-password", changePassword); // đổi mật khẩu
 jobseekerRoutes.get("/profile-completion", recalculateProfileCompletion); // tính lại tỉ lệ hoàn thành hồ sơ
 
 
-module.exports = jobseekerRoutes;
+export default jobseekerRoutes;
 
 
 

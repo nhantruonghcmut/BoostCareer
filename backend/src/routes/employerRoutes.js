@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 
-const {
+import {
   getListJobseekerBySearch,
   getJobseekerDetail,
   getListJobByUser,
@@ -28,9 +28,9 @@ const {
   getNotification,
   updateReadNotification,
   changePassword
-} = require("../controllers/employerControllers.js");
-const { verifyToken, verifyRole } = require('../middlewares/authMiddleware');
-const { upload } = require("../middlewares/imageUpload.js");
+} from "../controllers/employerControllers.js";
+import { verifyToken, verifyRole } from '../middlewares/authMiddleware.js';
+import { upload } from "../middlewares/imageUpload.js";
 
 const employerRoutes = express.Router();
 employerRoutes.use(verifyToken);
@@ -70,7 +70,7 @@ employerRoutes.get("/notification", getNotification); // lấy danh sách thông
 employerRoutes.put("/notification", updateReadNotification); // dùng để đánh dấu đã đọc thông báo
 
 employerRoutes.post("/change-password", changePassword); // đổi mật khẩu
-module.exports = employerRoutes ;
+export default employerRoutes ;
 
 
 

@@ -1,6 +1,11 @@
-const { S3Client } = require("@aws-sdk/client-s3");
-const dotenv = require("dotenv");
-const path = require('path');
+import { S3Client } from "@aws-sdk/client-s3";
+import dotenv from "dotenv";
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Đảm bảo load file .env từ đúng đường dẫn
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -18,5 +23,5 @@ const s3 = new S3Client({
   },
   forcePathStyle: false, // Thay đổi thành true nếu sử dụng minio hoặc s3 compatible service
 });
-
-module.exports = s3;
+export const bucketName = process.env.AWS_BUCKET_NAME;
+export default s3;

@@ -1,8 +1,7 @@
-const db = require("../config/databaseConfig.js");
-const JobTables = require("../config/table_for_job.js");
-const EmployerTables = require("../config/table_for_employer.js");
-const table_for_job = require("../config/table_for_job.js");
-const e = require("express");
+import db from "../config/databaseConfig.js";
+import JobTables from "../config/table_for_job.js";
+import EmployerTables from "../config/table_for_employer.js";
+import table_for_job from "../config/table_for_job.js";
 
 ///////////////////////////////////////////////////////////////////////////
 // Jobseeker Queries
@@ -1477,7 +1476,7 @@ const queryUpdateReadNotification = async (employer_id, notification_id) => {
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
-module.exports = {
+export {
   queryGetListJobseekerBySearch,
   queryGetJobseekerDetail,
   queryGetListJobByUser,

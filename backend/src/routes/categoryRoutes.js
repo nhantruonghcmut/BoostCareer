@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 
-const {
+import {
   getCategory_Industry,
   getCategory_Jobfunction,
   getCatalog_Benefit,
@@ -13,7 +13,7 @@ const {
   getCategory_Tags,
   getCategory_Education,
   gettime,
-} = require("../controllers/categoryControllers.js");
+} from "../controllers/categoryControllers.js";
 
 const categoryRoutes = express.Router();
 
@@ -30,4 +30,4 @@ categoryRoutes.get("/category-scale", getCategory_Scale);
 categoryRoutes.get("/category-tags", getCategory_Tags);
 categoryRoutes.get("/category-education", getCategory_Education);
 categoryRoutes.get("/time", gettime);
-module.exports = categoryRoutes;
+export default categoryRoutes;

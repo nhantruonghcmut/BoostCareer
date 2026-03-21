@@ -1,6 +1,6 @@
-const db = require("../config/databaseConfig.js");
-const profileTables = require("../config/table_for_jobseeker.js");
-const { queryGetWorkDetail } = require("./employerModels.js");
+import db from "../config/databaseConfig.js";
+import profileTables from "../config/table_for_jobseeker.js";
+import { queryGetJobDetailByUser as queryGetWorkDetail } from "./employerModels.js";
 
 const queryShowHideResume = async (profile_id, cv_id, type) => {
   try {
@@ -1514,7 +1514,7 @@ const queryUpdateCompanyReview = async (jobseeker_id, company_id, score, content
   }
 };
 
-module.exports = {
+export {
   queryJobseekerGetJobDetail,
   queryGetItemProfile,
   queryDeleteItemProfile,
