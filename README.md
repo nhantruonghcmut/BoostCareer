@@ -65,21 +65,24 @@ Hệ thống tích hợp AI bằng cách **gọi API (OpenAI/Gemini)** ở backe
 ---
 
 ## Screenshots
-
-![Home](docs/screenshots/Home.png)
+#### Home
+![Home](docs/screenshots/Home.jpeg)
+#### AI Fit Analysis
 ![AI Fit Analysis](docs/screenshots/AI-fit-analysis.png)
+#### Jobseeker Profile
 ![Jobseeker Profile](docs/screenshots/Jobseeker-profile.png)
-![Review](docs/screenshots/Review.png)
+#### Review - Info
+![Review](docs/screenshots/Rreview.jpeg)
 
 ---
 
 ### Video Demo
 
-[![BoostCareer Demo](https://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://www.youtube.com/watch?v=YOUTUBE_VIDEO_ID_HERE "BoostCareer Demo")
+[![BoostCareer Demo](https://img.youtube.com/vi/zC6qgznPIYY/0.jpg)](https://www.youtube.com/watch?v=zC6qgznPIYY "BoostCareer Demo")
 
 ---
 
 ## License
-Dự án phục vụ mục đích học tập/đồ án. License: MIT.
+Dự án phục vụ mục đích học tập/đồ án.
 
 
