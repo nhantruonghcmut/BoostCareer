@@ -1,1 +1,0 @@
-còn thiếu model cho register, và chưa xử lý ở controller
