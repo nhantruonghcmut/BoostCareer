@@ -60,20 +60,16 @@ Hệ thống tích hợp AI bằng cách **gọi API (OpenAI/Gemini)** ở backe
 
 ## Database Schema (ERD & Relational Data Model)
 
-```md
 ![ERD](docs/schema/ERD.png)
 ![Relational data model](docs/schema/Relational-Model.png)
-```
 ---
 
 ## Screenshots
 
-```md
 ![Home](docs/screenshots/Home.png)
 ![AI Fit Analysis](docs/screenshots/AI-fit-analysis.png)
-![AI Fit Analysis](docs/screenshots/Jobseeker-profile.png)
-![AI Fit Analysis](docs/screenshots/Review.png)
-```
+![Jobseeker Profile](docs/screenshots/Jobseeker-profile.png)
+![Review](docs/screenshots/Review.png)
 
 ---
 
