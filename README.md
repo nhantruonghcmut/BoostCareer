@@ -59,8 +59,9 @@ Hệ thống tích hợp AI bằng cách **gọi API (OpenAI/Gemini)** ở backe
 ---
 
 ## Database Schema (ERD & Relational Data Model)
-
+### ERD
 ![ERD](docs/schema/ERD.png)
+### Relational data model
 ![Relational data model](docs/schema/Relational-Model.png)
 ---
 
