@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/boostcareer?useSSL=false&serverTimezone=UTC
+    username: root
+    password: 1412
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+app:
+  jwt:
+    secret: ${JWT_SECRET_BASE64:PUT_YOUR_DEV_BASE64_256BIT_SECRET_HERE}

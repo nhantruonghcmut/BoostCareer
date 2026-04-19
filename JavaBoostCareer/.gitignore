@@ -1,0 +1,19 @@
+# IntelliJ — mở project tại JavaBoostCareer/ (không nằm trong app/)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Log & môi trường local
+*.log
+.env
+.env.*
+!.env.example
+
+# Spring Boot — cấu hình chỉ dùng máy local
+**/application-local.yml
+**/application-local.properties
