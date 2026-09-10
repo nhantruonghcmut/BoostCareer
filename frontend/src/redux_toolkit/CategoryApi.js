@@ -1,8 +1,8 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import domain from '../config/domain';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQuery } from './baseQueryWithAuth';
 export const categoryApi = createApi({
   reducerPath: 'categoryApi',
-  baseQuery: fetchBaseQuery({ baseUrl: domain }),
+  baseQuery,
   endpoints: (builder) => ({
     getIndustries: builder.query({
         query: () => '/api/category/category-industry',

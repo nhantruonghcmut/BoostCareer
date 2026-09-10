@@ -10,9 +10,11 @@ import {employerApi} from './employerApi.js';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
 const persistConfig = {
-  key: "root", // Key dùng để lưu vào localStorage
+  key: "root",
   storage,
-  blacklist: [categoryApi.reducerPath,guestApi.reducerPath, jobseekerApi.reducerPath, employerApi.reducerPath, 'isLogin', 'user'], // Danh sách các reducer không cần lưu vào localStorage
+  // Chỉ persist slice auth. RTK Query cache KHÔNG được persist
+  // (dữ liệu cũ sẽ hiện lại sau reload và không khớp server).
+  whitelist: ["auth"],
 };
 
 const rootReducer = combineReducers({

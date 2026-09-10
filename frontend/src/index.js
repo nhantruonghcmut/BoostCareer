@@ -9,12 +9,11 @@ import { Provider } from "react-redux";
 import store, { persistor } from "./redux_toolkit/store"; // Import the store and persistor from redux_toolkit/store.js
 import { PersistGate } from "redux-persist/integration/react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "jquery/dist/jquery.min.js";
-import "popper.js/dist/umd/popper.min.js";
-import "bootstrap/dist/js/bootstrap.min.js";
+// bundle đã gồm Popper -> không cần jquery/popper.js riêng
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
+// TODO(Phase 5): thay 18 icon "fa fa-*" còn lại bằng bootstrap-icons rồi gỡ dep này
 import "font-awesome/css/font-awesome.min.css";
-
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 //Toastify message

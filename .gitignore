@@ -42,3 +42,13 @@
 **/.Trashes
 **/ehthumbs.db
 **/Thumbs.db
+/PLAN.md
+
+# Archives / build snapshots (không commit)
+**/*.zip
+
+# Tài liệu tư duy nội bộ - không đẩy lên remote
+docs/thinking/
+
+# File chờ xoá thủ công
+**/_to_delete/

@@ -1,9 +1,9 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import domain from "../config/domain";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQuery } from "./baseQueryWithAuth";
 
 export const guestApi = createApi({
   reducerPath: "guestApi",
-  baseQuery: fetchBaseQuery({ baseUrl: domain }),
+  baseQuery,
   endpoints: (builder) => ({
     // Get company information by ID
     getCompanyInformation: builder.query({
