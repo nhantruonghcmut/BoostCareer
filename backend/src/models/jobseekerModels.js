@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import db from "../config/databaseConfig.js";
 import profileTables from "../config/table_for_jobseeker.js";
 import { queryGetJobDetailByUser as queryGetWorkDetail } from "./employerModels.js";
@@ -16,6 +17,7 @@ const queryShowHideResume = async (profile_id, cv_id, type) => {
         `,
         [cv_id, profile_id]
       );
+      await touchJobseekerProfile(profile_id);
       return result.affectedRows > 0;
     } else {
       const [result] = await db.query(
@@ -26,10 +28,11 @@ const queryShowHideResume = async (profile_id, cv_id, type) => {
         `,
         [profile_id, cv_id]
       );
+      await touchJobseekerProfile(profile_id);
       return result.affectedRows > 0;
     }
   } catch (error) {
-    console.error("Error show hide CV:", error);
+    logger.error("Error show hide CV:", error);
     throw error;
   }
 };
@@ -158,7 +161,7 @@ const queryJobseekerGetJobDetail = async (profile_id,job_id) => {
     return job[0];
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error("Error fetching job details:", error);
+    logger.error("Error fetching job details:", error);
     throw error; // Rethrow the error to be handled by the calling function
   } finally {
     if (connection) connection.release();
@@ -196,7 +199,7 @@ const queryGetUserInformation = async (id) => {
       p.nationality_id,
       cna.nation_name,
       p.percent_complete,
-      p.create_at as last_modify_date,
+      COALESCE(p.update_at, p.create_at) as last_modify_date,
       c.city_name,
       c.city_id
     FROM 
@@ -220,7 +223,7 @@ const queryGetUserInformation = async (id) => {
     `,
     [id]
   );
-  // console.log(userInfor);
+  // logger.debug(userInfor);
   return userInfor[0];
 };
 
@@ -363,7 +366,7 @@ const queryGetJobAppliedByID = async (id) => {
     return jobApplied;
   }
   catch (error) { 
-    console.error("Error in queryGetJobAppliedByID:", error);
+    logger.error("Error in queryGetJobAppliedByID:", error);
     throw error;
   }
 };
@@ -424,7 +427,7 @@ const queryGetFollowedCompanyByID = async (id) => {
     `,
     [id]
   );
-  // console.log(followedCompany);
+  // logger.debug(followedCompany);
   return followedCompany;
 };
 
@@ -448,6 +451,7 @@ const queryUpdateJobseekerProfileImage = async (id, url) => {
     `,
     [url, id]
   );
+  await touchJobseekerProfile(id);
   return affectedRows;
 };
 
@@ -455,7 +459,7 @@ const queryAddItemProfile = async (type, data) => {
   if (!profileTables['profile'][type] || profileTables['profile'][type].tableName === undefined || profileTables['profile'][type].key === "Basic") {
     throw new Error(`Invalid profile type: ${type}`);
   }
-  // console.log("data Add ",type);
+  // logger.debug("data Add ",type);
 try {
   if (type==="language" || type==="skill") { // array of objects
     const profile_id = data.profile_id;
@@ -484,7 +488,7 @@ try {
   else {
     const fieldsArray = profileTables['profile'][type]["addItem"];    
     const values = [];
-    // console.log("data Add ",data);
+    // logger.debug("data Add ",data);
     fieldsArray.forEach(field => {
       if (data[field] !== undefined) {
         values.push(data[field]);
@@ -496,7 +500,7 @@ try {
     const placeholders = values.map(() => "?").join(", ");
 
 
-    // console.log(      `
+    // logger.debug(      `
     //   INSERT INTO ${profileTables['profile'][type].tableName} (${fields})
     //   VALUES (${placeholders});`,
     //   values)
@@ -513,7 +517,7 @@ try {
       return result.affectedRows;
     }
   } catch (error) {
-    console.error("Error in queryAddItemProfile:", error);
+    logger.error("Error in queryAddItemProfile:", error);
     throw error;
   }
 };
@@ -526,7 +530,7 @@ const queryUpdateItemProfile = async (type, data) => {
     if (type === "Basic") {
       // Special case for Basic profile fields
       const key = profileTables['profile'][type]["key"][0]; // bang nay chi co 1 key
-      // console.log("data Update Basic ",data);
+      // logger.debug("data Update Basic ",data);
       const fieldsToUpdate_arr = [];
       const values = [];
       Object.keys(data).forEach((item) => {
@@ -536,7 +540,7 @@ const queryUpdateItemProfile = async (type, data) => {
         }
       });
       const fieldsToUpdate = fieldsToUpdate_arr.join(", ");
-      // console.log("fieldsToUpdate_arr", fieldsToUpdate);
+      // logger.debug("fieldsToUpdate_arr", fieldsToUpdate);
       values.push(data[key]);
       const [result] = await db.query(
         `
@@ -551,7 +555,7 @@ const queryUpdateItemProfile = async (type, data) => {
       
       return result.affectedRows;
     } else {
-      // console.log("data Update other ",data);
+      // logger.debug("data Update other ",data);
       if (!profileTables['profile'][type]) {
         throw new Error(`Invalid profile type: ${type}`);
       }
@@ -576,7 +580,7 @@ const queryUpdateItemProfile = async (type, data) => {
       return result.affectedRows;
     }
   } catch (error) {
-    console.error("Error in queryUpdateItemProfile:", error);
+    logger.error("Error in queryUpdateItemProfile:", error);
     throw error;
   }
 };
@@ -603,11 +607,11 @@ const queryDeleteItemProfile = async (type, data) => {
     // Update profile completion percentage after deletion
     await updateProfileCompletionPercentage(profile_id);
     
-    // console.log(result);
-    // console.log(result.affectedRows);
+    // logger.debug(result);
+    // logger.debug(result.affectedRows);
     return result.affectedRows>0;
   } catch (error) {
-    console.error(`Error in queryDeleteItemProfile:`, error);
+    logger.error(`Error in queryDeleteItemProfile:`, error);
     throw error;
   }
 };
@@ -659,7 +663,7 @@ const queryGetItemProfile = async (type, profile_id) => {
             const [job] = await queryGetWorkDetail(item.job_id);
             jobSaved.push(job);
           }
-          // console.log(jobSaved);
+          // logger.debug(jobSaved);
           return jobSaved;
         case "follow_employer":
           const followedCompany_basic = await queryGetFollowedCompanyByID(
@@ -668,7 +672,7 @@ const queryGetItemProfile = async (type, profile_id) => {
           const followedCompany = [];
           // if (!followedCompany_basic) return followedCompany;
           for (const item of followedCompany_basic) {
-            // console.log(item);
+            // logger.debug(item);
             const [company] = await queryGetBasicCompany(item.employer_id);
             followedCompany.push(company);
           }
@@ -679,7 +683,7 @@ const queryGetItemProfile = async (type, profile_id) => {
       // return result.affectedRows;;
     }
   } catch (error) {
-    console.error("Error in queryUpdateItemProfile:", error);
+    logger.error("Error in queryUpdateItemProfile:", error);
     throw error;
   }
 };
@@ -687,7 +691,7 @@ const queryGetItemProfile = async (type, profile_id) => {
 // Profile related queries
 
 // Resume related queries
-const queryAddResume = async (profile_id, resumeData) => { 
+const queryAddResume = async (profile_id, resumeData) => {
   try {
     const { cv_name, cv_link, s3_key } = resumeData;
     const create_at = new Date();
@@ -697,15 +701,17 @@ const queryAddResume = async (profile_id, resumeData) => {
     );
     if (count[0].count === 0) { isactive=1;}    
     const [result] = await db.query(
-      `INSERT INTO profile_cv (profile_id, cv_name, cv_link, s3_key, create_at, isactive) 
+      `INSERT INTO profile_cv (profile_id, cv_name, cv_link, s3_key, create_at, isactive)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [profile_id, cv_name, cv_link, s3_key, create_at, isactive]
     );
-    
+
+    await updateProfileCompletionPercentage(profile_id);
+
     return result.insertId;
   }
   catch (error) {
-    console.error("Error in queryAddResume:", error);
+    logger.error("Error in queryAddResume:", error);
     throw error;
   }
 
@@ -724,7 +730,7 @@ const queryGetResume = async (profile_id) => {
     return resumes;
   }
   catch (error) {
-    console.error("Error in queryGetResume:", error);
+    logger.error("Error in queryGetResume:", error);
     throw error;
   }
 
@@ -734,16 +740,18 @@ const queryDeleteResume = async (profile_id,cv_id) => {
   try 
   {
     const [result] = await db.query(
-      `DELETE FROM profile_cv 
+      `DELETE FROM profile_cv
        WHERE cv_id = ? AND profile_id = ?`,
       [cv_id, profile_id]
     );
-    
+
+    await updateProfileCompletionPercentage(profile_id);
+
     return result.affectedRows > 0;
   }
   catch (error)
   {
-    console.error("Error in queryDeleteResume:", error);
+    logger.error("Error in queryDeleteResume:", error);
     throw error;
   }
 
@@ -793,7 +801,7 @@ const queryGetListJobApplication = async (profile_id) => {
     }
   }
   catch (error) {
-    console.error("Error in queryGetListJobApplication:", error);
+    logger.error("Error in queryGetListJobApplication:", error);
     throw error;
   }
 };
@@ -825,7 +833,7 @@ const queryApplyToJob = async (profile_id, job_id) => {
     }
   }
 catch (error) {
-    console.error("Error in queryApplyToJob:", error);
+    logger.error("Error in queryApplyToJob:", error);
     throw error;
   }
 };
@@ -844,11 +852,11 @@ const queryAddCompanyReview = async ( profile_id, company_id,score,content) => {
         (?, ?, ?, ?, ?, ?);`,
       [company_id,"review", profile_id,"Bạn có lượt đánh giá mới ",0, create_at]
     );
-    // console.log(result);
+    // logger.debug(result);
     return result.affectedRows > 0 && result2.affectedRows > 0;
   }
   catch (error) {
-    console.error("Error in queryAddCompanyReview:", error);
+    logger.error("Error in queryAddCompanyReview:", error);
     throw error;
   }
 };
@@ -880,14 +888,14 @@ const queryGetListCompanyFollowing = async (profile_id) => {
         JOIN company c on ljfe.employer_id = c.company_id 
         JOIN catalog_industry ci on c.industry_id = ci.industry_id`,
       [profile_id]);
-      // console.log(followedCompanies);
+      // logger.debug(followedCompanies);
       if (followedCompanies.length > 0) {
         return followedCompanies;
       } else {
         return [];} // No followed companies found
   }
   catch (error) {
-    console.error("Error in queryGetListCompanyFollowing:", error);
+    logger.error("Error in queryGetListCompanyFollowing:", error);
     throw error;
   }
 };
@@ -904,7 +912,7 @@ const queryDeleteCompanyFollowing = async (profile_id, company_id) => {
   }
   catch (error) 
   {
-    console.error("Error in queryDeleteCompanyFollowing:", error);
+    logger.error("Error in queryDeleteCompanyFollowing:", error);
     throw error;
   }
 };
@@ -925,7 +933,7 @@ const queryAddCompanyFollowing = async (profile_id, company_id) => {
   }
   catch
   (error) {
-      console.error("Error in queryAddCompanyFollowing:", error);
+      logger.error("Error in queryAddCompanyFollowing:", error);
       throw error;
     }
 };
@@ -971,7 +979,7 @@ const queryGetListJobSaving = async (profile_id) => {
     else return []; // No saved jobs found
   }
   catch (error) {
-    console.error("Error in queryGetListJobSaving:", error);
+    logger.error("Error in queryGetListJobSaving:", error);
     throw error;
   }
 };
@@ -988,7 +996,7 @@ const queryAddJobSaving = async (profile_id,job_id) => {
     return result.affectedRows > 0;
   }
   catch (error) {
-    console.error("Error in queryAddJobSaving:", error);
+    logger.error("Error in queryAddJobSaving:", error);
     throw error;
   }
 };
@@ -1001,11 +1009,11 @@ const queryDeleteJobSaving = async (profile_id, job_id) => {
        WHERE jobseeker_id = ? AND job_id = ?`,
       [profile_id, job_id]
     );
-    // console.log(result);
+    // logger.debug(result);
     return result.affectedRows > 0; // Return true if deletion was successful
   }
   catch (error) {
-    console.error("Error in queryDeleteJobSaving:", error);
+    logger.error("Error in queryDeleteJobSaving:", error);
     throw error;
   }
 };
@@ -1027,7 +1035,7 @@ const queryGetOverview = async (profile_id, days) => {
     const step = (d2 - d1) / (1000 * 60 * 60 * 24);
     const d0 = new Date(d1);
     d0.setDate(d0.getDate() - step);
-    console.log("action overview");
+    logger.debug("action overview");
     
     const [result0] = await db.query(
       `SELECT 
@@ -1147,7 +1155,7 @@ const queryGetOverview = async (profile_id, days) => {
       `,
        [d0, d1, d0, d2, d0, d3, d0, d4, d0, d5, profile_id]
     );
-    // console.log(result7);
+    // logger.debug(result7);
     const [totalApply] = await db.query(
       `
         SELECT 
@@ -1187,10 +1195,10 @@ const queryGetOverview = async (profile_id, days) => {
         'jobseeker_rate_company': result7[0].jobseeker_rate_company
       }
     ;
-    // console.log(result);
+    // logger.debug(result);
     return {chart, totalApply: totalApply[0].total_apply_job, totalViews: totalViews[0].total_view_job, totalSaved: totalSaved[0].total_save_job,percent_complete: percent_complete[0].percent_complete};
   } catch (error) {
-    console.error("Error in queryGetOverview:", error);
+    logger.error("Error in queryGetOverview:", error);
     throw error;
   }
 };
@@ -1279,7 +1287,7 @@ const queryGetJobsSuggestion = async (profile_id) => {
     const result = data.sort(() => 0.5 - Math.random()).slice(0, 5);
     return result;
   } catch (error) {
-    console.error("Error in queryGetJobsSuggestion:", error);
+    logger.error("Error in queryGetJobsSuggestion:", error);
     throw error;
   }
 }
@@ -1314,7 +1322,7 @@ const queryGetNotification = async (jobseeker_id) => {
   
   }
   catch (error) {
-    console.error("Error in queryGetNotification:", error);
+    logger.error("Error in queryGetNotification:", error);
     throw error;
   };
   };
@@ -1327,7 +1335,7 @@ const queryGetNotification = async (jobseeker_id) => {
       );
       return result.affectedRows > 0; // Trả về true nếu cập nhật thành công
     } catch (error) {
-      console.error("Error updating notification:", error);
+      logger.error("Error updating notification:", error);
       throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
     }
   }
@@ -1341,9 +1349,16 @@ const queryGetNotification = async (jobseeker_id) => {
     );
     return result.affectedRows > 0; // Trả về true nếu cập nhật thành công
   } catch (error) {
-    console.error("Error updating password:", error);
+    logger.error("Error updating password:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
+};
+
+const touchJobseekerProfile = async (profile_id) => {
+  await db.query(
+    `UPDATE profile_jobseeker SET update_at = NOW() WHERE profile_id = ?`,
+    [profile_id]
+  );
 };
 
 // Function to calculate and update profile completion percentage
@@ -1467,13 +1482,13 @@ const updateProfileCompletionPercentage = async (profile_id) => {
 
     // Update the percent_complete field in profile_jobseeker table
     await db.query(
-      `UPDATE profile_jobseeker SET percent_complete = ? WHERE profile_id = ?`,
+      `UPDATE profile_jobseeker SET percent_complete = ?, update_at = NOW() WHERE profile_id = ?`,
       [totalPercentage, profile_id]
     );
 
     return totalPercentage;
   } catch (error) {
-    console.error("Error in updateProfileCompletionPercentage:", error);
+    logger.error("Error in updateProfileCompletionPercentage:", error);
     throw error;
   }
 };
@@ -1493,7 +1508,7 @@ const queryGetCompanyReview = async (jobseeker_id, company_id) => {
     );
     return result;
   } catch (error) {
-    console.error("Error in getCompanyReview:", error);
+    logger.error("Error in getCompanyReview:", error);
     throw error;
   }
 };
@@ -1509,7 +1524,7 @@ const queryUpdateCompanyReview = async (jobseeker_id, company_id, score, content
     );
     return result.affectedRows > 0;
   } catch (error) {
-    console.error("Error in updateCompanyReview:", error);
+    logger.error("Error in updateCompanyReview:", error);
     throw error;
   }
 };

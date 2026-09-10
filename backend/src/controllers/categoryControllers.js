@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import ApiError from '../utils/ApiError.js';
 import {
   queryCategory_Industry,
@@ -54,14 +55,14 @@ const getCategory_Nation = async (req, res, next) => {
  */
 const getCategory_City = async (req, res, next) => {
   try {
-    // console.log("req.query", req.query);
+    // logger.debug("req.query", req.query);
     const nation = req.query?.nation || 84;
     
     if (!nation) {
       return next(new ApiError("Thiếu thông tin mã quốc gia", 400));
     }    
     const data = await queryCategory_City(nation);
-    // console.log("nation", data);
+    // logger.debug("nation", data);
     return res.success(data || [], "Lấy danh sách thành phố thành công");
   } catch (err) {
     return next(new ApiError("Có lỗi khi lấy thông tin thành phố", 500));

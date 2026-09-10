@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import db from "../config/databaseConfig.js";
 import JobTables from "../config/table_for_job.js";
 import EmployerTables from "../config/table_for_employer.js";
@@ -137,8 +138,8 @@ JOIN
   query += ` LIMIT ? OFFSET ?;`;
   values.push(Number(paging_size));
   values.push((Number(active_page) - 1) * Number(paging_size));
-  // console.log("query", query);
-  // console.log("values", values);
+  // logger.debug("query", query);
+  // logger.debug("values", values);
   const [result] = await db.query(query, values);
   return result;
 };
@@ -266,7 +267,7 @@ const queryGetJobseekerDetail = async (employer_id, jobseeker_id) => {
       `SELECT * from logs_employer_rate_jobseeker WHERE jobseeker_id= ? and employer_id = ?`,
       [jobseeker_id, employer_id]
     );
-    // console.log("employerRating", employerRating);
+    // logger.debug("employerRating", employerRating);
     const fullRatingScale = [5, 4, 3, 2, 1].map((score) => {
       if (!ratings || !ratings.length) {
         return {
@@ -296,7 +297,7 @@ const queryGetJobseekerDetail = async (employer_id, jobseeker_id) => {
       `SELECT * FROM logs_employer_view_jobseeker WHERE employer_id = ? and jobseeker_id = ?`,
       [employer_id, jobseeker_id]
     );
-    console.log("checkLogsView", checkLogsView);
+    logger.debug("checkLogsView", checkLogsView);
     const [checkLogsSave] = await db.query(
       `SELECT * FROM logs_employer_save_jobseeker WHERE employer_id = ? and jobseeker_id = ?`,
       [employer_id, jobseeker_id]
@@ -304,7 +305,7 @@ const queryGetJobseekerDetail = async (employer_id, jobseeker_id) => {
     const isSaved = checkLogsSave.length > 0 ? true : false;
 
     if (checkLogsView.length > 0) {
-      console.log("update view");
+      logger.debug("update view");
       const [logs] = await db.query(
         `
                   UPDATE logs_employer_view_jobseeker set create_at =? WHERE employer_id=? AND jobseeker_id=? ;
@@ -347,7 +348,7 @@ const queryGetJobseekerDetail = async (employer_id, jobseeker_id) => {
     if (connection) {
       await connection.rollback();
     }
-    console.error("Error getting jobseeker detail:", error);
+    logger.error("Error getting jobseeker detail:", error);
     // throw error;
     return null;
   } finally {
@@ -444,7 +445,7 @@ const queryGetListJobByUser = async (employer_id) => {
     );
     return listJob;
   } catch (error) {
-    console.error("Error getting list job by user:", error);
+    logger.error("Error getting list job by user:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -473,7 +474,7 @@ FROM
     );
     return listJob[0].list_job;
   } catch (error) {
-    console.error("Error getting list job by user:", error);
+    logger.error("Error getting list job by user:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -563,7 +564,7 @@ const queryGetJobDetailByUser = async (job_id, employer_id) => {
     );
     return Job;
   } catch (error) {
-    console.error("Error getting list job by user:", error);
+    logger.error("Error getting list job by user:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -610,7 +611,7 @@ const queryAddJobByUser = async (data) => {
     const [result] = await connection.query(sql, values);
     const job_id = result.insertId;
 
-    console.log("job_id", job_id);
+    logger.debug("job_id", job_id);
     if (!job_id) {
       throw new Error("Failed to insert job into database");
     }
@@ -666,7 +667,7 @@ const queryAddJobByUser = async (data) => {
     if (connection) {
       await connection.rollback();
     }
-    console.error("Error adding job:", error);
+    logger.error("Error adding job:", error);
     throw error;
   } finally {
     // Chỉ release khi connection đã được khởi tạo
@@ -685,7 +686,7 @@ const queryUpdateJobByUser = async (data) => {
   try {
     const lastUpdateOn = new Date();
     data = { ...data, lastUpdateOn: lastUpdateOn };
-    console.log("data", data);
+    logger.debug("data", data);
     connection = await db.getConnection();
     await connection.beginTransaction();
 
@@ -699,8 +700,8 @@ const queryUpdateJobByUser = async (data) => {
     sql += ` WHERE job_id = ? AND employer_id = ?;`;
     const values = availableFields.map((field) => data[field]);
     values.push(job_id, employer_id);
-    console.log("sql", sql);
-    console.log("values", values);
+    logger.debug("sql", sql);
+    logger.debug("values", values);
     const [result] = await connection.query(sql, values);
     if (result.affectedRows === 0) {
       throw new Error("Failed to insert job into database");
@@ -770,7 +771,7 @@ const queryUpdateJobByUser = async (data) => {
     if (connection) {
       await connection.rollback();
     }
-    console.error("Error adding job:", error);
+    logger.error("Error adding job:", error);
     throw error;
   } finally {
     // Chỉ release khi connection đã được khởi tạo
@@ -791,7 +792,7 @@ const queryDeleteJobByUser = async (employer_id, job_id) => {
     }
     return true; // Trả về true nếu xóa thành công
   } catch (error) {
-    console.error("Error deleting job:", error);
+    logger.error("Error deleting job:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -850,7 +851,7 @@ const queryGetCompanyInformation = async (company_id) => {
     );
     return companyInfo[0];
   } catch (error) {
-    console.error("Error getting company information:", error);
+    logger.error("Error getting company information:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -859,12 +860,12 @@ const queryAddItemCompanyProfile = async (type, data) => {
   try {
     if (type === "company_location") {
       const { company_id, city_id, address = "" } = data;
-      // console.log(company_id, city_id, address);
+      // logger.debug(company_id, city_id, address);
       const [result] = await db.query(
         `INSERT INTO company_location (company_id, city_id, address) VALUES (?, ?, ?);`,
         [company_id, city_id, address]
       );
-      // console.log("result", result);
+      // logger.debug("result", result);
       return result.affectedRows > 0; // Trả về true nếu có hàng bị xóa
     } else if (type === "company_benefit") {
       const { company_id, benefit_id, benefit_value = "" } = data;
@@ -872,12 +873,12 @@ const queryAddItemCompanyProfile = async (type, data) => {
         `INSERT INTO company_benefit (company_id, benefit_id, benefit_value) VALUES (?, ?, ?);`,
         [company_id, benefit_id, benefit_value]
       );
-      // console.log("result", result);
+      // logger.debug("result", result);
       return result.affectedRows > 0; // Trả về true nếu có hàng bị xóa
     }
     return false;
   } catch (error) {
-    console.error("Error Add company information:", error);
+    logger.error("Error Add company information:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -893,8 +894,8 @@ const queryUpdateItemCompanyProfile = async (type, data) => {
       sql += ` WHERE company_id = ?;`;
       const values = availableFields.map((field) => data[field]);
       values.push(data.company_id);
-      // console.log("sql", sql);
-      // console.log("values", values);
+      // logger.debug("sql", sql);
+      // logger.debug("values", values);
       const [result] = await db.query(sql, values);
       return result.affectedRows > 0; //
     } else if (type === "company_location") {
@@ -914,20 +915,20 @@ const queryUpdateItemCompanyProfile = async (type, data) => {
     }
     return false;
   } catch (error) {
-    console.error("Error Update company information:", error);
+    logger.error("Error Update company information:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
 
 const queryDeleteItemCompanyProfile = async (type, company_id, id) => {
-  // console.log(type, company_id, id);
+  // logger.debug(type, company_id, id);
   try {
     if (type === "company_location") {
       const [result] = await db.query(
         `delete from company_location where company_id = ? and location_id =?;`,
         [company_id, id]
       );
-      // console.log("result", result);
+      // logger.debug("result", result);
       return result.affectedRows > 0; // Trả về true nếu có hàng bị xóa
     } else if (type === "company_benefit") {
       const [result] = await db.query(
@@ -939,7 +940,7 @@ const queryDeleteItemCompanyProfile = async (type, company_id, id) => {
     }
     return false;
   } catch (error) {
-    console.error("Error Delete company information:", error);
+    logger.error("Error Delete company information:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -947,14 +948,14 @@ const queryDeleteItemCompanyProfile = async (type, company_id, id) => {
 // Update logo image URL in the company profile
 const queryUpdateLogoImage = async (company_id, logoUrl) => {
   try {
-    console.log("Updating logo image for company:", company_id);
+    logger.debug("Updating logo image for company:", company_id);
     const [result] = await db.query(
       `UPDATE company SET logo = ? WHERE company_id = ?;`,
       [logoUrl, company_id]
     );
     return result.affectedRows > 0; // Return true if update was successful
   } catch (error) {
-    console.error("Error updating logo image:", error);
+    logger.error("Error updating logo image:", error);
     throw error;
   }
 };
@@ -962,14 +963,14 @@ const queryUpdateLogoImage = async (company_id, logoUrl) => {
 // Update background image URL in the company profile
 const queryUpdateBackgroundImage = async (company_id, bgUrl) => {
   try {
-    console.log("Updating background image for company:", company_id);
+    logger.debug("Updating background image for company:", company_id);
     const [result] = await db.query(
       `UPDATE company SET background = ? WHERE company_id = ?;`,
       [bgUrl, company_id]
     );
     return result.affectedRows > 0; // Return true if update was successful
   } catch (error) {
-    console.error("Error updating background image:", error);
+    logger.error("Error updating background image:", error);
     throw error;
   }
 };
@@ -999,7 +1000,7 @@ const queryGetListCandidateSaving = async (employer_id) => {
     );
     return listCandidate;
   } catch (error) {
-    console.error("Error getting list candidate:", error);
+    logger.error("Error getting list candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1013,7 +1014,7 @@ const querySaveCandidate = async (employer_id, jobseeker_id) => {
     );
     return result.affectedRows > 0;
   } catch (error) {
-    console.error("Error saving candidate:", error);
+    logger.error("Error saving candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1038,12 +1039,12 @@ const queryRateCandidate = async (
         `INSERT INTO logs_employer_rate_jobseeker (employer_id, jobseeker_id, score, content,create_at) VALUES (?, ?,?,?,?);`,
         [employer_id, application_id, rating, content, create_at]
       );
-      // console.log("result", result);
+      // logger.debug("result", result);
       return result.affectedRows > 0;
     }
     return false;
   } catch (error) {
-    console.error("Error saving candidate:", error);
+    logger.error("Error saving candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1058,7 +1059,7 @@ const queryDeleteCandidate = async (employer_id, jobseeker_id) => {
     );
     return result.affectedRows > 0; // Trả về true nếu có hàng bị xóa
   } catch (error) {
-    console.error("Error deleting candidate:", error);
+    logger.error("Error deleting candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1080,14 +1081,14 @@ const queryInviteJobseekerApply = async (employer_id, jobseeker_id, job_ids) => 
         `INSERT INTO notification (recipient_id, notification_type, entity_id,content,is_read, created_at) VALUES (?, ?, ?, ?,?,?);`,
         [jobseeker_id,"invitation",employer_id,"Bạn vừa được nhà tuyển dụng mời ứng tuyển",0, create_at]
       );
-      // console.log("result", result);
+      // logger.debug("result", result);
       if (result.affectedRows === 0 || result2.affectedRows === 0) {
         throw new Error("Failed to insert invite into database");
       }
     }
     return true; // Trả về true ok
   } catch (error) {
-    console.error("Error saving candidate:", error);
+    logger.error("Error saving candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1101,7 +1102,7 @@ const queryDeleteInvitation = async (employer_id, jobseeker_id, job_id) => {
     );
     return result.affectedRows > 0; // Trả về true nếu có hàng bị xóa
   } catch (error) {
-    console.error("Error deleting candidate:", error);
+    logger.error("Error deleting candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1129,7 +1130,7 @@ const queryGetListInvitaion = async (employer_id) => {
     );
     return result;
   } catch (error) {
-    console.error("Error Get Invitation candidate:", error);
+    logger.error("Error Get Invitation candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1166,7 +1167,7 @@ const queryGetListJobApplication = async (employer_id) => {
       return result;
 
   } catch (error) {
-    console.error("Error get candidate applied:", error);
+    logger.error("Error get candidate applied:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1175,7 +1176,7 @@ const queryGetListJobApplication = async (employer_id) => {
 
     
 //   } catch (error) {
-//     console.error("Error saving candidate:", error);
+//     logger.error("Error saving candidate:", error);
 //     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
 //   }
 // };
@@ -1191,7 +1192,7 @@ const [result] = await db.query(
   }
   return true; // Trả về true nếu cập nhật thành công
   } catch (error) {
-    console.error("Error saving candidate:", error);
+    logger.error("Error saving candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1203,7 +1204,7 @@ const queryAddNotification = async (employer_id, jobseeker_id, job_id) => {
 
     
   } catch (error) {
-    console.error("Error saving candidate:", error);
+    logger.error("Error saving candidate:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };
@@ -1403,7 +1404,7 @@ const queryGetOverview = async (employer_id, days) => {
       VisibleJob: VisibleJob[0].VisibleJob,
     };
   } catch (error) {
-    console.error("Error in queryGetOverview:", error);
+    logger.error("Error in queryGetOverview:", error);
     throw error;
   }
 };
@@ -1446,21 +1447,21 @@ return result;
 
 }
 catch (error) {
-  console.error("Error in queryGetNotification:", error);
+  logger.error("Error in queryGetNotification:", error);
   throw error;
 };
 };
 
 const queryUpdateReadNotification = async (employer_id, notification_id) => {
   try {
-    console.log(" queryUpdateReadNotification employer_id", employer_id);
+    logger.debug(" queryUpdateReadNotification employer_id", employer_id);
     const [result] = await db.query(
       `UPDATE notification SET is_read = 1 WHERE recipient_id = ? AND notification_id = ?;`,
       [employer_id, notification_id]
     );
     return result.affectedRows > 0; // Trả về true nếu cập nhật thành công
   } catch (error) {
-    console.error("Error updating notification:", error);
+    logger.error("Error updating notification:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 }
@@ -1472,7 +1473,7 @@ const queryUpdateReadNotification = async (employer_id, notification_id) => {
     );
     return result.affectedRows > 0; // Trả về true nếu cập nhật thành công
   } catch (error) {
-    console.error("Error updating password:", error);
+    logger.error("Error updating password:", error);
     throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
   }
 };

@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 const responseHandler = (req, res, next) => {
   res.success = (data = null, message = "Success", statusCode = 200) => {
     return res.status(statusCode).json({
@@ -8,7 +9,7 @@ const responseHandler = (req, res, next) => {
   };
   
   res.error = (message = "Error occurred", statusCode = 500, error = null) => {
-    console.error(`API Error: ${message}`, error);
+    logger.error(`API Error: ${message}`, error);
     return res.status(statusCode).json({
       success: false,
       message,

@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import db from "../config/databaseConfig.js";
 
 const queryGetPublicInformationOfCompany = async (id) => {
@@ -83,7 +84,7 @@ const queryGetPublicInformationOfCompany = async (id) => {
     }
     return result[0];
   } catch (error) {
-    console.error("Error fetching company information:", error);
+    logger.error("Error fetching company information:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
 };
@@ -204,7 +205,7 @@ const queryGetPublicJobDetail = async (job_id) => {
     return job[0];
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error("Error fetching job details:", error);
+    logger.error("Error fetching job details:", error);
     throw error; // Rethrow the error to be handled by the calling function
   } finally {
     if (connection) connection.release();
@@ -351,14 +352,14 @@ const queryGetListJobBySearch = async (searchData) => {
     const [result] = await db.query(query, values);
     return result;
   } catch (error) {
-    console.error("Error fetching jobs by search:", error);
+    logger.error("Error fetching jobs by search:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
 };
 
 const queryGetListJobOfCompany = async (companyId) => {
   try {
-    // console.log("companyId", companyId);
+    // logger.debug("companyId", companyId);
     const [result] = await db.query(
       `
       SELECT 
@@ -410,13 +411,13 @@ const queryGetListJobOfCompany = async (companyId) => {
       [companyId]
     );
 
-    // console.log("result", result);
+    // logger.debug("result", result);
     if (result.length === 0) {
       return null;
     }
     return result;
   } catch (error) {
-    console.error("Error fetching jobs of company:", error);
+    logger.error("Error fetching jobs of company:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
 };
@@ -464,7 +465,7 @@ const queryGetListLeadingCompany = async (paging_size) => {
     );
     return companies;
   } catch (error) {
-    console.error("Error fetching leading companies:", error);
+    logger.error("Error fetching leading companies:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
 };
@@ -540,7 +541,7 @@ SELECT
     const [companies] = await db.query(query, values);
     return companies;
   } catch (error) {
-    console.error("Error fetching companies by search:", error);
+    logger.error("Error fetching companies by search:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
 };
@@ -620,7 +621,7 @@ const queryGetGeneralInfo = async () => {
     };
     return result;
   } catch (error) {
-    console.error("Error fetching general info:", error);
+    logger.error("Error fetching general info:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
 };
@@ -709,7 +710,7 @@ const queryGetRelatedJobs = async (job_id) => {
    
  
   } catch (error) {
-    console.error("Error fetching related jobs:", error);
+    logger.error("Error fetching related jobs:", error);
     throw error; // Rethrow the error to be handled by the calling function
   }
 };

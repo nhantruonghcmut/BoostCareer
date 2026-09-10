@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import ApiError from '../utils/ApiError.js';
 import bcrypt from "bcrypt";
 // const {loginExecute} = require("../models/authencationModels.js");
@@ -38,7 +39,7 @@ import {
 const getListJobseekerBySearch = async (req, res, next) => {
   try {
     const searchData = req.query;
-    // console.log("searchData", searchData);
+    // logger.debug("searchData", searchData);
     if (!searchData) {
       return next(new ApiError("Thiếu thông tin tìm kiếm", 400));
     }
@@ -181,7 +182,7 @@ const deleteJobByUser = async (req, res, next) => {
   try {
     const employer_id = req.user.id;
     const {job_id } = req.body;
-    // console.log("deleteJobByUser", req.query);
+    // logger.debug("deleteJobByUser", req.query);
     if (!job_id || !employer_id) {
       return next(new ApiError("Thiếu thông tin ID bài đăng hoặc nhà tuyển dụng", 400));
     }
@@ -264,7 +265,7 @@ const deleteItemCompanyProfile = async (req, res, next) => {
   try {
     const company_id= req.user.id;
     const {type,id} = req.query;
-    // console.log("deleteItemCompanyProfile", req.query);
+    // logger.debug("deleteItemCompanyProfile", req.query);
     
     if (!company_id|| !type||!id) {
       return next(new ApiError("Thiếu thông tin ID hồ sơ hoặc công ty", 400));
@@ -272,7 +273,7 @@ const deleteItemCompanyProfile = async (req, res, next) => {
     
     
     const result = await queryDeleteItemCompanyProfile(type,company_id,id);
-    // console.log("result tai controller", result);
+    // logger.debug("result tai controller", result);
     if (!result) {
       return next(new ApiError("Xóa hồ sơ thất bại", 404));
     }
@@ -288,8 +289,8 @@ const updateLogoImage = async (req, res, next) => {
     const company_id = req.user.id;
     const logoFile = req.file;
     
-    console.log("Logo image update request received for company ID:", company_id);
-    console.log("File information:", logoFile ? { 
+    logger.debug("Logo image update request received for company ID:", company_id);
+    logger.debug("File information:", logoFile ? { 
       originalname: logoFile.originalname,
       mimetype: logoFile.mimetype,
       size: logoFile.size
@@ -304,19 +305,19 @@ const updateLogoImage = async (req, res, next) => {
     }
         
     // Upload ảnh lên S3
-    console.log("Starting S3 upload for logo image...");
+    logger.debug("Starting S3 upload for logo image...");
     try {
       const logoUrl = await uploadImgToS3_employer(logoFile, company_id);
-      console.log("S3 upload successful, URL:", logoUrl);
+      logger.debug("S3 upload successful, URL:", logoUrl);
 
       if (!logoUrl) {
         return next(new ApiError("Lỗi khi tải ảnh lên", 500));
       }
       
       // Cập nhật URL logo trong database
-      console.log("Updating logo URL in database...");
+      logger.debug("Updating logo URL in database...");
       const result = await queryUpdateLogoImage(company_id, logoUrl);
-      console.log("Database update result:", result);
+      logger.debug("Database update result:", result);
       
       if (!result) {
         return next(new ApiError("Cập nhật logo thất bại", 500));
@@ -324,11 +325,11 @@ const updateLogoImage = async (req, res, next) => {
       
       return res.success({ logo_url: logoUrl }, "Cập nhật logo thành công");
     } catch (uploadError) {
-      console.error("Error in image upload:", uploadError);
+      logger.error("Error in image upload:", uploadError);
       return next(new ApiError(`Lỗi khi tải ảnh lên S3: ${uploadError.message}`, 500));
     }
   } catch (err) {
-    console.error("Error in updateLogoImage:", err);
+    logger.error("Error in updateLogoImage:", err);
     return next(new ApiError(`Lỗi khi cập nhật logo công ty: ${err.message}`, 500));
   }
 };
@@ -338,8 +339,8 @@ const updateBackgroundImage = async (req, res, next) => {
     const company_id = req.user.id;
     const bgFile = req.file;
     
-    console.log("Background image update request received for company ID:", company_id);
-    console.log("File information:", bgFile ? { 
+    logger.debug("Background image update request received for company ID:", company_id);
+    logger.debug("File information:", bgFile ? { 
       originalname: bgFile.originalname,
       mimetype: bgFile.mimetype,
       size: bgFile.size
@@ -354,19 +355,19 @@ const updateBackgroundImage = async (req, res, next) => {
     }
     
     // Upload ảnh lên S3
-    console.log("Starting S3 upload for background image...");
+    logger.debug("Starting S3 upload for background image...");
     try {
       const bgUrl = await uploadImgToS3_employer(bgFile, company_id);
-      console.log("S3 upload successful, URL:", bgUrl);
+      logger.debug("S3 upload successful, URL:", bgUrl);
 
       if (!bgUrl) {
         return next(new ApiError("Lỗi khi tải ảnh lên", 500));
       }
       
       // Cập nhật URL ảnh bìa trong database
-      console.log("Updating background URL in database...");
+      logger.debug("Updating background URL in database...");
       const result = await queryUpdateBackgroundImage(company_id, bgUrl);
-      console.log("Database update result:", result);
+      logger.debug("Database update result:", result);
       
       if (!result) {
         return next(new ApiError("Cập nhật ảnh bìa thất bại", 500));
@@ -374,11 +375,11 @@ const updateBackgroundImage = async (req, res, next) => {
       
       return res.success({ background_url: bgUrl }, "Cập nhật ảnh bìa thành công");
     } catch (uploadError) {
-      console.error("Error in image upload:", uploadError);
+      logger.error("Error in image upload:", uploadError);
       return next(new ApiError(`Lỗi khi tải ảnh lên S3: ${uploadError.message}`, 500));
     }
   } catch (err) {
-    console.error("Error in updateBackgroundImage:", err);
+    logger.error("Error in updateBackgroundImage:", err);
     return next(new ApiError(`Lỗi khi cập nhật ảnh bìa công ty: ${err.message}`, 500));
   }
 };

@@ -29,7 +29,7 @@ import {
   changePassword,
 } from "../controllers/jobseekerControllers.js";
 
-import { upload } from "../middlewares/imageUpload.js";
+import { uploadImage, uploadCv } from "../middlewares/imageUpload.js";
 import { verifyToken, verifyRole } from '../middlewares/authMiddleware.js';
 const jobseekerRoutes = express.Router();
 
@@ -43,10 +43,10 @@ jobseekerRoutes.put("/profile", updateItemProfile);
 jobseekerRoutes.delete("/profile", deleteItemProfile);
 jobseekerRoutes.post(
   "/avatar-imagine",
-  upload.single("image"),
+  uploadImage.single("image"),
   updateJobseekerProfileImage
 );
-jobseekerRoutes.post("/profile-cv", upload.single("resume"), addResume);
+jobseekerRoutes.post("/profile-cv", uploadCv.single("resume"), addResume);
 jobseekerRoutes.get("/profile-cv", getResume);
 jobseekerRoutes.delete("/profile-cv", deleteResume);
 jobseekerRoutes.post("/show-hide-profile-cv", showHideResume);

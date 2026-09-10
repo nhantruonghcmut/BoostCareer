@@ -1,9 +1,16 @@
+import logger from "../utils/logger.js";
 import ApiError from "../utils/ApiError.js";
 import { OpenAI } from "openai";
 import {
   queryGetJobseekerDetail,
   queryGetJobDetailByUser,
+  queryGetAIFeatureCache,
+  queryUpsertAIFeatureCache,
 } from "../models/aiModels.js";
+import {
+  analyzeProfileFit,
+  getEmbedding as getProviderEmbedding,
+} from "../services/aiProviderService.js";
 
 
 async function getEmbedding(text) {
@@ -77,10 +84,60 @@ async function getAnalysProfile(jobText,candidateText) {
 
 
 function cosineSimilarity(vecA, vecB) {
+  if (!Array.isArray(vecA) || !Array.isArray(vecB) || vecA.length !== vecB.length) {
+    throw new Error("Embedding vectors are invalid or have different dimensions");
+  }
+
   const dot = vecA.reduce((sum, a, idx) => sum + a * vecB[idx], 0);
   const normA = Math.sqrt(vecA.reduce((sum, a) => sum + a * a, 0));
   const normB = Math.sqrt(vecB.reduce((sum, b) => sum + b * b, 0));
+  if (normA === 0 || normB === 0) return 0;
   return dot / (normA * normB);
+}
+
+function normalizeDateKey(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value.getTime();
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) return parsed.getTime();
+
+  return String(value);
+}
+
+function getProfileLastUpdate(profile) {
+  return profile.last_update_profile || profile.update_at || profile.create_at || new Date();
+}
+
+function isCacheFresh(cache, lastUpdateProfile) {
+  return (
+    cache &&
+    normalizeDateKey(cache.last_update_profile) === normalizeDateKey(lastUpdateProfile)
+  );
+}
+
+function parseCacheJson(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  const rawValue = Buffer.isBuffer(value) ? value.toString("utf8") : value;
+  try {
+    const parsed = typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function hasCachedAnalysis(cache) {
+  return cache?.strengths !== null && cache?.weaknesses !== null && cache?.suggestions !== null;
+}
+
+function getCachedAnalysis(cache) {
+  return {
+    strengths: parseCacheJson(cache.strengths),
+    weaknesses: parseCacheJson(cache.weaknesses),
+    suggestions: parseCacheJson(cache.suggestions),
+  };
 }
 
 function cleanText(text) {
@@ -94,7 +151,7 @@ function cleanText(text) {
 const scorematching = async (req, res, next) => {
   try {
     // const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    // console.log(req.query)
+    // logger.debug(req.query)
     const { job_id } = req.query;
     const profile_id= req.user.id;
     if (!job_id || !profile_id) {
@@ -117,7 +174,7 @@ const scorematching = async (req, res, next) => {
        
     return res.success(score, "Phân tích thành công", 200);
   } catch (error) {
-    console.error(error.message);
+    logger.error(error.message);
     return next(new ApiError("Error analyzing match", 500));
   }
 };
@@ -137,7 +194,7 @@ const analyzeProfile = async (req, res, next) => {
     }
     const candidateText = formatCandidateTextOptimized(profile_data);
     const jobText = formatJobPostingTextForOptimalEmbedding(job_data);
-    // console.log("Phân tích phản hồi từ AI:");
+    // logger.debug("Phân tích phản hồi từ AI:");
     let analysis;
 
     try {
@@ -147,7 +204,7 @@ const analyzeProfile = async (req, res, next) => {
       
       // Kiểm tra cấu trúc JSON trả về
       if (!analysis.strengths || !analysis.weaknesses || !analysis.suggestions) {
-        console.warn("API trả về thiếu trường JSON", analysis);
+        logger.warn("API trả về thiếu trường JSON", analysis);
         // Có thể điền giá trị mặc định cho các trường bị thiếu
         analysis = {
           strengths: analysis.strengths || [],
@@ -156,13 +213,99 @@ const analyzeProfile = async (req, res, next) => {
         };
       }
     } catch (jsonError) {
-      console.error("Lỗi phân tích JSON:", jsonError.message);
+      logger.error("Lỗi phân tích JSON:", jsonError.message);
       return next(new ApiError("Lỗi khi phân tích phản hồi từ AI", 500));
     }
     
     return res.success(analysis, "Phân tích thành công", 200);
   } catch (error) {
-    console.error(error.message);
+    logger.error(error.message);
+    return next(new ApiError("Error analyzing match", 500));
+  }
+};
+
+const scorematchingCached = async (req, res, next) => {
+  try {
+    const { job_id } = req.query;
+    const profile_id = req.user.id;
+    if (!job_id || !profile_id) {
+      return next(new ApiError("Missing job_id or profile_id", 400));
+    }
+
+    const profile_data = await queryGetJobseekerDetail(profile_id);
+    const job_data = await queryGetJobDetailByUser(job_id);
+    if (!profile_data || !job_data) {
+      return next(new ApiError("Profile or job not found", 404));
+    }
+
+    const lastUpdateProfile = getProfileLastUpdate(profile_data);
+    const cache = await queryGetAIFeatureCache(profile_id, job_id);
+    if (isCacheFresh(cache, lastUpdateProfile) && cache.scorematching !== null) {
+      return res.success(Number(cache.scorematching), "PhÃ¢n tÃ­ch thÃ nh cÃ´ng", 200);
+    }
+
+    const candidateText = formatCandidateTextOptimized(profile_data);
+    const jobText = formatJobPostingTextForOptimalEmbedding(job_data);
+
+    const [embedCandidate, embedJob] = await Promise.all([
+      getProviderEmbedding(candidateText),
+      getProviderEmbedding(jobText),
+    ]);
+
+    const rawScore = cosineSimilarity(embedCandidate, embedJob);
+    const scorematchingValue = Math.max(0, Math.min(100, Math.round(rawScore * 100)));
+
+    await queryUpsertAIFeatureCache({
+      jobseeker_id: profile_id,
+      job_id,
+      last_update_profile: lastUpdateProfile,
+      score: Number(rawScore.toFixed(6)),
+      scorematching: scorematchingValue,
+    });
+
+    return res.success(scorematchingValue, "PhÃ¢n tÃ­ch thÃ nh cÃ´ng", 200);
+  } catch (error) {
+    logger.error(error.message);
+    return next(new ApiError("Error analyzing match", 500));
+  }
+};
+
+const analyzeProfileCached = async (req, res, next) => {
+  try {
+    const { job_id } = req.query;
+    const profile_id = req.user.id;
+    if (!job_id || !profile_id) {
+      return next(new ApiError("Missing job_id or profile_id", 400));
+    }
+
+    const profile_data = await queryGetJobseekerDetail(profile_id);
+    const job_data = await queryGetJobDetailByUser(job_id);
+    if (!profile_data || !job_data) {
+      return next(new ApiError("Profile or job not found", 404));
+    }
+
+    const lastUpdateProfile = getProfileLastUpdate(profile_data);
+    const cache = await queryGetAIFeatureCache(profile_id, job_id);
+    if (isCacheFresh(cache, lastUpdateProfile) && hasCachedAnalysis(cache)) {
+      return res.success(getCachedAnalysis(cache), "PhÃ¢n tÃ­ch thÃ nh cÃ´ng", 200);
+    }
+
+    const candidateText = formatCandidateTextOptimized(profile_data);
+    const jobText = formatJobPostingTextForOptimalEmbedding(job_data);
+    const analysis = await analyzeProfileFit(jobText, candidateText);
+
+    await queryUpsertAIFeatureCache({
+      jobseeker_id: profile_id,
+      job_id,
+      last_update_profile: lastUpdateProfile,
+      strengths: analysis.strengths,
+      weaknesses: analysis.weaknesses,
+      suggestions: analysis.suggestions,
+    });
+
+    return res.success(analysis, "PhÃ¢n tÃ­ch thÃ nh cÃ´ng", 200);
+  } catch (error) {
+    logger.error(error.message);
     return next(new ApiError("Error analyzing match", 500));
   }
 };
@@ -358,7 +501,7 @@ function formatCandidateTextOptimized(profile) {
  */
 function formatJobPostingTextForOptimalEmbedding(jobPosting) {
   if (!jobPosting) {
-    // console.warn("Dữ liệu tin tuyển dụng không hợp lệ hoặc bị thiếu."); // Có thể bỏ qua log này
+    // logger.warn("Dữ liệu tin tuyển dụng không hợp lệ hoặc bị thiếu."); // Có thể bỏ qua log này
     return "";
   }
 
@@ -502,6 +645,6 @@ function formatJobPostingTextForOptimalEmbedding(jobPosting) {
 }
 
 export {
-  scorematching,
-  analyzeProfile
+  scorematchingCached as scorematching,
+  analyzeProfileCached as analyzeProfile
 };

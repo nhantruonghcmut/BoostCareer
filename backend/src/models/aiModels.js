@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import db from "../config/databaseConfig.js";
 
 const queryGetJobseekerDetail = async (jobseeker_id) => {
@@ -7,6 +8,7 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
         select
         js.avatar,
         pjs.*,
+        COALESCE(pjs.update_at, pjs.create_at) AS last_update_profile,
         u.email,
         js.is_open_for_job,
         u.phone_number,
@@ -92,7 +94,7 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
       );  
       return jobseeker_detail[0] || null; // Return the first result or null if not found
     } catch (error) {
-      console.error("Error getting jobseeker detail:", error);
+      logger.error("Error getting jobseeker detail:", error);
       return null;
     } 
   };
@@ -181,13 +183,117 @@ const queryGetJobseekerDetail = async (jobseeker_id) => {
       );
       return Job[0];
     } catch (error) {
-      console.error("Error getting list job by user:", error);
+      logger.error("Error getting list job by user:", error);
       throw error; // Ném lại lỗi để xử lý ở nơi gọi hàm
     }
   };
-  
+
+const queryGetAIFeatureCache = async (jobseeker_id, job_id) => {
+  try {
+    const [rows] = await db.query(
+      `
+      SELECT
+        jobseeker_id,
+        job_id,
+        last_update_profile,
+        score,
+        scorematching,
+        strengths,
+        weaknesses,
+        suggestions
+      FROM ai_feature_cache
+      WHERE jobseeker_id = ? AND job_id = ?
+      LIMIT 1;
+      `,
+      [jobseeker_id, job_id]
+    );
+
+    return rows[0] || null;
+  } catch (error) {
+    logger.error("Error getting AI feature cache:", error);
+    throw error;
+  }
+};
+
+const stringifyJsonColumn = (value) => {
+  if (value === undefined || value === null) return null;
+  return JSON.stringify(value);
+};
+
+const queryUpsertAIFeatureCache = async ({
+  jobseeker_id,
+  job_id,
+  last_update_profile,
+  score = null,
+  scorematching = null,
+  strengths = null,
+  weaknesses = null,
+  suggestions = null,
+}) => {
+  try {
+    const [result] = await db.query(
+      `
+      INSERT INTO ai_feature_cache (
+        jobseeker_id,
+        job_id,
+        last_update_profile,
+        score,
+        scorematching,
+        strengths,
+        weaknesses,
+        suggestions
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        score = CASE
+          WHEN ai_feature_cache.last_update_profile <=> VALUES(last_update_profile)
+          THEN COALESCE(VALUES(score), ai_feature_cache.score)
+          ELSE VALUES(score)
+        END,
+        scorematching = CASE
+          WHEN ai_feature_cache.last_update_profile <=> VALUES(last_update_profile)
+          THEN COALESCE(VALUES(scorematching), ai_feature_cache.scorematching)
+          ELSE VALUES(scorematching)
+        END,
+        strengths = CASE
+          WHEN ai_feature_cache.last_update_profile <=> VALUES(last_update_profile)
+          THEN COALESCE(VALUES(strengths), ai_feature_cache.strengths)
+          ELSE VALUES(strengths)
+        END,
+        weaknesses = CASE
+          WHEN ai_feature_cache.last_update_profile <=> VALUES(last_update_profile)
+          THEN COALESCE(VALUES(weaknesses), ai_feature_cache.weaknesses)
+          ELSE VALUES(weaknesses)
+        END,
+        suggestions = CASE
+          WHEN ai_feature_cache.last_update_profile <=> VALUES(last_update_profile)
+          THEN COALESCE(VALUES(suggestions), ai_feature_cache.suggestions)
+          ELSE VALUES(suggestions)
+        END,
+        last_update_profile = VALUES(last_update_profile);
+      `,
+      [
+        jobseeker_id,
+        job_id,
+        last_update_profile,
+        score,
+        scorematching,
+        stringifyJsonColumn(strengths),
+        stringifyJsonColumn(weaknesses),
+        stringifyJsonColumn(suggestions),
+      ]
+    );
+
+    return result.affectedRows > 0;
+  } catch (error) {
+    logger.error("Error upserting AI feature cache:", error);
+    throw error;
+  }
+};
+
 export {
     queryGetJobseekerDetail ,
-    queryGetJobDetailByUser
+    queryGetJobDetailByUser,
+    queryGetAIFeatureCache,
+    queryUpsertAIFeatureCache
   };
-  

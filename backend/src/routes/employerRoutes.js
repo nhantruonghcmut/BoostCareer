@@ -30,7 +30,7 @@ import {
   changePassword
 } from "../controllers/employerControllers.js";
 import { verifyToken, verifyRole } from '../middlewares/authMiddleware.js';
-import { upload } from "../middlewares/imageUpload.js";
+import { uploadImage } from "../middlewares/imageUpload.js";
 
 const employerRoutes = express.Router();
 employerRoutes.use(verifyToken);
@@ -48,8 +48,8 @@ employerRoutes.get("/profile", getCompanyInformation);
 employerRoutes.post("/profile", addItemCompanyProfile);
 employerRoutes.put("/profile", updateItemCompanyProfile);
 employerRoutes.delete("/profile", deleteItemCompanyProfile);
-employerRoutes.put("/logo-image",upload.single("logoCompany"), updateLogoImage);
-employerRoutes.put("/background-image",upload.single("background"), updateBackgroundImage);
+employerRoutes.put("/logo-image",uploadImage.single("logoCompany"), updateLogoImage);
+employerRoutes.put("/background-image",uploadImage.single("background"), updateBackgroundImage);
 
 employerRoutes.get("/candidates", getListCandidate);  // lấy danh sách ứng viên được lưu lại
 employerRoutes.post("/candidate", saveCandidate); // thêm ứng viên vào danh sách ứng viên đã lưu

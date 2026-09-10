@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import db from "../config/databaseConfig.js";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -48,7 +49,7 @@ const loginExecute = async (username, password) => {
     const validPassword = await bcrypt.compare(password, user.password_);
     if (!validPassword) return null;
     const { password_, ...userWithoutPassword } = user;
-    // console.log("userWithoutPassword", userWithoutPassword);
+    // logger.debug("userWithoutPassword", userWithoutPassword);
     if (Number(userWithoutPassword.role_id) === 2) {
       const [avatar] = await db.query(
         `SELECT  logo    
@@ -62,11 +63,11 @@ const loginExecute = async (username, password) => {
         FROM user_jobseeker WHERE jobseeker_id = ?`,
         [user.user_id]
       );
-      // console.log("tra ve frontend");
+      // logger.debug("tra ve frontend");
       return { ...userWithoutPassword, logo: avatar[0]?.logo }; // Trả về người dùng đầu tiên nếu tìm thấy
     }
   } catch (error) {
-    console.error("Lỗi khi thực hiện truy vấn:", error);
+    logger.error("Lỗi khi thực hiện truy vấn:", error);
     throw error; // Ném lỗi để xử lý ở nơi khác nếu cần
   }
 };
@@ -79,7 +80,7 @@ const registerExecute = async (
   email,
   phone
 ) => {
-  // console.log("role", role);
+  // logger.debug("role", role);
   const salt = await bcrypt.genSalt(Number(process.env.PASSWORD_SALT_ROUNDS));
   const hashedPassword = await bcrypt.hash(password, salt);
   
@@ -135,7 +136,7 @@ const registerExecute = async (
     if (connection) {
       await connection.rollback();
     }
-    console.error("Error register:", error);
+    logger.error("Error register:", error);
     throw error;
   } finally {
     // Chỉ release khi connection đã được khởi tạo

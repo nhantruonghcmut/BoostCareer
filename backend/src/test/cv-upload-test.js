@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 /**
  * Test script for CV upload functionality
  * 
@@ -17,23 +18,23 @@ const mockFile = {
 // Test function
 async function testCvUpload() {
   try {
-    console.log('Testing CV upload with user ID...');
+    logger.debug('Testing CV upload with user ID...');
     
     // Test with userId = 123
     const fileInfo = await uploadToS3CV(mockFile, 123);
     
-    console.log('Upload result:', fileInfo);
+    logger.debug('Upload result:', fileInfo);
     
     // Verify the path contains the user ID
     if (fileInfo.key.includes('/cv/123/')) {
-      console.log('SUCCESS: File uploaded to user-specific folder');
+      logger.debug('SUCCESS: File uploaded to user-specific folder');
     } else {
-      console.error('ERROR: File not uploaded to user-specific folder');
+      logger.error('ERROR: File not uploaded to user-specific folder');
     }
     
     return fileInfo;
   } catch (error) {
-    console.error('Test failed:', error);
+    logger.error('Test failed:', error);
   }
 }
 

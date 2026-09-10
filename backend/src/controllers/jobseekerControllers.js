@@ -1,3 +1,4 @@
+import logger from "../utils/logger.js";
 import { uploadImgToS3_jobseeker, uploadToS3CV, deleteFileFromS3 } from "../middlewares/imageUpload.js";
 import path from 'path';
 import bcrypt from "bcrypt";
@@ -92,7 +93,7 @@ const updateJobseekerProfileImage = async (req, res, next) => {
  */
 const getItemProfile = async (req, res, next) => {
   try {
-    console.log("getItemProfile");
+    logger.debug("getItemProfile");
     const profile_id = req.user.id;
     const { type } = req.query;
     
@@ -117,7 +118,7 @@ const updateItemProfile = async (req, res, next) => {
   try {
     const profile_id = req.user.id;
     const { type, data } = req.body;
-    // console.log("updateItemProfile", type, data);
+    // logger.debug("updateItemProfile", type, data);
     if (!type || !data) {
       return next(new ApiError("Thiếu thông tin cần thiết", 400));
     }
@@ -276,7 +277,7 @@ const deleteResume = async (req, res, next) => {
   try {
     const profile_id = req.user.id;
     const { cv_id } = req.body;
-    console.log("Delete resume", profile_id, cv_id);
+    logger.debug("Delete resume", profile_id, cv_id);
     
     // First get the resume to retrieve the S3 key
     const [resume] = await db.query(
@@ -297,7 +298,7 @@ const deleteResume = async (req, res, next) => {
         await deleteFileFromS3(resume[0].cv_link);
       }
     } catch (s3Error) {
-      console.error("Error deleting file from S3:", s3Error);
+      logger.error("Error deleting file from S3:", s3Error);
       // Continue with database deletion even if S3 deletion fails
     }
     
@@ -324,7 +325,7 @@ const getListJobApplication = async (req, res, next) => {
   try {
     const profile_id = req.user.id;
   // const profile_id = req.query.profile_id;
-  // console.log("getListJobApplication", profile_id);
+  // logger.debug("getListJobApplication", profile_id);
   if (!profile_id) {
     return next(new ApiError("Thiếu thông tin ID người dùng", 400));
   }
@@ -426,7 +427,7 @@ const getListCompanyFollowing = async (req, res, next) => {
     return next(new ApiError("Thiếu thông tin ID người dùng", 400));
   }
   const data = await queryGetListCompanyFollowing(profile_id);
-  // console.log("getListCompanyFollowing", data);
+  // logger.debug("getListCompanyFollowing", data);
   if (!data) {
     return next(new ApiError("Không tìm thấy thông tin công ty đã theo dõi", 404));
   }
@@ -642,7 +643,7 @@ const showHideResume = async (req, res, next) => {
 const changePassword = async (req, res, next) => {
   try {
     const jobseeker_id= req.user.id;
-    console.log("req.body", req.body);
+    logger.debug("req.body", req.body);
     const { newPassword } = req.body;
 
     if (!jobseeker_id || !newPassword) {

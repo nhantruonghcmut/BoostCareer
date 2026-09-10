@@ -1,4 +1,11 @@
+import logger from "../utils/logger.js";
 import bcrypt from "bcrypt";
+import env from "../config/env.js";
+import {
+  accessTokenCookie,
+  refreshTokenCookie,
+  clearAuthCookies,
+} from "../config/cookieConfig.js";
 import jwt from "jsonwebtoken";
 import ApiError from "../utils/ApiError.js";
 import {
@@ -8,7 +15,6 @@ import {
 } from "../models/authencationModels.js";
 
 const generateAccessToken = (user) => {
-   console.log("process.env.JWT_ACCESS_EXPIRES ", process.env.JWT_ACCESS_EXPIRES );
   return jwt.sign(
     { 
       id: user.user_id,
@@ -17,13 +23,13 @@ const generateAccessToken = (user) => {
       logo: user.logo || ''
 
     },
-    process.env.JWT_ACCESS_SECRET,
-    { expiresIn: parseInt(process.env.JWT_ACCESS_EXPIRES) } 
+    env.jwt.accessSecret,
+    { expiresIn: env.jwt.accessExpires } 
   );
 };
 
 const generateRefreshToken = (user) => {
-  console.log("process.env.JWT_REFRESH_EXPIRES ", process.env.JWT_REFRESH_EXPIRES );
+  logger.debug("process.env.JWT_REFRESH_EXPIRES ", process.env.JWT_REFRESH_EXPIRES );
   return jwt.sign(
     { 
       id: user.user_id,
@@ -31,35 +37,21 @@ const generateRefreshToken = (user) => {
       role: user.role_id ,
       logo: user.logo || ''
     },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn:  parseInt(process.env.JWT_REFRESH_EXPIRES)}
+    env.jwt.refreshSecret,
+    { expiresIn:  env.jwt.refreshExpires}
   );
 };
 
 const setTokenCookies = (res, accessToken, refreshToken) => {
-// console.log("env ", process.env.JWT_REFRESH_EXPIRES);
-  res.cookie('accessToken', accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/'   ,
-    maxAge: (parseInt(process.env.JWT_ACCESS_EXPIRES) || 3600) * 1000
-  });
-
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: (parseInt(process.env.JWT_REFRESH_EXPIRES) || 604800) * 1000
-  });
+  res.cookie("accessToken", accessToken, accessTokenCookie());
+  res.cookie("refreshToken", refreshToken, refreshTokenCookie());
 };
 
 /**
  * Xử lý đăng nhập
  */
 const login = async (req, res, next) => {
-  console.log("Login request received", req.body);
+  logger.debug("Login request received", req.body);
   try {
     const { username, password } = req.body.params;
 
@@ -84,8 +76,8 @@ const login = async (req, res, next) => {
     const accessToken = generateAccessToken(userLogin);
     const refreshToken = generateRefreshToken(userLogin);
     setTokenCookies(res, accessToken, refreshToken);
-    // const decodedRefresh = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-    // console.log("decodedRefresh", decodedRefresh);
+    // const decodedRefresh = jwt.verify(refreshToken, env.jwt.refreshSecret);
+    // logger.debug("decodedRefresh", decodedRefresh);
     return res.success(
       {
         user: {
@@ -99,7 +91,7 @@ const login = async (req, res, next) => {
       200  
     );
   } catch (error) {
-    console.error("Login error:", error);
+    logger.error("Login error:", error);
     // Xử lý các lỗi không xác định
     if (!(error instanceof ApiError)) {
       return next(new ApiError(error.message || "Có lỗi xảy ra khi đăng nhập.", 500));
@@ -112,7 +104,7 @@ const login = async (req, res, next) => {
  * Kiểm tra trạng thái đăng nhập
  */
 const isLogin = async (req, res, next) => {
-  console.log("Check isLogin", req.cookies.accessToken);
+  logger.debug("Check isLogin", req.cookies.accessToken);
   try {
     const accessToken = req.cookies.accessToken;
     
@@ -125,8 +117,8 @@ const isLogin = async (req, res, next) => {
     }
 
     try {
-      const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-      console.log("Check decoded", decoded);
+      const decoded = jwt.verify(accessToken, env.jwt.accessSecret);
+      logger.debug("Check decoded", decoded);
       const user = await findUserByUsername(decoded.username);
 
       if (!user) {
@@ -163,7 +155,7 @@ const isLogin = async (req, res, next) => {
         }
 
         try {
-          const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+          const decoded = jwt.verify(refreshToken, env.jwt.refreshSecret);
           const user = await findUserByUsername(decoded.username);
 
           if (!user) {
@@ -218,19 +210,7 @@ const isLogin = async (req, res, next) => {
  */
 const logout = (req, res, next) => {
   try {
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/'
-    });
-    
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/'
-    });
+    clearAuthCookies(res);
     
     return res.success(
       { logout: true },
@@ -248,7 +228,7 @@ const logout = (req, res, next) => {
 const register = async (req, res, next) => {
   try {
     const data = req.body.params;
-    console.log(data);
+    logger.debug(data);
     // Kiểm tra dữ liệu đầu vào
     const { role, username, name, password, email, phone,...prop } = data;
     if (!role || !username || !name || !password || !email || !phone) {
@@ -288,7 +268,7 @@ const register = async (req, res, next) => {
  * Refresh token
  */
 const refreshToken = async (req, res, next) => {
-  console.log("SỬ DUNG REFRESH API");
+  logger.debug("SỬ DUNG REFRESH API");
   try {
     const refreshToken = req.cookies.refreshToken;
     
@@ -296,7 +276,7 @@ const refreshToken = async (req, res, next) => {
       throw new ApiError("Refresh token không tồn tại", 401);
     }
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, env.jwt.refreshSecret);
     const user = await findUserByUsername(decoded.username);
 
     if (!user) {
